@@ -11,27 +11,27 @@ namespace WebGallery.UI.Controllers
     {
         private readonly string _baseUrl = "http://192.168.1.251:5000/picture";
 
-        public IActionResult Index()
-        {
-            var vm = new GalleryViewModel
-            {
-                Columns = new List<GalleryColumnViewModel> 
-                {
-                    new GalleryColumnViewModel{ Pics = new List<string>() },
-                    new GalleryColumnViewModel{ Pics = new List<string>() },
-                    new GalleryColumnViewModel{ Pics = new List<string>() },
-                    new GalleryColumnViewModel{ Pics = new List<string>() },
-                }
-            };
+    //    public IActionResult Index()
+    //    {
+    //        var vm = new HomeViewModel
+    //        {
+    //            Galleries = new List<HomeGalleryViewModel> 
+    //            {
+    //                new HomeGalleryViewModel{ Pics = new List<string>() },
+    //                new HomeGalleryViewModel{ Pics = new List<string>() },
+    //                new HomeGalleryViewModel{ Pics = new List<string>() },
+    //                new HomeGalleryViewModel{ Pics = new List<string>() },
+    //            }
+    //        };
 
-            int counter = 1;
-            foreach (var column in vm.Columns)
-            {
-                for (int i = 0; i<4; i++)
-                    column.Pics.Add(_baseUrl + "/" + counter++);
-            }
+    //        int counter = 1;
+    //        foreach (var column in vm.Galleries)
+    //        {
+    //            for (int i = 0; i<4; i++)
+    //                column.Pics.Add(_baseUrl + "/" + counter++);
+    //        }
 
-            return View(vm);
-        }
+    //        return View(vm);
+    //    }
     }
 }

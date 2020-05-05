@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "jqueryui@1.12.1",
+      "destination": "wwwroot/lib/jqueryui/"
+    }
+  ,
+{
+  "library": "magnific-popup.js@1.1.0",
+  "destination": "wwwroot/lib/magnific-popup.js/"
+}
+,
+{
+  "library": "fancybox@3.5.7",
+  "destination": "wwwroot/lib/fancybox/"
+}
+]
+}
