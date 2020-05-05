@@ -1,0 +1,27 @@
+﻿@model WebGallery.UI.ViewModels.GalleryViewModel
+
+<div class="container-fluid">
+    <div class="row" id="galleryFrame">
+        @foreach (var column in Model.Columns)
+        {
+            <div class="col-xs-6 col-md-3">
+                @foreach (string pictureUrl in column.Pics)
+                {
+                    <a href='javascript:void(0)'>
+                        <img src="@pictureUrl" class='img-thumbnail' />
+                    </a>
+                }
+            </div>
+        }
+    </div>
+
+
+    @*<div class="row">
+        <div class="col-xs-6 col-md-3">
+            <a href='javascript:void(0)'>
+                <img src="http://192.168.1.251:5000/picture/1" class='img-thumbnail' id="overlay-image" onclick="overlay_switch()"/>
+            </a>
+        </div>
+    </div>*@
+</div>
+
