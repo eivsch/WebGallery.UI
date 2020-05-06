@@ -1,4 +1,4 @@
-﻿using Application.Galleries;
+﻿using Application.Pictures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Application.Services.Interfaces
 {
-    public interface IGalleryService
+    public interface IPictureService
     {
-        Task<IEnumerable<GalleryResponse>> GetAll();
+        Task<IEnumerable<PictureResponse>> GetPictures(string galleryId);
     }
 }
