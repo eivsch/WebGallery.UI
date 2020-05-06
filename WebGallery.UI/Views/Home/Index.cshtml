@@ -44,7 +44,7 @@
             @foreach(var gallery in Model.Galleries)
             {
                 <div class="col-6 col-md-6 col-lg-4" data-aos="fade-up">
-                    <a href="/Single" class="d-block photo-item">
+                    <a href="/Single/@gallery.Id" class="d-block photo-item">
                         <img src="@gallery.CoverImageUrl" alt="Image" class="img-fluid">
                         <div class="photo-text-more">
                             <div class="photo-text-more">

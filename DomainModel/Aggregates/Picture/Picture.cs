@@ -8,18 +8,18 @@ namespace DomainModel.Aggregates.Picture
 {
     public class Picture : Entity, IAggregateRoot
     {
-        private string _urlPath;
+        int _globalSortOrder;
 
-        public virtual string UrlPath => _urlPath;
+        public virtual int GlobalSortOrder => _globalSortOrder;
 
         private Picture(string id)
         {
             Id = id;
         }
 
-        public static Picture Create(string id, string urlPath)
+        public static Picture Create(string id, int globalSortOrder)
         {
-            return new Picture(id) { _urlPath = urlPath };
+            return new Picture(id) { _globalSortOrder = globalSortOrder };
         }
     }
 }

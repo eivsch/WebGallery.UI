@@ -47,7 +47,7 @@ namespace Infrastructure.Galleries
 
         public async Task<IEnumerable<Gallery>> GetAll()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "gallery");
+            var request = new HttpRequestMessage(HttpMethod.Get, "galleries");
 
             var response = await _client.SendAsync(request);
 

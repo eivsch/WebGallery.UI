@@ -10,7 +10,7 @@ namespace Infrastructure.Pictures.DTO
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonPropertyName("url")]
-        public int Url { get; set; }
+        [JsonPropertyName("globalSortOrder")]
+        public int GlobalSortOrder { get; set; }
     }
 }

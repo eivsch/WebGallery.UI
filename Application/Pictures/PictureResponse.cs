@@ -7,6 +7,6 @@ namespace Application.Pictures
     public class PictureResponse
     {
         public string Id { get; set; }
-        public string Url { get; set; }
+        public int GlobalSortOrder { get; set; }
     }
 }

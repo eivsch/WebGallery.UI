@@ -15,7 +15,7 @@ namespace WebGallery.UI.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IGalleryService _galleryService;
 
-        private readonly string _baseUrl = "http://localhost:5000/picture";
+        private readonly string _baseUrl = "http://localhost:5000/pictures";
 
         public HomeController(ILogger<HomeController> logger, IGalleryService galleryService)
         {
