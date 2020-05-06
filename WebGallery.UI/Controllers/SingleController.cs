@@ -6,10 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebGallery.UI.Controllers
 {
+    [Route("[controller]")]
     public class SingleController : Controller
     {
-        public IActionResult Index()
+
+        [HttpGet("{id}")]
+        public IActionResult Index(string id)
         {
+
+
             return View();
         }
     }

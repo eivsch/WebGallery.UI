@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebGallery.UI.ViewModels;
@@ -12,28 +13,36 @@ namespace WebGallery.UI.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly string _baseUrl = "http://192.168.1.251:5000/picture";
+        private readonly IGalleryService _galleryService;
 
-        public HomeController(ILogger<HomeController> logger)
+        private readonly string _baseUrl = "http://localhost:5000/picture";
+
+        public HomeController(ILogger<HomeController> logger, IGalleryService galleryService)
         {
             _logger = logger;
+            _galleryService = galleryService ?? throw new ArgumentNullException(nameof(galleryService));
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var galleries = new List<HomeGalleryViewModel>();
-            for (int i = 1; i < 13; i++)
+            // Create view model
+            // TODO: Separate into a UI service/manager/factory
+            var galleries = await _galleryService.GetAll();
+            var list = new List<HomeGalleryViewModel>();
+            foreach(var gallery in galleries)
             {
-                galleries.Add(
+                list.Add(
                     new HomeGalleryViewModel
                     {
-                        CoverImageUrl = _baseUrl + "/" + i
+                        Id = gallery.Id,
+                        ItemCount = gallery.ImageCount,
+                        CoverImageUrl = $"{_baseUrl}/{gallery.Id}/1",   // TODO: Randomize cover image
                     });
             }
 
             var vm = new HomeViewModel
             {
-                Galleries = galleries
+                Galleries = list
             };
 
             return View(vm);
