@@ -17,13 +17,13 @@ namespace Application.Services
             _pictureRepository = pictureRepository;
         }
 
-        public async Task<IEnumerable<PictureResponse>> GetPictures(string galleryId)
+        public async Task<IEnumerable<PictureResponse>> GetPictures(string galleryId, int offset = 0)
         {
-            var pics = await _pictureRepository.GetPictures(galleryId);
+            var pics = await _pictureRepository.GetPictures(galleryId, offset);
 
             var list = new List<PictureResponse>();
             foreach(var pic in pics)
-                list.Add(new PictureResponse { Id = pic.Id, GlobalSortOrder = pic.GlobalSortOrder });
+                list.Add(new PictureResponse { Id = pic.Id, GlobalSortOrder = pic.GlobalSortOrder, FolderSortOrder = pic.FolderSortOrder });
 
             return list;
         }

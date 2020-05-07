@@ -45,9 +45,9 @@ namespace Infrastructure.Pictures
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<Picture>> GetPictures(string galleryId)
+        public async Task<IEnumerable<Picture>> GetPictures(string galleryId, int offset = 0)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures?galleryId={galleryId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures?galleryId={galleryId}&offset={offset}");
             
             var response = await _client.SendAsync(request);
          
@@ -59,7 +59,7 @@ namespace Infrastructure.Pictures
                 List<Picture> list = new List<Picture>();
                 foreach (var p in data)
                 {
-                    list.Add(Picture.Create(p.Id, p.GlobalSortOrder));
+                    list.Add(Picture.Create(p.Id, p.GlobalSortOrder, p.FolderSortOrder));
                 }
 
                 return list;

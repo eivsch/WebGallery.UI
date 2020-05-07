@@ -8,5 +8,6 @@ namespace Application.Pictures
     {
         public string Id { get; set; }
         public int GlobalSortOrder { get; set; }
+        public int FolderSortOrder { get; set; }
     }
 }

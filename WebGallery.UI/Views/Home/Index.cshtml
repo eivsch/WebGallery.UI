@@ -43,8 +43,11 @@
     *@
             @foreach(var gallery in Model.Galleries)
             {
-                <div class="col-6 col-md-6 col-lg-4" data-aos="fade-up">
-                    <a href="/Single/@gallery.Id" class="d-block photo-item">
+                int offset = gallery.CoverImageIndex - 1;
+                string popUpDelayAtr = gallery.PopUpDelay == 0 ? "" : $"data-aos-delay={gallery.PopUpDelay}";
+
+                <div class="col-6 col-md-6 col-lg-@gallery.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                    <a href="/Single/@(gallery.Id + "?offset=" + offset)" class="d-block photo-item">
                         <img src="@gallery.CoverImageUrl" alt="Image" class="img-fluid">
                         <div class="photo-text-more">
                             <div class="photo-text-more">

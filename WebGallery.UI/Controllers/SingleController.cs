@@ -21,17 +21,17 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Index(string id)
+        public async Task<IActionResult> Index(string id, int offset)
         {
-            var pics = await _pictureService.GetPictures(id);
+            var pics = await _pictureService.GetPictures(id, offset);
 
             var list = new List<SingleGalleryImageViewModel>();
-            foreach(var pic in pics)
+            foreach(var pic in pics.OrderBy(i => i.FolderSortOrder))
             {
                 list.Add(new SingleGalleryImageViewModel 
                 { 
                     Id = pic.Id, 
-                    Url = $"{_baseUrl}/{pic.GlobalSortOrder}"
+                    Url = $"{_baseUrl}/{id}/{pic.FolderSortOrder}"
                 });
             }
 

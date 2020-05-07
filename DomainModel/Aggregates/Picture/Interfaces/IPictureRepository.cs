@@ -8,6 +8,6 @@ namespace DomainModel.Aggregates.Picture.Interfaces
 {
     public interface IPictureRepository : IRepository<Picture>
     {
-        Task<IEnumerable<Picture>> GetPictures(string galleryId);
+        Task<IEnumerable<Picture>> GetPictures(string galleryId, int offset = 0);
     }
 }

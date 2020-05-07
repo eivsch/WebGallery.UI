@@ -12,5 +12,8 @@ namespace Infrastructure.Pictures.DTO
 
         [JsonPropertyName("globalSortOrder")]
         public int GlobalSortOrder { get; set; }
+
+        [JsonPropertyName("folderSortOrder")]
+        public int FolderSortOrder { get; set; }
     }
 }
