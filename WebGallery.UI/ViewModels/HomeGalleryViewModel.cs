@@ -8,5 +8,6 @@ namespace WebGallery.UI.ViewModels
         public string CoverImageUrl { get; set; }
         public string Title { get; set; }
         public int ItemCount { get; set; }
+        public int LargeScreenSize { get; set; }
     }
 }
