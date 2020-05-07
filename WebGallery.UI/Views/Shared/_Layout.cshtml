@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - WebGallery.UI</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/magnific-popup.js/magnific-popup.min.css" />
     <link rel="stylesheet" href="~/lib/jqueryui/jquery-ui.min.css">
 
-    <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="~/css/shutter/style.css" />
-    <link rel="stylesheet" href="~/lib/magnific-popup.js/magnific-popup.min.css" />
+    <link rel="stylesheet" href="~/lib/aos/aos.css" />
     <link rel="stylesheet" href="~/lib/fancybox/jquery.fancybox.min.css" />
+    
+    <link rel="stylesheet" href="~/css/shutter/style.css" />
+    @*<link rel="stylesheet" href="~/css/site.css" />*@
 
 
 </head>
@@ -20,11 +22,13 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script src="~/lib/magnific-popup.js/jquery.magnific-popup.min.js"></script>
-    <script src="~/lib/fancybox/jquery.fancybox.min.js"></script>
+    <script src="~/lib/aos/aos.js"></script>
 
+    <script src="~/lib/fancybox/jquery.fancybox.min.js"></script>
+    
+    <script src="~/js/main.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

@@ -5,16 +5,23 @@
     {
       "library": "jqueryui@1.12.1",
       "destination": "wwwroot/lib/jqueryui/"
+    },
+    {
+      "library": "magnific-popup.js@1.1.0",
+      "destination": "wwwroot/lib/magnific-popup.js/"
+    },
+    {
+      "library": "fancybox@3.5.7",
+      "destination": "wwwroot/lib/fancybox/"
+    },
+    {
+      "library": "OwlCarousel2@2.3.4",
+      "destination": "wwwroot/lib/OwlCarousel2/"
     }
   ,
 {
-  "library": "magnific-popup.js@1.1.0",
-  "destination": "wwwroot/lib/magnific-popup.js/"
-}
-,
-{
-  "library": "fancybox@3.5.7",
-  "destination": "wwwroot/lib/fancybox/"
+  "library": "aos@2.3.4",
+  "destination": "wwwroot/lib/aos/"
 }
 ]
 }
