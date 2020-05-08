@@ -33,7 +33,7 @@ namespace WebGallery.UI
 
             services.AddHttpClient<ApiClient>(c => 
             {
-                c.BaseAddress = new Uri("http://localhost:5000");   // TODO: Config
+                c.BaseAddress = new Uri(Configuration.GetValue("ConnectionStrings:ApiEndpoint", ""));
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
             });
             
