@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using WebGallery.UI.ViewModels.Single;
+using WebGallery.UI.Generators;
 
 namespace WebGallery.UI.Controllers
 {
@@ -12,8 +12,6 @@ namespace WebGallery.UI.Controllers
     public class SingleController : Controller
     {
         private readonly IPictureService _pictureService;
-
-        private readonly string _baseUrl = "http://localhost:5000/pictures";
 
         public SingleController(IPictureService pictureService)
         {
@@ -25,21 +23,7 @@ namespace WebGallery.UI.Controllers
         {
             var pics = await _pictureService.GetPictures(id, offset);
 
-            var list = new List<SingleGalleryImageViewModel>();
-            foreach(var pic in pics.OrderBy(i => i.FolderSortOrder))
-            {
-                list.Add(new SingleGalleryImageViewModel 
-                { 
-                    Id = pic.Id, 
-                    Url = $"{_baseUrl}/{id}/{pic.FolderSortOrder}"
-                });
-            }
-
-            var vm = new SingleGalleryViewModel
-            {
-                Id = id,
-                Images = list,
-            };
+            var vm = SinglePageGenerator.GenerateRandom_ByFolderOrder(id, pics);
 
             return View(vm);
         }

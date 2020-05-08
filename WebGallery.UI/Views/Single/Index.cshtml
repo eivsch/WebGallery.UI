@@ -1,4 +1,12 @@
-﻿@model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
+﻿@using Microsoft.Extensions.Configuration
+
+@model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
+
+@inject IConfiguration Configuration
+
+@{
+    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/pictures";
+}
 
 <div class="site-wrap">
 
@@ -22,9 +30,6 @@
             <ul class="js-clone-nav">
                 <li><a href="index.html">Home</a></li>
                 <li class="active"><a href="photos.html">Photos</a></li>
-                <li><a href="bio.html">Bio</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="contact.html">Contact</a></li>
             </ul>
             <ul class="social js-clone-nav">
                 <li><a href="#"><span class="icon-facebook"></span></a></li>
@@ -43,17 +48,20 @@
             </div>
 
             <div class="row align-items-stretch">
-            @foreach (var image in Model.Images)
-            {
-                <div class="col-6 col-md-6 col-lg-3" data-aos="fade-up">
-                    <a href="@image.Url" class="d-block photo-item" data-fancybox="gallery">
-                        <img src="@image.Url" alt="Image" class="img-fluid">
-                        <div class="photo-text-more">
-                            <span class="icon icon-search"></span>
-                        </div>
-                    </a>
-                </div>
-            }
+                @foreach (var image in Model.Images)
+                {
+                    string imageUrl = $"{baseUrl}/{Model.Id}/{image.GalleryIndex}";
+                    string popUpDelayAtr = image.PopUpDelay == 0 ? "" : $"data-aos-delay={image.PopUpDelay}";
+
+                    <div class="col-6 col-md-6 col-lg-@image.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                        <a href="@imageUrl" class="d-block photo-item" data-fancybox="gallery">
+                            <img src="@imageUrl" alt="Image" class="img-fluid">
+                            <div class="photo-text-more">
+                                <span class="icon icon-search"></span>
+                            </div>
+                        </a>
+                    </div>
+                }
 
             </div>
 

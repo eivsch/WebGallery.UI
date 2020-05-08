@@ -1,19 +1,19 @@
-﻿using Application.Galleries;
+﻿using Application.Pictures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebGallery.UI.Generators.Helpers;
-using WebGallery.UI.ViewModels;
+using WebGallery.UI.ViewModels.Single;
 
 namespace WebGallery.UI.Generators
 {
-    public static class HomePageGenerator
+    public static class SinglePageGenerator
     {
-        public static HomeViewModel GenerateAllRandom(IEnumerable<GalleryResponse> input)
+        public static SingleGalleryViewModel GenerateRandom_ByFolderOrder(string galleryId, IEnumerable<PictureResponse> input)
         {
-            input.ToList().ShuffleList();
-            var outList = new List<HomeGalleryViewModel>();
+            input.OrderBy(i => i.FolderSortOrder);
+            var outList = new List<SingleGalleryImageViewModel>();
 
             int totalSizeOfRow = 0, indexer = 0;
             var rowFormat = RandomHelpers.GetRandomRowFormat;
@@ -27,27 +27,25 @@ namespace WebGallery.UI.Generators
                 }
 
                 var size = rowFormat[indexer];
-                var coverImageIndex = RandomHelpers.Rng.Next(1, item.ImageCount);
-                var vm = new HomeGalleryViewModel
+                var vm = new SingleGalleryImageViewModel
                 {
                     Id = item.Id,
-                    ItemCount = item.ImageCount,
-                    CoverImageIndex = coverImageIndex,
+                    GalleryIndex = item.FolderSortOrder,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,
                 };
 
                 outList.Add(vm);
-                
+
                 totalSizeOfRow += size;
                 indexer++;
             }
 
-            return new HomeViewModel
+            return new SingleGalleryViewModel
             {
-                Galleries = outList
+                Id = galleryId,
+                Images = outList
             };
         }
-
     }
 }

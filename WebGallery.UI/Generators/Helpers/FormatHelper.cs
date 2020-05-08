@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebGallery.UI.Generators.Helpers
 {
-    public static class RowFormats
+    public static class FormatHelper
     {
         public static int[][] Format => new int[][]
             {
