@@ -24,6 +24,8 @@ namespace WebGallery.UI.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.Current = "Home";
+
             var galleries = await _galleryService.GetAll();
 
             var vm = HomePageGenerator.GenerateAllRandom(galleries);

@@ -8,75 +8,43 @@
     string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/pictures";
 }
 
-<div class="site-wrap">
+<main class="main-content">
+    <div class="container-fluid photos">
 
-    <div class="site-mobile-menu">
-        <div class="site-mobile-menu-header">
-            <div class="site-mobile-menu-close mt-3">
-                <span class="icon-close2 js-menu-toggle"></span>
+        <div class="row pt-4 mb-5 text-center">
+            <div class="col-12">
+                <h2 class="text-white mb-4">'Nature' &mdash; 19 Photos</h2>
             </div>
         </div>
-        <div class="site-mobile-menu-body"></div>
+
+        <div class="row align-items-stretch">
+            @foreach (var image in Model.Images)
+            {
+                string imageUrl = $"{baseUrl}/{Model.Id}/{image.GalleryIndex}";
+                string popUpDelayAtr = image.PopUpDelay == 0 ? "" : $"data-aos-delay={image.PopUpDelay}";
+
+                <div class="col-6 col-md-6 col-lg-@image.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                    <a href="@imageUrl" class="d-block photo-item" data-fancybox="gallery">
+                        <img src="@imageUrl" alt="Image" class="img-fluid">
+                        <div class="photo-text-more">
+                            <span class="icon icon-search"></span>
+                        </div>
+                    </a>
+                </div>
+            }
+
+        </div>
+
+
+        <div class="row justify-content-center">
+            <div class="col-md-12 text-center py-5">
+                <p>
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                    Copyright &copy;
+                    <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                </p>
+            </div>
+        </div>
     </div>
-
-    <header class="header-bar d-flex d-lg-block align-items-center">
-        <div class="site-logo">
-            <a href="index.html">Shutter</a>
-        </div>
-
-        <div class="d-inline-block d-xl-none ml-md-0 ml-auto py-3" style="position: relative; top: 3px;"><a href="#" class="site-menu-toggle js-menu-toggle text-white"><span class="icon-menu h3"></span></a></div>
-
-        <div class="main-menu">
-            <ul class="js-clone-nav">
-                <li><a href="index.html">Home</a></li>
-                <li class="active"><a href="photos.html">Photos</a></li>
-            </ul>
-            <ul class="social js-clone-nav">
-                <li><a href="#"><span class="icon-facebook"></span></a></li>
-                <li><a href="#"><span class="icon-twitter"></span></a></li>
-                <li><a href="#"><span class="icon-instagram"></span></a></li>
-            </ul>
-        </div>
-    </header>
-    <main class="main-content">
-        <div class="container-fluid photos">
-
-            <div class="row pt-4 mb-5 text-center">
-                <div class="col-12">
-                    <h2 class="text-white mb-4">'Nature' &mdash; 19 Photos</h2>
-                </div>
-            </div>
-
-            <div class="row align-items-stretch">
-                @foreach (var image in Model.Images)
-                {
-                    string imageUrl = $"{baseUrl}/{Model.Id}/{image.GalleryIndex}";
-                    string popUpDelayAtr = image.PopUpDelay == 0 ? "" : $"data-aos-delay={image.PopUpDelay}";
-
-                    <div class="col-6 col-md-6 col-lg-@image.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                        <a href="@imageUrl" class="d-block photo-item" data-fancybox="gallery">
-                            <img src="@imageUrl" alt="Image" class="img-fluid">
-                            <div class="photo-text-more">
-                                <span class="icon icon-search"></span>
-                            </div>
-                        </a>
-                    </div>
-                }
-
-            </div>
-
-
-            <div class="row justify-content-center">
-                <div class="col-md-12 text-center py-5">
-                    <p>
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                        Copyright &copy;
-                        <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                    </p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-</div> <!-- .site-wrap -->
+</main>

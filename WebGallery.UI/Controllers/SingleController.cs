@@ -21,6 +21,8 @@ namespace WebGallery.UI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Index(string id, int offset)
         {
+            ViewBag.Current = "Single";
+
             var pics = await _pictureService.GetPictures(id, offset);
 
             var vm = SinglePageGenerator.GenerateRandom_ByFolderOrder(id, pics);
