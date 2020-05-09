@@ -5,7 +5,7 @@
 @inject IConfiguration Configuration
 
 @{
-    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/pictures";
+    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
 }
 
 <main class="main-content">

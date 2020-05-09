@@ -40,9 +40,25 @@ namespace Infrastructure.Pictures
             throw new NotImplementedException();
         }
 
-        public Task<Picture> FindById(int id)
+        public async Task<Picture> FindById(int id)
         {
-            throw new NotImplementedException();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures/{id}");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
+
+                var picture = Picture.Create(data.Id, data.GlobalSortOrder, data.FolderSortOrder);
+
+                return picture;
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
         }
 
         public async Task<IEnumerable<Picture>> GetPictures(string galleryId, int offset = 0)

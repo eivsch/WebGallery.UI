@@ -9,5 +9,6 @@ namespace Application.Services.Interfaces
     public interface IPictureService
     {
         Task<IEnumerable<PictureResponse>> GetPictures(string galleryId, int offset = 0);
+        Task<PictureResponse> Get(int index);
     }
 }

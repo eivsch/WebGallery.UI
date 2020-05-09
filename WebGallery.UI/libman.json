@@ -13,11 +13,10 @@
     {
       "library": "fancybox@3.5.7",
       "destination": "wwwroot/lib/fancybox/"
+    },
+    {
+      "library": "aos@2.3.4",
+      "destination": "wwwroot/lib/aos/"
     }
-  ,
-{
-  "library": "aos@2.3.4",
-  "destination": "wwwroot/lib/aos/"
-}
-]
+  ]
 }

@@ -1,5 +1,5 @@
 ﻿@{ 
-    string currentView = @ViewBag.Current;
+    string currentView = @ViewBag.Current ?? "home";
 }
 
 <!DOCTYPE html>
@@ -42,6 +42,7 @@
             <div class="main-menu">
                 <ul class="js-clone-nav">
                     <li class="@(currentView.ToLower() == "home" ? "active": "")"><a href="/">Home</a></li>
+                    <li class="@(currentView.ToLower() == "bio" ? "active": "")"><a href="/Bio">Bio</a></li>
                     @*<li class="@(currentView == "single" ? "active": "")"><a href="photos.html">Single</a></li>*@
                 </ul>
                 <ul class="social js-clone-nav">
