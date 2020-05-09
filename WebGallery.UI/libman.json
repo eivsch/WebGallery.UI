@@ -13,10 +13,6 @@
     {
       "library": "fancybox@3.5.7",
       "destination": "wwwroot/lib/fancybox/"
-    },
-    {
-      "library": "OwlCarousel2@2.3.4",
-      "destination": "wwwroot/lib/OwlCarousel2/"
     }
   ,
 {
