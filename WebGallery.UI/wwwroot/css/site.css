@@ -1,1 +1,28 @@
-﻿
+﻿.tag-list, li {
+    display: inline;
+}
+
+.tag-list-item{
+    margin-right: 3%;
+}
+
+#bioPicture {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.test {
+    text-align:center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.img-nav {
+    font-size: 25px;
+}
+
+#bioImgCounter{
+    padding-left: 10px;
+    padding-right: 10px;
+}

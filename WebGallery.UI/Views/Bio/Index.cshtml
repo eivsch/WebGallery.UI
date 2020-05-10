@@ -1,37 +1,22 @@
-﻿@using Microsoft.Extensions.Configuration
-
-@model WebGallery.UI.ViewModels.Bio.BioViewModel
-
-@inject IConfiguration Configuration
-@{
-    string imageUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images/{Model.GlobalSortOrder}";
-}
-
+﻿@model WebGallery.UI.ViewModels.Bio.BioViewModel
 
 <main class="main-content">
     <div class="container-fluid photos">
+
+        <partial name="_Picture" model="Model.BioPictureViewModel" />
+        
         <div class="row justify-content-center">
+            <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
+        </div>
 
-            <div class="col-md-10 pt-4">
-                <figure class="mb-5" data-aos="fade-up">
-                    <img src="@imageUrl" alt="Image" class="img-fluid">
-                </figure>
-
-                <a href="/Bio/@(Model.GlobalSortOrder + 1)">
-                    <h3 class="text-white mb-4" data-aos="fade-up">Next</h3>
-                </a>
-
-                <div class="row" data-aos="fade-up">
-                    <div class="col-md-12">
-                        <ul>
-                            <li>tag1</li>
-                            <li>tag1</li>
-                            <li>tag1</li>
-                        </ul>
-                    </div>
-                </div>
+        <div class="row justify-content-center">
+            <div id="myDropdown">
+                <input type="text" placeholder="Search.." id="myInput" style="display:none" />
+                @foreach (var tag in Model.AllTags)
+                {
+                    <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>
+                }
             </div>
-
         </div>
 
         <div class="row justify-content-center">
@@ -44,6 +29,5 @@
                 </p>
             </div>
         </div>
-    </div>
+        </div>
 </main>
-

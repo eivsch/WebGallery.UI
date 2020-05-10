@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using WebGallery.UI.Models;
 using WebGallery.UI.ViewModels.Bio;
 
 namespace WebGallery.UI.Controllers
@@ -12,6 +13,8 @@ namespace WebGallery.UI.Controllers
     public class BioController : Controller
     {
         private readonly IPictureService _pictureService;
+
+        static string _currentPictureId = string.Empty;
 
         public BioController(IPictureService pictureService)
         {
@@ -24,25 +27,51 @@ namespace WebGallery.UI.Controllers
 
             var vm = new BioViewModel
             {
-                PictureId = picture.Id,
-                GlobalSortOrder = picture.GlobalSortOrder,
+                AllTags = new List<string> { "About", "Base", "Blog", "Contact", "Custom", "Support", "Tools" },
+                BioPictureViewModel = new BioPictureViewModel
+                {
+                    PictureId = picture.Id,
+                    GlobalSortOrder = picture.GlobalSortOrder,
+                    Tags = new List<string>
+                    {
+                        "tag1",
+                        "tag2",
+                        "About"
+                    }
+                }
             };
+
+            _currentPictureId = picture.Id;
 
             return View(vm);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Index(int id)
+        public async Task<IActionResult> Switch(int id)
         {
             var picture = await _pictureService.Get(id);
 
-            var vm = new BioViewModel
+            var vm = new BioPictureViewModel
             {
                 PictureId = picture.Id,
                 GlobalSortOrder = picture.GlobalSortOrder,
+                Tags = new List<string>
+                {
+                    "tag1",
+                    "tag2",
+                    "About"
+                }
             };
 
-            return View(vm);
+            _currentPictureId = picture.Id;
+
+            return PartialView("_Picture", vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddTag(AddTagAjaxRequest data)
+        {
+            return Ok();
         }
     }
 }

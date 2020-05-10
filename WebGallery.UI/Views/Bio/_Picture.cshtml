@@ -1,32 +1,42 @@
 ﻿@using Microsoft.Extensions.Configuration
 
-@model WebGallery.UI.ViewModels.Bio.BioViewModel
+@model WebGallery.UI.ViewModels.Bio.BioPictureViewModel
 
 @inject IConfiguration Configuration
 @{
     string imageUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images/{Model.GlobalSortOrder}";
 }
 
-<div class="row justify-content-center">
-
-    <div class="col-md-10 pt-4">
+<div id="placeholder">
+    <div id="BioPicture" class="row justify-content-center">
         <figure class="mb-5" data-aos="fade-up">
-            <img src="@imageUrl" alt="Image" class="img-fluid">
-        </figure>
+            <img src="@imageUrl" alt="Image" class="img-fluid" id="bioPicture">
 
-        <a href="/Bio/@(Model.GlobalSortOrder + 1)">
-            <h3 class="text-white mb-4" data-aos="fade-up">Next</h3>
-        </a>
+            <div class="col-lg-11 test" data-aos="fade-left" data-aos-duration="1000">
+                <ul class="tag-list" id="bioPictureTags">
+                    @foreach (var tag in Model.Tags)
+                    {
+                        string tagStr = tag;
+                        if (!tag.StartsWith('#'))
+                            tagStr = "#" + tag;
 
-        <div class="row" data-aos="fade-up">
-            <div class="col-md-12">
-                <ul>
-                    <li>tag1</li>
-                    <li>tag1</li>
-                    <li>tag1</li>
+                        <li class="tag-list-item">@tagStr</li>
+                    }
                 </ul>
             </div>
-        </div>
+            </figure>
+</div>
+
+    <div class="row justify-content-center">
+        <a href data-ajax="true" data-ajax-url="/Bio/@(Model.GlobalSortOrder - 1)" data-ajax-update="#placeholder">
+            <div class="text-white img-nav"><<<  </div>
+        </a>
+
+        <div class="text-white img-nav" id="bioImgCounter">#@Model.GlobalSortOrder</div>
+
+        <a href data-ajax="true" data-ajax-url="/Bio/@(Model.GlobalSortOrder + 1)" data-ajax-update="#placeholder">
+            <div class="text-white img-nav">  >>></div>
+        </a>
     </div>
 
 </div>
