@@ -1,8 +1,10 @@
 ﻿using Application.Galleries;
 using Application.Services.Interfaces;
+using DomainModel.Aggregates.Gallery;
 using DomainModel.Aggregates.Gallery.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,6 +33,27 @@ namespace Application.Services
                 list.Add(new GalleryResponse { Id = gal.Id, ImageCount = gal.ImageCount});
 
             return list;
+        }
+
+        public async Task<GalleryResponse> GetRandom(int numberOfPics)
+        {
+            var response = await _galleryRepository.GetRandom(numberOfPics);
+
+            return new GalleryResponse 
+            { 
+                Id = response.Id, 
+                ImageCount = response.ImageCount,
+                GalleryPictures = response.GalleryItems.Select(s => Map(s))
+            };
+        }
+
+        private GalleryPicture Map(GalleryItem item)
+        {
+            return new GalleryPicture
+            {
+                Id = item.Id,
+                Index = item.Index
+            };
         }
     }
 }

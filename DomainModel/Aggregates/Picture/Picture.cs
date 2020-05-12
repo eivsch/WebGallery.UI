@@ -21,6 +21,9 @@ namespace DomainModel.Aggregates.Picture
 
         public static Picture Create(string id, int globalSortOrder, int folderSortOrder)
         {
+            if (string.IsNullOrWhiteSpace(id) && globalSortOrder < 1)
+                throw new ArgumentException("Either a valid id or global index must be provided");
+
             return new Picture(id) { _globalSortOrder = globalSortOrder, _folderSortOrder = folderSortOrder };
         }
     }

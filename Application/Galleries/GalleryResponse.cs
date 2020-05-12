@@ -8,5 +8,6 @@ namespace Application.Galleries
     {
         public string Id { get; set; }
         public int ImageCount { get; set; }
+        public IEnumerable<GalleryPicture> GalleryPictures { get; set; }
     }
 }

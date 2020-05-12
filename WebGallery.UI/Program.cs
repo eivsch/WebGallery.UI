@@ -20,7 +20,7 @@ namespace WebGallery.UI
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://0.0.0.0:5001", "http://localhost:5001").UseStartup<Startup>();
                 });
     }
 }

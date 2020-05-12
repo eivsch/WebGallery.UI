@@ -9,5 +9,6 @@ namespace Application.Services.Interfaces
     public interface IGalleryService
     {
         Task<IEnumerable<GalleryResponse>> GetAll();
+        Task<GalleryResponse> GetRandom(int numberOfPics);
     }
 }

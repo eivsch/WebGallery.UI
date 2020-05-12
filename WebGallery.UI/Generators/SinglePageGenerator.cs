@@ -1,4 +1,5 @@
-﻿using Application.Pictures;
+﻿using Application.Galleries;
+using Application.Pictures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,6 +45,43 @@ namespace WebGallery.UI.Generators
             return new SingleGalleryViewModel
             {
                 Id = galleryId,
+                Images = outList
+            };
+        }
+
+        public static SingleGalleryViewModel Generate(GalleryResponse input)
+        {
+            var outList = new List<SingleGalleryImageViewModel>();
+
+            int totalSizeOfRow = 0, indexer = 0;
+            var rowFormat = RandomHelpers.GetRandomRowFormat;
+            foreach (var item in input.GalleryPictures)
+            {
+                if (totalSizeOfRow == 12)
+                {
+                    totalSizeOfRow = 0;
+                    indexer = 0;
+                    rowFormat = RandomHelpers.GetRandomRowFormat;
+                }
+
+                var size = rowFormat[indexer];
+                var vm = new SingleGalleryImageViewModel
+                {
+                    Id = item.Id,
+                    Index = item.Index,
+                    LargeScreenSize = size,
+                    PopUpDelay = 100 * indexer,
+                };
+
+                outList.Add(vm);
+
+                totalSizeOfRow += size;
+                indexer++;
+            }
+
+            return new SingleGalleryViewModel
+            {
+                Id = input.Id,
                 Images = outList
             };
         }

@@ -9,5 +9,8 @@ namespace DomainModel.Aggregates.Gallery.Interfaces
     public interface IGalleryRepository : IRepository<Gallery>
     {
         public Task<IEnumerable<Gallery>> GetAll();
+
+        public Task<Gallery> GetRandom(int numOfPics);
+
     }
 }
