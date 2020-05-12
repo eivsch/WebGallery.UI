@@ -13,7 +13,7 @@ namespace WebGallery.UI.Generators
     {
         public static SingleGalleryViewModel GenerateRandom_ByFolderOrder(string galleryId, IEnumerable<PictureResponse> input)
         {
-            input.OrderBy(i => i.FolderSortOrder);
+            input = input.OrderBy(i => i.FolderSortOrder);
             var outList = new List<SingleGalleryImageViewModel>();
 
             int totalSizeOfRow = 0, indexer = 0;
