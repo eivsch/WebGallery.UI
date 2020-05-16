@@ -4,6 +4,16 @@
  	once: false
  });
 
+$.fancybox.defaults.buttons = [
+	"zoom",
+	//"share",
+	"slideShow",
+	"fullScreen",
+	//"download",
+	"thumbs",
+	"close"
+],
+
 jQuery(document).ready(function($) {
 
 	"use strict";

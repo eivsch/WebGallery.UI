@@ -32,6 +32,7 @@ namespace WebGallery.UI.Generators
                 {
                     Id = item.Id,
                     GalleryIndex = item.FolderSortOrder,
+                    Index = item.GlobalSortOrder,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,
                 };

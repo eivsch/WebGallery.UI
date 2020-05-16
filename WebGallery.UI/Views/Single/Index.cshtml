@@ -24,7 +24,7 @@
                 string popUpDelayAtr = image.PopUpDelay == 0 ? "" : $"data-aos-delay={image.PopUpDelay}";
 
                 <div class="col-6 col-md-6 col-lg-@image.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                    <a href="@imageUrl" class="d-block photo-item" data-fancybox="gallery">
+                    <a href="@imageUrl" class="d-block photo-item" data-fancybox="gallery" data-type="image" data-caption="<a href='/Bio/@image.Index'>@image.Id</a>">
                         <img src="@imageUrl" alt="Image" class="img-fluid">
                         <div class="photo-text-more">
                             <span class="icon icon-search"></span>

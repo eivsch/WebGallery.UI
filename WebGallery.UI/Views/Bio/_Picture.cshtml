@@ -10,7 +10,7 @@
 <div id="placeholder">
     <div id="BioPicture" class="row justify-content-center">
         <figure class="mb-5" data-aos="fade-up">
-            <img src="@imageUrl" alt="Image" class="img-fluid" id="bioPicture">
+            <a href="@imageUrl" data-fancybox data-type="image"><img src="@imageUrl" alt="Image" class="img-fluid" id="bioPicture"></a>
 
             <div class="col-lg-11 test" data-aos="fade-left" data-aos-duration="1000">
                 <ul class="tag-list" id="bioPictureTags">
@@ -28,13 +28,13 @@
 </div>
 
     <div class="row justify-content-center">
-        <a href data-ajax="true" data-ajax-url="/Bio/@(Model.GlobalSortOrder - 1)" data-ajax-update="#placeholder">
+        <a href data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#placeholder">
             <div class="text-white img-nav"><<<  </div>
         </a>
 
         <div class="text-white img-nav" id="bioImgCounter">#@Model.GlobalSortOrder</div>
 
-        <a href data-ajax="true" data-ajax-url="/Bio/@(Model.GlobalSortOrder + 1)" data-ajax-update="#placeholder">
+        <a href data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder + 1)" data-ajax-update="#placeholder">
             <div class="text-white img-nav">  >>></div>
         </a>
     </div>

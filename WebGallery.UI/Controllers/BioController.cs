@@ -23,7 +23,7 @@ namespace WebGallery.UI.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var picture = await _pictureService.Get(-1); // Random
+            var picture = await _pictureService.Get(-1);    // Random
 
             var vm = new BioViewModel
             {
@@ -47,6 +47,32 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("{id}")]
+        public async Task<IActionResult> Index(int id)
+        {
+            var picture = await _pictureService.Get(id);
+
+            var vm = new BioViewModel
+            {
+                AllTags = new List<string> { "About", "Base", "Blog", "Contact", "Custom", "Support", "Tools" },
+                BioPictureViewModel = new BioPictureViewModel
+                {
+                    PictureId = picture.Id,
+                    GlobalSortOrder = picture.GlobalSortOrder,
+                    Tags = new List<string>
+                    {
+                        "tag1",
+                        "tag2",
+                        "About"
+                    }
+                }
+            };
+
+            _currentPictureId = picture.Id;
+
+            return View(vm);
+        }
+
+        [HttpGet("switch/{id}")]
         public async Task<IActionResult> Switch(int id)
         {
             var picture = await _pictureService.Get(id);
