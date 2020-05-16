@@ -2,6 +2,7 @@
 using Application.Tags;
 using DomainModel.Aggregates.Tags;
 using DomainModel.Aggregates.Tags.Interfaces;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -24,6 +25,11 @@ namespace Application.Services
             );
 
             await _tagRepository.Save(tag);
+        }
+
+        public async Task<IEnumerable<string>> GetAll()
+        {
+            return await _tagRepository.GetAll();
         }
     }
 }

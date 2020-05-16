@@ -27,10 +27,11 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> Index()
         {
             var picture = await _pictureService.Get(-1);    // Random
+            var tags = await _tagService.GetAll();
 
             var vm = new BioViewModel
             {
-                AllTags = new List<string> { "About", "Base", "Blog", "Contact", "Custom", "Support", "Tools" },
+                AllTags = tags.ToList(),
                 BioPictureViewModel = new BioPictureViewModel
                 {
                     PictureId = picture.Id,
@@ -48,10 +49,11 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> Index(int id)
         {
             var picture = await _pictureService.Get(id);
+            var tags = await _tagService.GetAll();
 
             var vm = new BioViewModel
             {
-                AllTags = new List<string> { "About", "Base", "Blog", "Contact", "Custom", "Support", "Tools" },    // TODO
+                AllTags = tags.ToList(),
                 BioPictureViewModel = new BioPictureViewModel
                 {
                     PictureId = picture.Id,

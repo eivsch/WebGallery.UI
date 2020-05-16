@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -43,6 +44,25 @@ namespace Infrastructure.Tags
         public Task<Tag> FindById(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<string>> GetAll()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "tags");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<IEnumerable<string>>(responseStream);
+
+                return data;
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
         }
 
         public void Remove(Tag aggregate)
