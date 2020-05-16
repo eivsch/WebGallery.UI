@@ -4,6 +4,7 @@ using Infrastructure.Common;
 using Infrastructure.Pictures.DTO;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -51,9 +52,7 @@ namespace Infrastructure.Pictures
                 using var responseStream = await response.Content.ReadAsStreamAsync();
                 var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
 
-                var picture = Picture.Create(data.Id, data.GlobalSortOrder, data.FolderSortOrder);
-
-                return picture;
+                return Map(data);
             }
             else
             {
@@ -75,7 +74,7 @@ namespace Infrastructure.Pictures
                 List<Picture> list = new List<Picture>();
                 foreach (var p in data)
                 {
-                    list.Add(Picture.Create(p.Id, p.GlobalSortOrder, p.FolderSortOrder));
+                    list.Add(Map(p));
                 }
 
                 return list;
@@ -84,6 +83,26 @@ namespace Infrastructure.Pictures
             {
                 throw new Exception($"The API returned a {response.StatusCode} status code.");
             }
+        }
+
+        private Picture Map(PictureDTO dto)
+        {
+            var aggregate = Picture.Create(
+                id: dto.Id,
+                name: dto.Name,
+                appPath: dto.AppPath,
+                originalPath: dto.OriginalPath,
+                folderName: dto.FolderName,
+                folderId: dto.FolderId,
+                globalSortOrder: dto.GlobalSortOrder,
+                folderSortOrder: dto.FolderSortOrder,
+                size: dto.Size,
+                created: dto.CreateTimestamp
+            );
+
+            dto.Tags?.ToList().ForEach(tag => aggregate.AddTag(tag));
+
+            return aggregate;
         }
 
         public void Remove(Picture aggregate)

@@ -35,12 +35,7 @@ namespace WebGallery.UI.Controllers
                 {
                     PictureId = picture.Id,
                     GlobalSortOrder = picture.GlobalSortOrder,
-                    Tags = new List<string>
-                    {
-                        "tag1",
-                        "tag2",
-                        "About"
-                    }
+                    Tags = picture.Tags.ToList()
                 }
             };
 
@@ -56,17 +51,12 @@ namespace WebGallery.UI.Controllers
 
             var vm = new BioViewModel
             {
-                AllTags = new List<string> { "About", "Base", "Blog", "Contact", "Custom", "Support", "Tools" },
+                AllTags = new List<string> { "About", "Base", "Blog", "Contact", "Custom", "Support", "Tools" },    // TODO
                 BioPictureViewModel = new BioPictureViewModel
                 {
                     PictureId = picture.Id,
                     GlobalSortOrder = picture.GlobalSortOrder,
-                    Tags = new List<string>
-                    {
-                        "tag1",
-                        "tag2",
-                        "About"
-                    }
+                    Tags = picture.Tags.ToList()
                 }
             };
 
@@ -84,12 +74,7 @@ namespace WebGallery.UI.Controllers
             {
                 PictureId = picture.Id,
                 GlobalSortOrder = picture.GlobalSortOrder,
-                Tags = new List<string>
-                {
-                    "tag1",
-                    "tag2",
-                    "About"
-                }
+                Tags = picture.Tags.ToList()
             };
 
             _currentPictureId = picture.Id;

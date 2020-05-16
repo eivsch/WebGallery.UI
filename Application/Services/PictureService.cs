@@ -1,5 +1,6 @@
 ﻿using Application.Pictures;
 using Application.Services.Interfaces;
+using DomainModel.Aggregates.Picture;
 using DomainModel.Aggregates.Picture.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -21,12 +22,7 @@ namespace Application.Services
         {
             var picture = await _pictureRepository.FindById(index);
 
-            return new PictureResponse
-            {
-                Id = picture.Id,
-                GlobalSortOrder = picture.GlobalSortOrder,
-                FolderSortOrder = picture.FolderSortOrder
-            };
+            return Map(picture);
         }
 
         public async Task<IEnumerable<PictureResponse>> GetPictures(string galleryId, int offset = 0)
@@ -36,15 +32,28 @@ namespace Application.Services
             var list = new List<PictureResponse>();
             foreach (var picture in pictures)
             {
-                list.Add(new PictureResponse
-                {
-                    Id = picture.Id,
-                    GlobalSortOrder = picture.GlobalSortOrder,
-                    FolderSortOrder = picture.FolderSortOrder
-                });
+                list.Add(Map(picture));
             }
 
             return list;
+        }
+
+        private PictureResponse Map(Picture aggregate)
+        {
+            return new PictureResponse
+            {
+                Id = aggregate.Id,
+                AppPath = aggregate.AppPath,
+                CreateTimestamp = aggregate.CreateTimestamp,
+                FolderId = aggregate.FolderId,
+                FolderName = aggregate.FolderName,
+                FolderSortOrder = aggregate.FolderSortOrder,
+                GlobalSortOrder = aggregate.GlobalSortOrder,
+                Name = aggregate.Name,
+                OriginalPath = aggregate.OriginalPath,
+                Size = aggregate.Size,
+                Tags = aggregate.Tags
+            };
         }
     }
 }
