@@ -6,9 +6,11 @@ using Application.Services;
 using Application.Services.Interfaces;
 using DomainModel.Aggregates.Gallery.Interfaces;
 using DomainModel.Aggregates.Picture.Interfaces;
+using DomainModel.Aggregates.Tags.Interfaces;
 using Infrastructure.Common;
 using Infrastructure.Galleries;
 using Infrastructure.Pictures;
+using Infrastructure.Tags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -39,9 +41,11 @@ namespace WebGallery.UI
             
             services.AddTransient<IGalleryRepository, GalleryRepository>();
             services.AddTransient<IGalleryService, GalleryService>();
+            services.AddTransient<ITagService, TagService>();
 
             services.AddTransient<IPictureService, PictureService>();
             services.AddTransient<IPictureRepository, PictureRepository>();
+            services.AddTransient<ITagRepository, TagRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
+using Application.Tags;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Models;
 using WebGallery.UI.ViewModels.Bio;
@@ -13,12 +14,14 @@ namespace WebGallery.UI.Controllers
     public class BioController : Controller
     {
         private readonly IPictureService _pictureService;
+        private readonly ITagService _tagService;
 
         static string _currentPictureId = string.Empty;
 
-        public BioController(IPictureService pictureService)
+        public BioController(IPictureService pictureService, ITagService tagService)
         {
             _pictureService = pictureService;
+            _tagService = tagService;
         }
 
         public async Task<IActionResult> Index()
@@ -97,6 +100,14 @@ namespace WebGallery.UI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddTag(AddTagAjaxRequest data)
         {
+            var request = new TagRequest
+            {
+                PictureId = _currentPictureId,
+                TagName = data.Tag
+            };
+
+            await _tagService.Add(request);
+
             return Ok();
         }
     }
