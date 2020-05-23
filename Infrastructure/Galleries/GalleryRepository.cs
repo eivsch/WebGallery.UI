@@ -72,7 +72,7 @@ namespace Infrastructure.Galleries
 
         public async Task<Gallery> GetRandom(int itemsInEach)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"galleries/random?num=1&itemsInEach={itemsInEach}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"galleries/random?itemsInEach={itemsInEach}");
 
             var response = await _client.SendAsync(request);
 

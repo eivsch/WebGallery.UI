@@ -12,12 +12,10 @@ namespace WebGallery.UI.Controllers
     public class SingleController : Controller
     {
         private readonly IPictureService _pictureService;
-        private readonly IGalleryService _galleryService;
 
-        public SingleController(IPictureService pictureService, IGalleryService galleryService)
+        public SingleController(IPictureService pictureService)
         {
             _pictureService = pictureService;
-            _galleryService = galleryService;
         }
 
         [HttpGet("{id}")]
@@ -32,17 +30,5 @@ namespace WebGallery.UI.Controllers
 
             return View(vm);
         }
-
-        //[HttpGet("randomized")]
-        //public async Task<IActionResult> Randomized()
-        //{
-        //    ViewBag.Current = "Randomized";
-
-        //    var gallery = await _galleryService.GetRandom(12);
-
-        //    var vm = HomePageGenerator.GenerateHomePage(gallery, randomizeCoverImage: false);
-
-        //    return View("Index", vm);
-        //}
     }
 }
