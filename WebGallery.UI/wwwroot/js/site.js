@@ -115,3 +115,22 @@ function focusInput() {
 /**
  *  END SECTION: Tags (Bio)
  */
+
+/**
+ *  SECTION: Customizer
+ */
+
+$('input:radio[name="RadioTagmodeOption"]').change(
+    function () {
+        if ($(this).is(':checked') && $(this).val() == 'custom') {
+            $('[data-tag-manager]').show();
+        }
+        else {
+            $('[data-tag-manager]').hide();
+        }
+    }
+);
+
+/**
+ *  END SECTION: Customizer
+ */

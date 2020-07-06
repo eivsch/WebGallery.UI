@@ -144,7 +144,7 @@ jQuery(document).ready(function($) {
 	initSlider();
 
 	$('[data-select-tags]').select2({
-		placeholder: "Filter tags",
+		placeholder: "Search tags...",
 	});
 
 });
