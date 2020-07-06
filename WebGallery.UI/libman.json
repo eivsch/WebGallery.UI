@@ -25,6 +25,10 @@
     {
       "library": "noUiSlider@14.6.0",
       "destination": "wwwroot/lib/nouislider/"
+    },
+    {
+      "library": "select2@4.1.0-beta.1",
+      "destination": "wwwroot/lib/select2/"
     }
-]
+  ]
 }

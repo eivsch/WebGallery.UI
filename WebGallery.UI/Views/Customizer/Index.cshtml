@@ -1,27 +1,49 @@
-﻿<div class="customizer-form">
-    <h2>Gallery Customizer</h2>
-    <form>
-        <div class="row">
-            <div class="form-group col-md-8">
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model WebGallery.UI.ViewModels.Customizer.CustomizerViewModel;
+
+        <div class="customizer-form">
+            <h2>Gallery Customizer</h2>
+            <form>
                 <div class="row">
-                    <div class="col-md-12">
-                        <label>Set number of pics:</label>
-                    </div>
-                    <div class="col-md-10">
-                        <div my-slider></div>
-                    </div>
-                    <div class="col-md-2">
-                        <input class="form-control" type="number" data-number-pics />
+                    <div class="form-group col-md-8">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Set number of pics:</label>
+                            </div>
+                            <div class="col-md-10">
+                                <div my-slider></div>
+                            </div>
+                            <div class="col-md-2">
+                                <input class="form-control" type="number" data-number-pics />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                <label class="form-check-label" for="inlineCheckbox1">Allow GIFs</label>
-            </div>
+                <div class="row">
+                    <div class="form-group col-md-8">
+                        <div class="row">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+                                <label class="form-check-label" for="inlineRadio1">Include Only</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+                                <label class="form-check-label" for="inlineRadio2">Exclude Only</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+                        <label class="form-check-label" for="inlineCheckbox1">Allow GIFs</label>
+                    </div>
+                </div>
+
+            </form>
+                @*<select data-select-tags asp-items="@(new SelectList(Model.Tags, "ThreeLetterIsoCode", "Name"))" multiple="multiple" style="width: 50%"></select>*@
         </div>
-    </form>
-</div>
