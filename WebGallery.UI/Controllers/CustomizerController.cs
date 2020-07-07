@@ -40,7 +40,7 @@ namespace WebGallery.UI.Controllers
             if(vm.SelectedTags != null)
                 tags = string.Join(",", vm.SelectedTags);
 
-            return Redirect($"/SingleRandom/Custom?nbr={vm.NumberOfPictures}&tags={tags}&tagFilterMode={tagFilterMode}");
+            return Redirect($"/SingleRandom/Custom?nbr={vm.NumberOfPictures}&tags={tags}&tagFilterMode={tagFilterMode}&gifMode={vm.RadioGifModeOption}");
         }
 
         private string ParseTagMode(string tagMode, string tagModeCustomFilter)
@@ -59,7 +59,7 @@ namespace WebGallery.UI.Controllers
                         case "exclusive":
                             return "customexclusive";
                         default:
-                            throw new ArgumentException("Unkown tag mode selected");
+                            throw new ArgumentException("Unknown tag mode selected");
                     }
                 default:
                     return "undefined";

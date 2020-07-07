@@ -31,11 +31,11 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("custom")]
-        public async Task<IActionResult> Custom(int nbr, string tags, string tagFilterMode)
+        public async Task<IActionResult> Custom(int nbr, string tags, string tagFilterMode, string gifMode)
         {
             ViewBag.Current = "Random";
 
-            var uri = await _galleryService.GenerateGalleryUri(nbr, tags, tagFilterMode);
+            var uri = await _galleryService.GenerateGalleryUri(nbr, tags, tagFilterMode, gifMode);
             var gallery = await _galleryService.Get(uri);
 
             var vm = SinglePageGenerator.Generate(gallery);

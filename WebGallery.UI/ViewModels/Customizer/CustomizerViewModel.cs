@@ -8,6 +8,7 @@ namespace WebGallery.UI.ViewModels.Customizer
         public int NumberOfPictures { get; set; }
         public string RadioTagModeOption { get; set; }
         public string RadioTagFilterOption { get; set; }
+        public string RadioGifModeOption { get; set; }
         public List<Tag> Tags { get; set; }
         public List<string> SelectedTags { get; set; }
     }
