@@ -12,5 +12,7 @@ namespace DomainModel.Aggregates.Gallery.Interfaces
 
         public Task<Gallery> GetRandom(int numOfPics);
 
+        public Task<Gallery> GetRandom(int numOfPics, string tags, string tagMode);
+
     }
 }

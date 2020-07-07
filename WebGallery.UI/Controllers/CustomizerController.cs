@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
@@ -31,12 +30,40 @@ namespace WebGallery.UI.Controllers
             return View(vm);
         }
 
+        // TODO: Create service method "GenerateUrl" or something
         [HttpPost]
-        public async Task<IActionResult> Generate(CustomizerViewModel vm)
+        public IActionResult Generate(CustomizerViewModel vm)
         {
+            string tags = string.Join(",", vm.SelectedTags);
+            string tagMode = ParseTagMode(vm);
 
+            return Redirect($"/SingleRandom/Custom?num={vm.NumberOfPictures}&tags={tags}&tagMode={tagMode}");
+        }
 
-            return View(new CustomizerViewModel());
+        private string ParseTagMode(CustomizerViewModel vm)
+        {
+            if (vm.RadioTagModeOption == "custom")
+            {
+                switch (vm.RadioTagFilterOption)
+                {
+                    case "inclusive":
+                        return "custominclusive";
+                    case "exclusive":
+                        return "customexclusive";
+                    default:
+                        throw new ArgumentException("Unkown tag mode selected");
+                }
+            }
+
+            switch (vm.RadioTagModeOption)
+            {
+                case "untagged":
+                    return "onlyuntagged";
+                case "onlytagged":
+                    return "onlytagged";
+                default:
+                    return "undefined";
+            }
         }
     }
 }

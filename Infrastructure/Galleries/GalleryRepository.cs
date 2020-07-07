@@ -93,6 +93,31 @@ namespace Infrastructure.Galleries
             }
         }
 
+        public async Task<Gallery> GetRandom(int numOfPics, string tags, string tagMode)
+        {
+            var request = new HttpRequestMessage(
+                HttpMethod.Get, 
+                $"galleries/customized-random?itemsInEach={numOfPics}&tags={tags}&tagFilterMode={tagMode}");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<GalleryDTO>(responseStream);
+
+                Gallery gallery = Gallery.Create(data.Id, data.ImageCount);
+                foreach (var item in data.GalleryPictures)
+                    gallery.AddGalleryItem(galleryItemId: item.Id, index: item.Index);
+
+                return gallery;
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
+
         public void Remove(Gallery aggregate)
         {
             throw new NotImplementedException();

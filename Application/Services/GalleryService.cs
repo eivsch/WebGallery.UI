@@ -5,7 +5,6 @@ using DomainModel.Aggregates.Gallery.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -22,6 +21,18 @@ namespace Application.Services
         public Task<GalleryResponse> Get(string id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<GalleryResponse> Get(int imageCount, string tags, string tagMode)
+        {
+            var response = await _galleryRepository.GetRandom(imageCount, tags, tagMode);
+
+            return new GalleryResponse
+            {
+                Id = response.Id,
+                ImageCount = response.ImageCount,
+                GalleryPictures = response.GalleryItems.Select(s => Map(s))
+            };
         }
 
         public async Task<IEnumerable<GalleryResponse>> GetAll()

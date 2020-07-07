@@ -28,5 +28,22 @@ namespace WebGallery.UI.Controllers
 
             return View("Index", vm);
         }
+
+        [HttpGet("custom")]
+        public async Task<IActionResult> Custom(int num, string tags, string tagMode)
+        {
+            ViewBag.Current = "Random";
+
+            var gallery = await _galleryService.Get(num, tags, tagMode);
+
+            var vm = SinglePageGenerator.Generate(gallery);
+
+            return View("Index", vm);
+        }
+
+        private List<string> ParseTags(string tags)
+        {
+            return tags.Split(',').ToList();
+        }
     }
 }
