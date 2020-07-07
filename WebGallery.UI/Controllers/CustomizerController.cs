@@ -20,6 +20,8 @@ namespace WebGallery.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            ViewBag.Current = "Customizer";
+
             var tags = await _tagService.GetAll();
 
             var vm = new CustomizerViewModel

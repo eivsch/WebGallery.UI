@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Application.Tags;
@@ -26,6 +24,8 @@ namespace WebGallery.UI.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.Current = "Bio";
+
             var picture = await _pictureService.Get(-1);    // Random
             var tags = await _tagService.GetAll();
 
