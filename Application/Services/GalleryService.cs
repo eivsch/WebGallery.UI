@@ -18,14 +18,14 @@ namespace Application.Services
             _galleryRepository = galleryRepository ?? throw new ArgumentNullException(nameof(galleryRepository));
         }
 
-        public Task<GalleryResponse> Get(string id)
+        public Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "")
         {
-            throw new NotImplementedException();
+            return _galleryRepository.GetRandomizerUri(imageCount, tags, tagFilterMode);
         }
 
-        public async Task<GalleryResponse> Get(int imageCount, string tags, string tagMode)
+        public async Task<GalleryResponse> Get(string galleryUri)
         {
-            var response = await _galleryRepository.GetRandom(imageCount, tags, tagMode);
+            var response = await _galleryRepository.GetRandom(galleryUri);
 
             return new GalleryResponse
             {
@@ -44,18 +44,6 @@ namespace Application.Services
                 list.Add(new GalleryResponse { Id = gal.Id, ImageCount = gal.ImageCount});
 
             return list;
-        }
-
-        public async Task<GalleryResponse> GetRandom(int numberOfPics)
-        {
-            var response = await _galleryRepository.GetRandom(numberOfPics);
-
-            return new GalleryResponse 
-            { 
-                Id = response.Id, 
-                ImageCount = response.ImageCount,
-                GalleryPictures = response.GalleryItems.Select(s => Map(s))
-            };
         }
 
         private GalleryPicture Map(GalleryItem item)

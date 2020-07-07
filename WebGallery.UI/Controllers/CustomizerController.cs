@@ -30,37 +30,35 @@ namespace WebGallery.UI.Controllers
             return View(vm);
         }
 
-        // TODO: Create service method "GenerateUrl" or something
         [HttpPost]
-        public IActionResult Generate(CustomizerViewModel vm)
+        public async Task<IActionResult> Generate(CustomizerViewModel vm)
         {
-            string tags = string.Join(",", vm.SelectedTags);
-            string tagMode = ParseTagMode(vm);
+            string tagFilterMode = ParseTagMode(vm.RadioTagModeOption, vm.RadioTagFilterOption);
+            string tags = "";
+            if(vm.SelectedTags != null)
+                tags = string.Join(",", vm.SelectedTags);
 
-            return Redirect($"/SingleRandom/Custom?num={vm.NumberOfPictures}&tags={tags}&tagMode={tagMode}");
+            return Redirect($"/SingleRandom/Custom?nbr={vm.NumberOfPictures}&tags={tags}&tagFilterMode={tagFilterMode}");
         }
 
-        private string ParseTagMode(CustomizerViewModel vm)
+        private string ParseTagMode(string tagMode, string tagModeCustomFilter)
         {
-            if (vm.RadioTagModeOption == "custom")
-            {
-                switch (vm.RadioTagFilterOption)
-                {
-                    case "inclusive":
-                        return "custominclusive";
-                    case "exclusive":
-                        return "customexclusive";
-                    default:
-                        throw new ArgumentException("Unkown tag mode selected");
-                }
-            }
-
-            switch (vm.RadioTagModeOption)
+            switch (tagMode)
             {
                 case "untagged":
                     return "onlyuntagged";
                 case "onlytagged":
                     return "onlytagged";
+                case "custom":
+                    switch (tagModeCustomFilter)
+                    {
+                        case "inclusive":
+                            return "custominclusive";
+                        case "exclusive":
+                            return "customexclusive";
+                        default:
+                            throw new ArgumentException("Unkown tag mode selected");
+                    }
                 default:
                     return "undefined";
             }

@@ -22,7 +22,8 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Random";
 
-            var gallery = await _galleryService.GetRandom(24);
+            var uri = await _galleryService.GenerateGalleryUri(24);
+            var gallery = await _galleryService.Get(uri);
 
             var vm = SinglePageGenerator.Generate(gallery);
 
@@ -30,20 +31,16 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("custom")]
-        public async Task<IActionResult> Custom(int num, string tags, string tagMode)
+        public async Task<IActionResult> Custom(int nbr, string tags, string tagFilterMode)
         {
             ViewBag.Current = "Random";
 
-            var gallery = await _galleryService.Get(num, tags, tagMode);
+            var uri = await _galleryService.GenerateGalleryUri(nbr, tags, tagFilterMode);
+            var gallery = await _galleryService.Get(uri);
 
             var vm = SinglePageGenerator.Generate(gallery);
 
             return View("Index", vm);
-        }
-
-        private List<string> ParseTags(string tags)
-        {
-            return tags.Split(',').ToList();
         }
     }
 }

@@ -70,34 +70,11 @@ namespace Infrastructure.Galleries
             }
         }
 
-        public async Task<Gallery> GetRandom(int itemsInEach)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"galleries/random?itemsInEach={itemsInEach}");
-
-            var response = await _client.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                var data = await JsonSerializer.DeserializeAsync<GalleryDTO>(responseStream);
-
-                Gallery gallery = Gallery.Create(data.Id, data.ImageCount);
-                foreach(var item in data.GalleryPictures)
-                    gallery.AddGalleryItem(galleryItemId: item.Id, index: item.Index);
-
-                return gallery;
-            }
-            else
-            {
-                throw new Exception($"The API returned a {response.StatusCode} status code.");
-            }
-        }
-
-        public async Task<Gallery> GetRandom(int numOfPics, string tags, string tagMode)
+        public async Task<Gallery> GetRandom(string uri)
         {
             var request = new HttpRequestMessage(
                 HttpMethod.Get, 
-                $"galleries/customized-random?itemsInEach={numOfPics}&tags={tags}&tagFilterMode={tagMode}");
+                uri);
 
             var response = await _client.SendAsync(request);
 
@@ -116,6 +93,17 @@ namespace Infrastructure.Galleries
             {
                 throw new Exception($"The API returned a {response.StatusCode} status code.");
             }
+        }
+
+        public async Task<string> GetRandomizerUri(int imageCount, string tagList, string tagFilterMode)
+        {
+            string uri = $"galleries/customized-random?itemsInEach={imageCount}";
+            if (!string.IsNullOrWhiteSpace(tagList))
+                uri += $"&tags={tagList}";
+            if (!string.IsNullOrWhiteSpace(tagFilterMode))
+                uri += $"&tagFilterMode={tagFilterMode}";
+
+            return uri;
         }
 
         public void Remove(Gallery aggregate)

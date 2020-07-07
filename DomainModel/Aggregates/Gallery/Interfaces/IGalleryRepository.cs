@@ -1,7 +1,5 @@
 ﻿using DomainModel.Common.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DomainModel.Aggregates.Gallery.Interfaces
@@ -10,9 +8,8 @@ namespace DomainModel.Aggregates.Gallery.Interfaces
     {
         public Task<IEnumerable<Gallery>> GetAll();
 
-        public Task<Gallery> GetRandom(int numOfPics);
-
-        public Task<Gallery> GetRandom(int numOfPics, string tags, string tagMode);
+        public Task<string> GetRandomizerUri(int imageCount, string tagList, string tagFilterMode);
+        public Task<Gallery> GetRandom(string uri);
 
     }
 }
