@@ -6,18 +6,20 @@
 };
 
 function initSlider() {
-    var slider = $('[my-slider]')[0];
+    if ($('[my-slider]').length > 0) {
+        var slider = $('[my-slider]')[0];
 
-    noUiSlider.create(slider, {
-        start: [12],
-        step: 2,
-        connect: 'lower',
-        range: {
-            'min': 0,
-            'max': 48
-        },
-        padding: [2, 0]
-    });
+        noUiSlider.create(slider, {
+            start: [12],
+            step: 2,
+            connect: 'lower',
+            range: {
+                'min': 0,
+                'max': 48
+            },
+            padding: [2, 0]
+        });
 
-    slider.noUiSlider.on('slide', updateInput);
+        slider.noUiSlider.on('slide', updateInput);
+    }
 };
