@@ -1,4 +1,5 @@
 ﻿using DomainModel.Common;
+using DomainModel.Common.Enums;
 using DomainModel.Common.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -27,9 +28,9 @@ namespace DomainModel.Aggregates.Gallery
             };
         }
 
-        public virtual void AddGalleryItem(string galleryItemId, int index, string tags = "")
+        public virtual void AddGalleryItem(string galleryItemId, int index, string mediaType, string tags = "")
         {
-            var galleryItem = GalleryItem.Create(galleryItemId, index);
+            var galleryItem = GalleryItem.Create(galleryItemId, index, ParseMediaType(mediaType));
 
             if (!string.IsNullOrWhiteSpace(tags))
             {
@@ -40,6 +41,21 @@ namespace DomainModel.Aggregates.Gallery
             }
 
             _galleryItems.Add(galleryItem);
+        }
+
+        private MediaType ParseMediaType(string mediaType)
+        {
+            switch (mediaType.Trim().ToLower())
+            {
+                case "image":
+                    return MediaType.Image;
+                case "video":
+                    return MediaType.Video;
+                case "gif":
+                    return MediaType.Gif;
+                default:
+                    return MediaType.Image;
+            }
         }
     }
 }

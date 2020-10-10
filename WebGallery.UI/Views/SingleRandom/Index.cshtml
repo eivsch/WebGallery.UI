@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Extensions.Configuration
+@using Application.Enums
 
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
@@ -18,19 +19,32 @@
         </div>
 
         <div class="row align-items-stretch">
-            @foreach (var image in Model.Images)
+            @foreach (var item in Model.Images)
             {
-                string imageUrl = $"{baseUrl}/{image.Index}";
-                string popUpDelayAtr = image.PopUpDelay == 0 ? "" : $"data-aos-delay={image.PopUpDelay}";
+                string itemUrl = $"{baseUrl}/{item.Index}";
+                string popUpDelayAtr = item.PopUpDelay == 0 ? "" : $"data-aos-delay={item.PopUpDelay}";
 
-                <div class="col-6 col-md-6 col-lg-@image.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                    <a href="@imageUrl" class="d-block photo-item" data-fancybox="gallery" data-type="image" data-caption="<a href='/Bio/@image.Index'>@image.Id</a>">
-                        <img src="@imageUrl" alt="Image" class="img-fluid">
-                        <div class="photo-text-more">
-                            <span class="icon icon-search"></span>
-                        </div>
-                    </a>
-                </div>
+                if (item.MediaType == MediaType.Video)
+                {
+                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="video" data-caption="<a href='/Bio/@item.Index'>@item.Id</a>">
+                            <video class="img-fluid" autoplay loop muted>
+                                <source src="@itemUrl" type="video/mp4" />
+                            </video>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="image" data-caption="<a href='/Bio/@item.Index'>@item.Id</a>">
+                            <img src="@itemUrl" alt="Image" class="img-fluid">
+                            <div class="photo-text-more">
+                                <span class="icon icon-search"></span>
+                            </div>
+                        </a>
+                    </div>
+                }
             }
 
         </div>

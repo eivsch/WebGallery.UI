@@ -1,4 +1,5 @@
-﻿using Application.Galleries;
+﻿using Application.Enums;
+using Application.Galleries;
 using Application.Services.Interfaces;
 using DomainModel.Aggregates.Gallery;
 using DomainModel.Aggregates.Gallery.Interfaces;
@@ -51,8 +52,24 @@ namespace Application.Services
             return new GalleryPicture
             {
                 Id = item.Id,
-                Index = item.Index
+                Index = item.Index,
+                MediaType = Parse(item.MediaType),
             };
+        }
+
+        private MediaType Parse(DomainModel.Common.Enums.MediaType mediaType)
+        {
+            switch (mediaType)
+            {
+                case DomainModel.Common.Enums.MediaType.Gif:
+                    return MediaType.Gif;
+                case DomainModel.Common.Enums.MediaType.Image:
+                    return MediaType.Image;
+                case DomainModel.Common.Enums.MediaType.Video:
+                    return MediaType.Video;
+                default:
+                    return MediaType.Image;
+            }
         }
     }
 }

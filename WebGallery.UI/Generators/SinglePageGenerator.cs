@@ -72,6 +72,7 @@ namespace WebGallery.UI.Generators
                     Index = item.Index,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,
+                    MediaType = item.MediaType
                 };
 
                 outList.Add(vm);

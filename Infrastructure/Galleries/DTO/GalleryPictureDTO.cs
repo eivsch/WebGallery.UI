@@ -9,5 +9,8 @@ namespace Infrastructure.Galleries.DTO
 
         [JsonPropertyName("index")]
         public int Index { get; set; }
+
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace Infrastructure.Galleries.DTO
     {
         [JsonPropertyName("id")]
         public string Id { get; set; }
-
+        
         [JsonPropertyName("imageCount")]
         public int ImageCount { get; set; }
 
