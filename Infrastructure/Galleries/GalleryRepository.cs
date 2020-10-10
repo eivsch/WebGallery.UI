@@ -103,7 +103,7 @@ namespace Infrastructure.Galleries
             if (!string.IsNullOrWhiteSpace(tagFilterMode))
                 uri += $"&tagFilterMode={tagFilterMode}";
             if (!string.IsNullOrWhiteSpace(gifMode))
-                uri += $"&gifMode={gifMode}";
+                uri += $"&mediaFilterMode={gifMode}";
 
             return uri;
         }
