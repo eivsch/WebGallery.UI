@@ -18,9 +18,9 @@ namespace Application.Services
             _galleryRepository = galleryRepository ?? throw new ArgumentNullException(nameof(galleryRepository));
         }
 
-        public Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "", string gifMode = "")
+        public Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "", string mediaFilterMode = "")
         {
-            return _galleryRepository.GetRandomizerUri(imageCount, tags, tagFilterMode, gifMode);
+            return _galleryRepository.GetRandomizerUri(imageCount, tags, tagFilterMode, mediaFilterMode);
         }
 
         public async Task<GalleryResponse> Get(string galleryUri)

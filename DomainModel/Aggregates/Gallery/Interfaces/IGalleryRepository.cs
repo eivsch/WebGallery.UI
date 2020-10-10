@@ -8,7 +8,7 @@ namespace DomainModel.Aggregates.Gallery.Interfaces
     {
         public Task<IEnumerable<Gallery>> GetAll();
 
-        public Task<string> GetRandomizerUri(int imageCount, string tagList, string tagFilterMode, string gifMode);
+        public Task<string> GetRandomizerUri(int imageCount, string tagList, string tagFilterMode, string mediaFilterMode);
         public Task<Gallery> GetRandom(string uri);
 
     }

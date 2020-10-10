@@ -95,15 +95,15 @@ namespace Infrastructure.Galleries
             }
         }
 
-        public async Task<string> GetRandomizerUri(int imageCount, string tagList, string tagFilterMode, string gifMode)
+        public async Task<string> GetRandomizerUri(int imageCount, string tagList, string tagFilterMode, string mediaFilterMode)
         {
             string uri = $"galleries/customized-random?itemsInEach={imageCount}";
             if (!string.IsNullOrWhiteSpace(tagList))
                 uri += $"&tags={tagList}";
             if (!string.IsNullOrWhiteSpace(tagFilterMode))
                 uri += $"&tagFilterMode={tagFilterMode}";
-            if (!string.IsNullOrWhiteSpace(gifMode))
-                uri += $"&mediaFilterMode={gifMode}";
+            if (!string.IsNullOrWhiteSpace(mediaFilterMode))
+                uri += $"&mediaFilterMode={mediaFilterMode}";
 
             return uri;
         }
