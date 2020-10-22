@@ -1,8 +1,10 @@
 ﻿using Application.Enums;
 using Application.Galleries;
 using Application.Services.Interfaces;
+using AutoMapper;
 using DomainModel.Aggregates.Gallery;
 using DomainModel.Aggregates.Gallery.Interfaces;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +15,12 @@ namespace Application.Services
     public class GalleryService : IGalleryService
     {
         IGalleryRepository _galleryRepository;
+        IMapper _mapper;
 
-        public GalleryService(IGalleryRepository galleryRepository)
+        public GalleryService(IGalleryRepository galleryRepository, IMapper mapper)
         {
             _galleryRepository = galleryRepository ?? throw new ArgumentNullException(nameof(galleryRepository));
+            _mapper = mapper;
         }
 
         public Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "", string mediaFilterMode = "")
@@ -36,13 +40,13 @@ namespace Application.Services
             };
         }
 
-        public async Task<IEnumerable<GalleryResponse>> GetAll()
+        public async Task<IEnumerable<GalleryResponse>> GetAllGalleriesWithoutItems()
         {
-            var resp = await _galleryRepository.GetAll();
+            var galleriesResponse = await _galleryRepository.GetAll();
 
             var list = new List<GalleryResponse>();
-            foreach(var gal in resp)
-                list.Add(new GalleryResponse { Id = gal.Id, ImageCount = gal.ImageCount});
+            foreach(var aggregate in galleriesResponse)
+                list.Add(_mapper.Map<GalleryResponse>(aggregate));
 
             return list;
         }

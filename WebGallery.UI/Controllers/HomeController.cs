@@ -13,22 +13,29 @@ namespace WebGallery.UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IGalleryService _galleryService;
+        private readonly IPictureService _pictureService;
 
-        public HomeController(ILogger<HomeController> logger, IGalleryService galleryService)
+        public HomeController(ILogger<HomeController> logger, IGalleryService galleryService, IPictureService pictureService)
         {
             _logger = logger;
-            _galleryService = galleryService ?? throw new ArgumentNullException(nameof(galleryService));
+            _galleryService = galleryService;
+            _pictureService = pictureService;
         }
 
         public async Task<IActionResult> Index()
         {
             ViewBag.Current = "Home";
 
-            var galleries = await _galleryService.GetAll();
+            var allGalleries = await _galleryService.GetAllGalleriesWithoutItems();
+            var allGalleriesVm = HomePageGenerator.GenerateAllRandom(allGalleries);
+            
+            foreach (var galleryVm in allGalleriesVm.Galleries)
+            {
+                var picture = await _pictureService.Get(galleryVm.GalleryId, galleryVm.CoverImageIndex);
+                galleryVm.CoverImageGlobalIndex = picture.GlobalSortOrder;
+            }
 
-            var vm = HomePageGenerator.GenerateAllRandom(galleries);
-
-            return View(vm);
+            return View(allGalleriesVm);
         }
 
         public IActionResult Privacy()

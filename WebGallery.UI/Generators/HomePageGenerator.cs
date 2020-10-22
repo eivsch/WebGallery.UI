@@ -17,7 +17,7 @@ namespace WebGallery.UI.Generators
 
             int totalSizeOfRow = 0, indexer = 0;
             var rowFormat = RandomHelpers.GetRandomRowFormat;
-            foreach (var item in input)
+            foreach (var gallery in input)
             {
                 if (totalSizeOfRow == 12)
                 {
@@ -27,11 +27,11 @@ namespace WebGallery.UI.Generators
                 }
 
                 var size = rowFormat[indexer];
-                var coverImageIndex = RandomHelpers.Rng.Next(1, item.ImageCount);
+                var coverImageIndex = RandomHelpers.Rng.Next(1, gallery.ImageCount);
                 var vm = new HomeGalleryViewModel
                 {
-                    Id = item.Id,
-                    ItemCount = item.ImageCount,
+                    GalleryId = gallery.Id,
+                    ItemCount = gallery.ImageCount,
                     CoverImageIndex = coverImageIndex,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,

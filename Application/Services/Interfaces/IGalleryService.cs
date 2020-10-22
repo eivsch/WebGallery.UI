@@ -8,6 +8,6 @@ namespace Application.Services.Interfaces
     {
         Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "", string mediaFilterMode = "");
         Task<GalleryResponse> Get(string galleryUri);
-        Task<IEnumerable<GalleryResponse>> GetAll();
+        Task<IEnumerable<GalleryResponse>> GetAllGalleriesWithoutItems();
     }
 }

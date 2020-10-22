@@ -60,6 +60,25 @@ namespace Infrastructure.Pictures
             }
         }
 
+        public async Task<Picture> GetPicture(string galleryId, int index = 0)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures/{galleryId}/{index}");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
+
+                return Map(data);
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
+
         public async Task<IEnumerable<Picture>> GetPictures(string galleryId, int offset = 0)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"pictures?galleryId={galleryId}&offset={offset}");
