@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Application.Galleries
 {
@@ -8,6 +6,6 @@ namespace Application.Galleries
     {
         public string Id { get; set; }
         public int ImageCount { get; set; }
-        public IEnumerable<GalleryPicture> GalleryPictures { get; set; }
+        public IEnumerable<GalleryItem> GalleryItems { get; set; }
     }
 }

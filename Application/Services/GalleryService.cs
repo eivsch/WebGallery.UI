@@ -36,7 +36,19 @@ namespace Application.Services
             {
                 Id = response.Id,
                 ImageCount = response.ImageCount,
-                GalleryPictures = response.GalleryItems.Select(s => Map(s))
+                GalleryItems = response.GalleryItems.Select(s => Map(s))
+            };
+        }
+
+        public async Task<GalleryResponse> Get(string galleryId, int itemIndexStart, int numberOfItems)
+        {
+            var aggregate = await _galleryRepository.Get(galleryId, itemIndexStart, numberOfItems);
+
+            return new GalleryResponse
+            {
+                Id = aggregate.Id,
+                ImageCount = aggregate.ImageCount,
+                GalleryItems = aggregate.GalleryItems.Select(s => Map(s))
             };
         }
 
@@ -51,9 +63,9 @@ namespace Application.Services
             return list;
         }
 
-        private GalleryPicture Map(GalleryItem item)
+        private Galleries.GalleryItem Map(DomainModel.Aggregates.Gallery.GalleryItem item)
         {
-            return new GalleryPicture
+            return new Galleries.GalleryItem
             {
                 Id = item.Id,
                 Index = item.Index,

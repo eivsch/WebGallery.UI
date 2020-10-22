@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Generators;
@@ -11,11 +8,11 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class SingleController : Controller
     {
-        private readonly IPictureService _pictureService;
+        private readonly IGalleryService _galleryService;
 
-        public SingleController(IPictureService pictureService)
+        public SingleController(IGalleryService galleryService)
         {
-            _pictureService = pictureService;
+            _galleryService = galleryService;
         }
 
         [HttpGet("{id}")]
@@ -23,9 +20,9 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Single";
 
-            var pics = await _pictureService.GetPictures(id, offset);
+            var galleryResponse = await _galleryService.Get(id, offset, 48);
 
-            var vm = SinglePageGenerator.GenerateRandom_ByFolderOrder(id, pics);
+            var vm = SinglePageGenerator.Generate(galleryResponse);
             vm.Offset = offset;
 
             return View(vm);
