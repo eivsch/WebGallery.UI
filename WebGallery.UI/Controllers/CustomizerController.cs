@@ -40,7 +40,7 @@ namespace WebGallery.UI.Controllers
             if(vm.SelectedTags != null)
                 tags = string.Join(",", vm.SelectedTags);
 
-            return Redirect($"/SingleRandom/Custom?nbr={vm.NumberOfPictures}&tags={tags}&tagFilterMode={tagFilterMode}&mediaFilterMode={vm.RadioMediaFilterModeOption}");
+            return Redirect($"/Single/Custom?nbr={vm.NumberOfPictures}&tags={tags}&tagFilterMode={tagFilterMode}&mediaFilterMode={vm.RadioMediaFilterModeOption}");
         }
 
         private string ParseTagMode(string tagMode, string tagModeCustomFilter)

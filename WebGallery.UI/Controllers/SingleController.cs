@@ -15,6 +15,19 @@ namespace WebGallery.UI.Controllers
             _galleryService = galleryService;
         }
 
+        public async Task<IActionResult> Index()
+        {
+            ViewBag.Current = "Random";
+
+            var uri = await _galleryService.GenerateGalleryUri(24);
+            var gallery = await _galleryService.Get(uri);
+
+            var vm = SinglePageGenerator.Generate(gallery);
+            vm.GalleryTitle = "Randomized";
+
+            return View("Index", vm);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Index(string id, int offset)
         {
@@ -23,9 +36,23 @@ namespace WebGallery.UI.Controllers
             var galleryResponse = await _galleryService.Get(galleryId: id, itemIndexStart: offset + 1, numberOfItems: 48);
             
             var vm = SinglePageGenerator.Generate(galleryResponse);
-            vm.GalleryType = "Gallery";
+            vm.GalleryTitle = "Gallery";
 
             return View(vm);
+        }
+
+        [HttpGet("custom")]
+        public async Task<IActionResult> Custom(int nbr, string tags, string tagFilterMode, string mediaFilterMode)
+        {
+            ViewBag.Current = "Random";
+
+            var uri = await _galleryService.GenerateGalleryUri(nbr, tags, tagFilterMode, mediaFilterMode);
+            var gallery = await _galleryService.Get(uri);
+
+            var vm = SinglePageGenerator.Generate(gallery);
+            vm.GalleryTitle = "Randomized";
+
+            return View("Index", vm);
         }
     }
 }
