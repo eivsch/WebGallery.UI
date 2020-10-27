@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace WebGallery.UI.Controllers
             ViewBag.Current = "Home";
 
             var allGalleries = await _galleryService.GetAllGalleriesWithoutItems();
-            var allGalleriesVm = HomePageGenerator.GenerateAllRandom(allGalleries);
+            var allGalleriesVm = HomePageGenerator.GenerateAllRandom(allGalleries.ToList());
             
             foreach (var galleryVm in allGalleriesVm.Galleries)
             {

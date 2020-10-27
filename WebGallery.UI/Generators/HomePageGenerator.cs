@@ -10,9 +10,9 @@ namespace WebGallery.UI.Generators
 {
     public static class HomePageGenerator
     {
-        public static HomeViewModel GenerateAllRandom(IEnumerable<GalleryResponse> input)
+        public static HomeViewModel GenerateAllRandom(IList<GalleryResponse> input)
         {
-            input.ToList().ShuffleList();
+            input.ShuffleList();
             var outList = new List<HomeGalleryViewModel>();
 
             int totalSizeOfRow = 0, indexer = 0;
