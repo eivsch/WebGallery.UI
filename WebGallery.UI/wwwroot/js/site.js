@@ -31,12 +31,11 @@ function formatTag(tag) {
 }
 
 function addTag(tag) {
-    // Cleanup field
     $('#myInput').val('');
-    // Format the string
     tag = formatTag(tag);
-    // Check that it doesn't already exist
     var exists = tagExists(tag);
+    var picId = $('#image-id-placeholder').text();
+
     // Add
     if (!exists) {
         $.post(
@@ -44,7 +43,8 @@ function addTag(tag) {
             "/bio",
             // Data
             {
-                tag: tag
+                tag: tag,
+                pictureId: picId
             }
             // OnSuccess
             , function () {
