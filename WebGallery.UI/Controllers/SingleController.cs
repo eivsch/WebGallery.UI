@@ -20,10 +20,9 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Single";
 
-            var galleryResponse = await _galleryService.Get(id, offset, 48);
-
+            var galleryResponse = await _galleryService.Get(galleryId: id, itemIndexStart: offset + 1, numberOfItems: 48);
+            
             var vm = SinglePageGenerator.Generate(galleryResponse);
-            vm.Offset = offset;
 
             return View(vm);
         }

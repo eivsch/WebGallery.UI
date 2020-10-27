@@ -68,7 +68,7 @@ namespace Application.Services
             return new Galleries.GalleryItem
             {
                 Id = item.Id,
-                Index = item.Index,
+                IndexGlobal = item.IndexGlobal,
                 MediaType = Parse(item.MediaType),
             };
         }

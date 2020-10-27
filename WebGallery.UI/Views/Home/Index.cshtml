@@ -18,7 +18,7 @@
             *@
             @foreach (var gallery in Model.Galleries)
             {
-                int offset = gallery.CoverImageIndex - 1;
+                int offset = gallery.CoverImageIndex - 1;   // Index starts from 1
                 string popUpDelayAtr = gallery.PopUpDelay == 0 ? "" : $"data-aos-delay={gallery.PopUpDelay}";
                 string coverImageUri = $"{fileServerUrl}/{gallery.CoverImageGlobalIndex}";
 

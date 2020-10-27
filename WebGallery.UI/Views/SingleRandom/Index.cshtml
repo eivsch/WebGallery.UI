@@ -21,13 +21,13 @@
         <div class="row align-items-stretch">
             @foreach (var item in Model.Images)
             {
-                string itemUrl = $"{baseUrl}/{item.Index}";
+                string itemUrl = $"{baseUrl}/{item.IndexGlobal}";
                 string popUpDelayAtr = item.PopUpDelay == 0 ? "" : $"data-aos-delay={item.PopUpDelay}";
 
                 if (item.MediaType == MediaType.Video)
                 {
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="video" data-caption="<a href='/Bio/@item.Index'>@item.Id</a>">
+                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="video" data-caption="<a href='/Bio/@item.IndexGlobal'>@item.Id</a>">
                             <video class="img-fluid" autoplay loop muted>
                                 <source src="@itemUrl" type="video/mp4" />
                             </video>
@@ -37,7 +37,7 @@
                 else
                 {
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="image" data-caption="<a href='/Bio/@item.Index'>@item.Id</a>">
+                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="image" data-caption="<a href='/Bio/@item.IndexGlobal'>@item.Id</a>">
                             <img src="@itemUrl" alt="Image" class="img-fluid">
                             <div class="photo-text-more">
                                 <span class="icon icon-search"></span>

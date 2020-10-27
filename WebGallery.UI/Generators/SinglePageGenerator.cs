@@ -29,8 +29,8 @@ namespace WebGallery.UI.Generators
                 var vm = new SingleGalleryImageViewModel
                 {
                     Id = galleryItem.Id,
-                    GalleryIndex = galleryItem.Index,
-                    Index = galleryItem.Index,
+                    GalleryIndex = galleryItem.IndexGlobal,
+                    IndexGlobal = galleryItem.IndexGlobal,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,
                     MediaType = galleryItem.MediaType
