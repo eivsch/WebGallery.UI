@@ -33,8 +33,8 @@ namespace WebGallery.UI.Controllers
             foreach (var galleryVm in allGalleriesVm.Galleries)
             {
                 var picture = await _pictureService.Get(galleryVm.GalleryId, galleryVm.CoverImageIndex);
-                galleryVm.CoverImageGlobalIndex = picture.GlobalSortOrder;
                 galleryVm.CoverImageMediaType = picture.MediaType;
+                galleryVm.CoverImageId = picture.Id;
             }
 
             return View(allGalleriesVm);
