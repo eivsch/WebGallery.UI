@@ -1,11 +1,12 @@
 ﻿using DomainModel.Common;
+using DomainModel.Common.Enums;
 using DomainModel.Common.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DomainModel.Aggregates.Picture
 {
+    // TODO: Rename to 'Media/GalleryMedia'?
     public class Picture : Entity, IAggregateRoot
     {
         private string _appPath;
@@ -18,6 +19,7 @@ namespace DomainModel.Aggregates.Picture
         private int _size;
         private DateTime _createTimestamp;
         private List<string> _tags = new List<string>();
+        private MediaType _mediaType;
 
         public virtual string Name => _name;
         public virtual string AppPath => _appPath;
@@ -29,6 +31,7 @@ namespace DomainModel.Aggregates.Picture
         public virtual int Size => _size;
         public virtual DateTime CreateTimestamp => _createTimestamp;
         public virtual IReadOnlyCollection<string> Tags => _tags;
+        public virtual MediaType MediaType => _mediaType;
 
         private Picture(string id)
         {
@@ -51,6 +54,8 @@ namespace DomainModel.Aggregates.Picture
             if (string.IsNullOrWhiteSpace(id) && globalSortOrder < 1)
                 throw new ArgumentException("Either a valid id or global index must be provided");
 
+            var mediaType = ParseMediaType(name);
+
             return new Picture(id) 
             {
                 _name = name,
@@ -61,7 +66,8 @@ namespace DomainModel.Aggregates.Picture
                 _folderSortOrder = folderSortOrder,
                 _globalSortOrder = globalSortOrder,
                 _size = size,
-                _createTimestamp = created
+                _createTimestamp = created,
+                _mediaType = mediaType
             };
         }
 
@@ -72,6 +78,16 @@ namespace DomainModel.Aggregates.Picture
 
             if (!_tags.Contains(tagName))
                 _tags.Add(tagName);
+        }
+
+        private static MediaType ParseMediaType(string name)
+        {
+            if (name.EndsWith(".gif"))
+                return MediaType.Gif;
+            else if (name.EndsWith(".mp4"))
+                return MediaType.Video;
+
+            return MediaType.Image;
         }
     }
 }

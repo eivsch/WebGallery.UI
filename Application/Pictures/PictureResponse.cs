@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Application.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace Application.Pictures
@@ -16,5 +17,6 @@ namespace Application.Pictures
         public int Size { get; set; }
         public DateTime CreateTimestamp { get; set; }
         public IEnumerable<string> Tags { get; set; }
+        public MediaType MediaType { get; set; }
     }
 }

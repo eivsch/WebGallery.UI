@@ -47,23 +47,5 @@ namespace Application.Services
 
             return list;
         }
-
-        private PictureResponse Map(Picture aggregate)
-        {
-            return new PictureResponse
-            {
-                Id = aggregate.Id,
-                AppPath = aggregate.AppPath,
-                CreateTimestamp = aggregate.CreateTimestamp,
-                FolderId = aggregate.FolderId,
-                FolderName = aggregate.FolderName,
-                FolderSortOrder = aggregate.FolderSortOrder,
-                GlobalSortOrder = aggregate.GlobalSortOrder,
-                Name = aggregate.Name,
-                OriginalPath = aggregate.OriginalPath,
-                Size = aggregate.Size,
-                Tags = aggregate.Tags
-            };
-        }
     }
 }
