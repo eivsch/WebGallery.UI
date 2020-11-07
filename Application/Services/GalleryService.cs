@@ -1,8 +1,10 @@
 ﻿using Application.Enums;
 using Application.Galleries;
 using Application.Services.Interfaces;
+using AutoMapper;
 using DomainModel.Aggregates.Gallery;
 using DomainModel.Aggregates.Gallery.Interfaces;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +15,12 @@ namespace Application.Services
     public class GalleryService : IGalleryService
     {
         IGalleryRepository _galleryRepository;
+        IMapper _mapper;
 
-        public GalleryService(IGalleryRepository galleryRepository)
+        public GalleryService(IGalleryRepository galleryRepository, IMapper mapper)
         {
             _galleryRepository = galleryRepository ?? throw new ArgumentNullException(nameof(galleryRepository));
+            _mapper = mapper;
         }
 
         public Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "", string mediaFilterMode = "")
@@ -32,27 +36,39 @@ namespace Application.Services
             {
                 Id = response.Id,
                 ImageCount = response.ImageCount,
-                GalleryPictures = response.GalleryItems.Select(s => Map(s))
+                GalleryItems = response.GalleryItems.Select(s => Map(s))
             };
         }
 
-        public async Task<IEnumerable<GalleryResponse>> GetAll()
+        public async Task<GalleryResponse> Get(string galleryId, int itemIndexStart, int numberOfItems)
         {
-            var resp = await _galleryRepository.GetAll();
+            var aggregate = await _galleryRepository.Get(galleryId, itemIndexStart, numberOfItems);
+
+            return new GalleryResponse
+            {
+                Id = aggregate.Id,
+                ImageCount = aggregate.ImageCount,
+                GalleryItems = aggregate.GalleryItems.Select(s => Map(s))
+            };
+        }
+
+        public async Task<IEnumerable<GalleryResponse>> GetAllGalleriesWithoutItems()
+        {
+            var galleriesResponse = await _galleryRepository.GetAll();
 
             var list = new List<GalleryResponse>();
-            foreach(var gal in resp)
-                list.Add(new GalleryResponse { Id = gal.Id, ImageCount = gal.ImageCount});
+            foreach(var aggregate in galleriesResponse)
+                list.Add(_mapper.Map<GalleryResponse>(aggregate));
 
             return list;
         }
 
-        private GalleryPicture Map(GalleryItem item)
+        private Galleries.GalleryItem Map(DomainModel.Aggregates.Gallery.GalleryItem item)
         {
-            return new GalleryPicture
+            return new Galleries.GalleryItem
             {
                 Id = item.Id,
-                Index = item.Index,
+                IndexGlobal = item.IndexGlobal,
                 MediaType = Parse(item.MediaType),
             };
         }

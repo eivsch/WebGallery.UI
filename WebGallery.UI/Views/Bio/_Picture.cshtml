@@ -8,6 +8,9 @@
 }
 
 <div id="placeholder">
+
+    <div id="image-id-placeholder" style="display:none">@Model.PictureId</div>
+
     <div id="BioPicture" class="row justify-content-center">
         <figure class="mb-5" data-aos="fade-up">
             <a href="@imageUrl" data-fancybox data-type="image"><img src="@imageUrl" alt="Image" class="img-fluid" id="bioPicture"></a>
@@ -24,8 +27,8 @@
                     }
                 </ul>
             </div>
-            </figure>
-</div>
+        </figure>
+    </div>
 
     <div class="row justify-content-center">
         <a href data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#placeholder">

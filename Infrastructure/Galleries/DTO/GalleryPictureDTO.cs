@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Galleries.DTO
 {
@@ -7,10 +8,13 @@ namespace Infrastructure.Galleries.DTO
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonPropertyName("index")]
-        public int Index { get; set; }
+        [JsonPropertyName("indexGlobal")]
+        public int IndexGlobal { get; set; }
 
         [JsonPropertyName("mediaType")]
         public string MediaType { get; set; }
+
+        [JsonPropertyName("tags")]
+        public IEnumerable<string> Tags { get; set; }
     }
 }

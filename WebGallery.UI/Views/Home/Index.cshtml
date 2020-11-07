@@ -5,26 +5,35 @@
 @inject IConfiguration Configuration
 
 @{
-    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
+    string fileServerUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
 }
 
 <main class="main-content">
     <div class="container-fluid photos">
         <div class="row align-items-stretch">
             @*
-                Each image row has a witdh of "12", meaning col-lg-x must add up to 12 to fit it on one row
+            Each image row has a witdh of "12", meaning col-lg-x must add up to 12 to fit it on one row
 
-                    data-aos="fade-up" data-aos-delay="100" provides an animation while loading the picture
+            data-aos="fade-up" data-aos-delay="100" provides an animation while loading the picture
             *@
             @foreach (var gallery in Model.Galleries)
             {
-                int offset = gallery.CoverImageIndex - 1;
+                int offset = gallery.CoverImageIndex - 1;   // Index starts from 1
                 string popUpDelayAtr = gallery.PopUpDelay == 0 ? "" : $"data-aos-delay={gallery.PopUpDelay}";
-                string coverImageUrl = $"{baseUrl}/{gallery.Id}/{gallery.CoverImageIndex}";
+                string coverImageUri = $"{fileServerUrl}/sha/{gallery.CoverImageId}";
 
                 <div class="col-6 col-md-6 col-lg-@gallery.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                    <a href="/Single/@(gallery.Id + "?offset=" + offset)" class="d-block photo-item">
-                        <img src="@coverImageUrl" alt="Image" class="img-fluid">
+                    <a href="/Single/@(gallery.GalleryId + "?offset=" + offset)" class="d-block photo-item">
+                    @if (gallery.CoverImageMediaType == Application.Enums.MediaType.Video)
+                    {
+                        <video class="img-fluid" autoplay loop muted>
+                            <source src="@coverImageUri" type="video/mp4" />
+                        </video>
+                    }
+                    else
+                    {
+                        <img src="@coverImageUri" alt="Image" class="img-fluid">
+                    }
                         <div class="photo-text-more">
                             <div class="photo-text-more">
                                 <h3 class="heading">Photos Title Here</h3>
@@ -34,8 +43,6 @@
                     </a>
                 </div>
             }
-
-
         </div>
 
         <div class="row justify-content-center">

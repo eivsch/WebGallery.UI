@@ -28,9 +28,9 @@ namespace DomainModel.Aggregates.Gallery
             };
         }
 
-        public virtual void AddGalleryItem(string galleryItemId, int index, string mediaType, string tags = "")
+        public virtual void AddGalleryItem(string galleryItemId, int indexGlobal, string mediaType, string tags = "")
         {
-            var galleryItem = GalleryItem.Create(galleryItemId, index, ParseMediaType(mediaType));
+            var galleryItem = GalleryItem.Create(galleryItemId, indexGlobal, ParseMediaType(mediaType));
 
             if (!string.IsNullOrWhiteSpace(tags))
             {

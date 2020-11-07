@@ -1,5 +1,4 @@
 ﻿using Application.Galleries;
-using Application.Pictures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +10,13 @@ namespace WebGallery.UI.Generators
 {
     public static class SinglePageGenerator
     {
-        public static SingleGalleryViewModel GenerateRandom_ByFolderOrder(string galleryId, IEnumerable<PictureResponse> input)
+        public static SingleGalleryViewModel Generate(GalleryResponse galleryResponse)
         {
-            input = input.OrderBy(i => i.FolderSortOrder);
             var outList = new List<SingleGalleryImageViewModel>();
 
             int totalSizeOfRow = 0, indexer = 0;
             var rowFormat = RandomHelpers.GetRandomRowFormat;
-            foreach (var item in input)
+            foreach (var galleryItem in galleryResponse.GalleryItems)
             {
                 if (totalSizeOfRow == 12)
                 {
@@ -30,11 +28,12 @@ namespace WebGallery.UI.Generators
                 var size = rowFormat[indexer];
                 var vm = new SingleGalleryImageViewModel
                 {
-                    Id = item.Id,
-                    GalleryIndex = item.FolderSortOrder,
-                    Index = item.GlobalSortOrder,
+                    Id = galleryItem.Id,
+                    GalleryIndex = galleryItem.IndexGlobal,
+                    IndexGlobal = galleryItem.IndexGlobal,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,
+                    MediaType = galleryItem.MediaType
                 };
 
                 outList.Add(vm);
@@ -45,45 +44,7 @@ namespace WebGallery.UI.Generators
 
             return new SingleGalleryViewModel
             {
-                Id = galleryId,
-                Images = outList
-            };
-        }
-
-        public static SingleGalleryViewModel Generate(GalleryResponse input)
-        {
-            var outList = new List<SingleGalleryImageViewModel>();
-
-            int totalSizeOfRow = 0, indexer = 0;
-            var rowFormat = RandomHelpers.GetRandomRowFormat;
-            foreach (var item in input.GalleryPictures)
-            {
-                if (totalSizeOfRow == 12)
-                {
-                    totalSizeOfRow = 0;
-                    indexer = 0;
-                    rowFormat = RandomHelpers.GetRandomRowFormat;
-                }
-
-                var size = rowFormat[indexer];
-                var vm = new SingleGalleryImageViewModel
-                {
-                    Id = item.Id,
-                    Index = item.Index,
-                    LargeScreenSize = size,
-                    PopUpDelay = 100 * indexer,
-                    MediaType = item.MediaType
-                };
-
-                outList.Add(vm);
-
-                totalSizeOfRow += size;
-                indexer++;
-            }
-
-            return new SingleGalleryViewModel
-            {
-                Id = input.Id,
+                Id = galleryResponse.Id,
                 Images = outList
             };
         }

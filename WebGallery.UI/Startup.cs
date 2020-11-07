@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Services;
 using Application.Services.Interfaces;
+using AutoMapper;
 using DomainModel.Aggregates.Gallery.Interfaces;
 using DomainModel.Aggregates.Picture.Interfaces;
 using DomainModel.Aggregates.Tags.Interfaces;
@@ -46,6 +47,13 @@ namespace WebGallery.UI
             services.AddTransient<IPictureService, PictureService>();
             services.AddTransient<IPictureRepository, PictureRepository>();
             services.AddTransient<ITagRepository, TagRepository>();
+
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new Mappings.AutoMapperGalleryProfile());
+                mc.AddProfile(new Mappings.AutoMapperPictureProfile());
+            });
+            services.AddSingleton(mapperConfig.CreateMapper());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

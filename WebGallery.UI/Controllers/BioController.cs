@@ -14,8 +14,6 @@ namespace WebGallery.UI.Controllers
         private readonly IPictureService _pictureService;
         private readonly ITagService _tagService;
 
-        static string _currentPictureId = string.Empty;
-
         public BioController(IPictureService pictureService, ITagService tagService)
         {
             _pictureService = pictureService;
@@ -40,8 +38,6 @@ namespace WebGallery.UI.Controllers
                 }
             };
 
-            _currentPictureId = picture.Id;
-
             return View(vm);
         }
 
@@ -62,8 +58,6 @@ namespace WebGallery.UI.Controllers
                 }
             };
 
-            _currentPictureId = picture.Id;
-
             return View(vm);
         }
 
@@ -79,8 +73,6 @@ namespace WebGallery.UI.Controllers
                 Tags = picture.Tags.ToList()
             };
 
-            _currentPictureId = picture.Id;
-
             return PartialView("_Picture", vm);
         }
 
@@ -89,7 +81,7 @@ namespace WebGallery.UI.Controllers
         {
             var request = new TagRequest
             {
-                PictureId = _currentPictureId,
+                PictureId = data.PictureId,
                 TagName = data.Tag
             };
 

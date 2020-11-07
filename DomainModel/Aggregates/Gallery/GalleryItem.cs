@@ -8,11 +8,11 @@ namespace DomainModel.Aggregates.Gallery
 {
     public class GalleryItem : Entity
     {
-        private int _index;
+        private int _indexGlobal;
         private List<string> _tags = new List<string>();
         private MediaType _mediaType;
 
-        public virtual int Index => _index;
+        public virtual int IndexGlobal => _indexGlobal;
         public virtual IReadOnlyCollection<string> Tags => _tags;
         public virtual MediaType MediaType => _mediaType;
 
@@ -24,11 +24,11 @@ namespace DomainModel.Aggregates.Gallery
                 Id = id;
         }
 
-        internal static GalleryItem Create(string id, int index, MediaType mediaType)
+        internal static GalleryItem Create(string id, int indexGlobal, MediaType mediaType)
         {
             var item = new GalleryItem(id)
             {
-                _index = index,
+                _indexGlobal = indexGlobal,
                 _mediaType = mediaType,
             };
 

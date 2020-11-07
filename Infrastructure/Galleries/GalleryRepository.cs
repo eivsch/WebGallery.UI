@@ -45,6 +45,29 @@ namespace Infrastructure.Galleries
             throw new NotImplementedException();
         }
 
+        public async Task<Gallery> Get(string id, int itemIndexStart, int numberOfItems)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"galleries/{id}?itemIndexStart={itemIndexStart}&numberOfItems={numberOfItems}");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<GalleryDTO>(responseStream);
+
+                Gallery gallery = Gallery.Create(data.Id, data.ImageCount);
+                foreach (var item in data.GalleryPictures)
+                    gallery.AddGalleryItem(galleryItemId: item.Id, indexGlobal: item.IndexGlobal, item.MediaType);
+
+                return gallery;
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
+
         public async Task<IEnumerable<Gallery>> GetAll()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "galleries");
@@ -85,7 +108,7 @@ namespace Infrastructure.Galleries
 
                 Gallery gallery = Gallery.Create(data.Id, data.ImageCount);
                 foreach (var item in data.GalleryPictures)
-                    gallery.AddGalleryItem(galleryItemId: item.Id, index: item.Index, item.MediaType);
+                    gallery.AddGalleryItem(galleryItemId: item.Id, indexGlobal: item.IndexGlobal, item.MediaType);
 
                 return gallery;
             }

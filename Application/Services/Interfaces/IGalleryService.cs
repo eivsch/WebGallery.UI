@@ -6,8 +6,9 @@ namespace Application.Services.Interfaces
 {
     public interface IGalleryService
     {
+        Task<GalleryResponse> Get(string galleryId, int itemIndexStart, int numberOfItems);
         Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "", string mediaFilterMode = "");
         Task<GalleryResponse> Get(string galleryUri);
-        Task<IEnumerable<GalleryResponse>> GetAll();
+        Task<IEnumerable<GalleryResponse>> GetAllGalleriesWithoutItems();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -13,22 +14,30 @@ namespace WebGallery.UI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IGalleryService _galleryService;
+        private readonly IPictureService _pictureService;
 
-        public HomeController(ILogger<HomeController> logger, IGalleryService galleryService)
+        public HomeController(ILogger<HomeController> logger, IGalleryService galleryService, IPictureService pictureService)
         {
             _logger = logger;
-            _galleryService = galleryService ?? throw new ArgumentNullException(nameof(galleryService));
+            _galleryService = galleryService;
+            _pictureService = pictureService;
         }
 
         public async Task<IActionResult> Index()
         {
             ViewBag.Current = "Home";
 
-            var galleries = await _galleryService.GetAll();
+            var allGalleries = await _galleryService.GetAllGalleriesWithoutItems();
+            var allGalleriesVm = HomePageGenerator.GenerateAllRandom(allGalleries.ToList());
+            
+            foreach (var galleryVm in allGalleriesVm.Galleries)
+            {
+                var picture = await _pictureService.Get(galleryVm.GalleryId, galleryVm.CoverImageIndex);
+                galleryVm.CoverImageMediaType = picture.MediaType;
+                galleryVm.CoverImageId = picture.Id;
+            }
 
-            var vm = HomePageGenerator.GenerateAllRandom(galleries);
-
-            return View(vm);
+            return View(allGalleriesVm);
         }
 
         public IActionResult Privacy()
