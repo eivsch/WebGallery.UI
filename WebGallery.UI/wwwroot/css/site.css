@@ -1,4 +1,22 @@
-﻿.tag-list, li {
+﻿.bio-content {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 55px;
+
+    max-width: 900px;
+}
+
+.bio-figure {
+    height: 600px;
+}
+
+.bio-img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.tag-list, li {
     display: inline;
 }
 
@@ -6,26 +24,32 @@
     margin-right: 3%;
 }
 
-#bioPicture {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+.bio-nav-container {
+    margin-top: 15px;
 }
 
-.test {
-    text-align:center;
-    margin-left: auto;
-    margin-right: auto;
+.bio-nav-item {
+    margin-bottom: 15px;
 }
 
-.img-nav {
+.bio-nav-item {
     font-size: 25px;
+    display: inline-block;
+    color: gray;
 }
+
+.bio-nav-item, a {
+    color: gray;
+}
+
 
 #bioImgCounter{
     padding-left: 10px;
     padding-right: 10px;
 }
+
+
+
 
 .customizer-form {
     margin: auto;

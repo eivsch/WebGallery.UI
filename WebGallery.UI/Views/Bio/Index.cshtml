@@ -1,33 +1,26 @@
 ﻿@model WebGallery.UI.ViewModels.Bio.BioViewModel
 
 <main class="main-content">
-    <div class="container-fluid photos">
-
+    <div class="bio-content">
         <partial name="_Picture" model="Model.BioPictureViewModel" />
-        
-        <div class="row justify-content-center">
-            <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
+        <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
+        <div id="myDropdown">
+            <input type="text" placeholder="Search.." id="myInput" style="display:none" />
+            @foreach (var tag in Model.AllTags)
+            {
+                <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>
+            }
         </div>
+    </div>
 
-        <div class="row justify-content-center">
-            <div id="myDropdown">
-                <input type="text" placeholder="Search.." id="myInput" style="display:none" />
-                @foreach (var tag in Model.AllTags)
-                {
-                    <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>
-                }
-            </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12 text-center py-5">
+            <p>
+                <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                Copyright &copy;
+                <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+            </p>
         </div>
-
-        <div class="row justify-content-center">
-            <div class="col-md-12 text-center py-5">
-                <p>
-                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                    Copyright &copy;
-                    <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                </p>
-            </div>
-        </div>
-        </div>
+    </div>
 </main>
