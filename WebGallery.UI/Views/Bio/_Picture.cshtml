@@ -7,36 +7,33 @@
     string imageUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images/{Model.GlobalSortOrder}";
 }
 
-<div id="placeholder">
+<div id="image-id-placeholder" style="display:none">@Model.PictureId</div>
 
-    <div id="image-id-placeholder" style="display:none">@Model.PictureId</div>
+<figure class="bio-figure" data-aos="fade-in">
+    <a href="@imageUrl" data-fancybox data-type="image">
+        <img src="@imageUrl" alt="Image" class="bio-img">
+    </a>
+</figure>
 
-    <figure class="bio-figure" data-aos="fade-in">
-        <a href="@imageUrl" data-fancybox data-type="image">
-            <img src="@imageUrl" alt="Image" class="bio-img">
-        </a>
-    </figure>
+<div data-aos="fade-left" data-aos-duration="1000">
+    <ul class="tag-list" id="bioPictureTags">
+        @foreach (var tag in Model.Tags)
+        {
+            string tagStr = tag;
+            if (!tag.StartsWith('#'))
+                tagStr = "#" + tag;
 
-    <div data-aos="fade-left" data-aos-duration="1000">
-        <ul class="tag-list" id="bioPictureTags">
-            @foreach (var tag in Model.Tags)
-            {
-                string tagStr = tag;
-                if (!tag.StartsWith('#'))
-                    tagStr = "#" + tag;
+            <li class="tag-list-item">@tagStr</li>
+        }
+    </ul>
+</div>
 
-                <li class="tag-list-item">@tagStr</li>
-            }
-        </ul>
+<div class="bio-nav-container">
+    <div class="bio-nav-item">
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#bio-img-partial"><<<  </a>
     </div>
-
-    <div class="bio-nav-container">
-        <div class="bio-nav-item">
-            <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#placeholder"><<<  </a>
-        </div>
-        <div class="bio-nav-item" id="bioImgCounter">#@Model.GlobalSortOrder</div>
-        <div class="bio-nav-item">
-            <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder + 1)" data-ajax-update="#placeholder">  >>></a>
-        </div>
+    <div class="bio-nav-item" id="bioImgCounter">#@Model.GlobalSortOrder</div>
+    <div class="bio-nav-item">
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder + 1)" data-ajax-update="#bio-img-partial">  >>></a>
     </div>
 </div>

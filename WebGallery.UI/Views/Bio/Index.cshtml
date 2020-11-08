@@ -2,7 +2,9 @@
 
 <main class="main-content">
     <div class="bio-content">
-        <partial name="_Picture" model="Model.BioPictureViewModel" />
+        <div id="bio-img-partial">
+            <partial name="_Picture" model="Model.BioPictureViewModel" />
+        </div>
         <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
         <div id="myDropdown">
             <input type="text" placeholder="Search.." id="myInput" style="display:none" />
