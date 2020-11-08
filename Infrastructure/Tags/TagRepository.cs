@@ -4,6 +4,7 @@ using Infrastructure.Common;
 using Infrastructure.Tags.DTO;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -46,7 +47,7 @@ namespace Infrastructure.Tags
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<string>> GetAll()
+        public async Task<IEnumerable<Tag>> GetAll()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "tags");
 
@@ -55,9 +56,16 @@ namespace Infrastructure.Tags
             if (response.IsSuccessStatusCode)
             {
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                var data = await JsonSerializer.DeserializeAsync<IEnumerable<string>>(responseStream);
+                var data = await JsonSerializer.DeserializeAsync<IEnumerable<TagDTO>>(responseStream);
 
-                return data;
+                var allTags = new List<Tag>();
+                foreach (var tag in data)
+                {
+                    var aggregate = Tag.Create(tag.Name, itemCount: tag.ItemCount);
+                    allTags.Add(aggregate);
+                }
+
+                return allTags;
             }
             else
             {
@@ -74,9 +82,8 @@ namespace Infrastructure.Tags
         {
             var dto = new TagDTO
             {
-                PictureId = aggregate.PictureId,
-                PictureIndex = aggregate.PictureIndex ?? 0,
-                Tag = aggregate.TagName
+                Name = aggregate.TagName,
+                MediaItems = aggregate.MediaItems.Select(s => Map(s))
             };
 
             var response = await _client.PostAsync("tags", new JsonContent(dto));
@@ -89,6 +96,15 @@ namespace Infrastructure.Tags
             {
                 throw new Exception($"The API returned a {response.StatusCode} status code.");
             }
+        }
+
+        private TagItemDTO Map(TagMediaItem tagMediaItem)
+        {
+            return new TagItemDTO
+            {
+                Id = tagMediaItem.Id,
+                GlobalIndex = tagMediaItem.GlobalIndex,
+            };
         }
     }
 }

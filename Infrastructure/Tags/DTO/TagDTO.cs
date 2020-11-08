@@ -1,9 +1,16 @@
-﻿namespace Infrastructure.Tags.DTO
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+
+namespace Infrastructure.Tags.DTO
 {
     internal class TagDTO
     {
-        public string Tag { get; set; }
-        public string PictureId { get; set; }
-        public int PictureIndex { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+        [JsonPropertyName("itemCount")]
+        public int ItemCount { get; set; }
+        [JsonPropertyName("mediaItems")]
+        public IEnumerable<TagItemDTO> MediaItems { get; set; }
     }
 }

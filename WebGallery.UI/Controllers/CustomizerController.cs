@@ -26,7 +26,7 @@ namespace WebGallery.UI.Controllers
 
             var vm = new CustomizerViewModel
             {
-                Tags = tags.Select(t => new Models.Tag { Name = t }).ToList()
+                Tags = tags.Select(t => new Models.Tag { Name = t.TagName }).ToList()
             };
 
             return View(vm);

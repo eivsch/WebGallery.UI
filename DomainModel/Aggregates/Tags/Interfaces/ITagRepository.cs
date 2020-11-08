@@ -6,6 +6,6 @@ namespace DomainModel.Aggregates.Tags.Interfaces
 {
     public interface ITagRepository : IRepository<Tag>
     {
-        Task<IEnumerable<string>> GetAll();
+        Task<IEnumerable<Tag>> GetAll();
     }
 }
