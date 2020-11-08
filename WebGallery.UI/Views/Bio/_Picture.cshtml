@@ -30,10 +30,10 @@
 
 <div class="bio-nav-container">
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#bio-img-partial"><<<  </a>
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch(@(Model.GlobalSortOrder - 1))"><<<  </a>
     </div>
     <div class="bio-nav-item" id="bioImgCounter">#@Model.GlobalSortOrder</div>
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder + 1)" data-ajax-update="#bio-img-partial">  >>></a>
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch(@(Model.GlobalSortOrder + 1))">  >>></a>
     </div>
 </div>

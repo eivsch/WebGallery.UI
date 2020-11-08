@@ -112,6 +112,10 @@ function focusInput() {
     $('#myInput').focus();
 }
 
+function bioSwitch(globalSortOrder) {
+    window.history.pushState("", "", '/Bio/' + globalSortOrder);
+}
+
 /**
  *  END SECTION: Tags (Bio)
  */
