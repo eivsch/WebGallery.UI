@@ -50,7 +50,10 @@ namespace WebGallery.UI.Controllers
             var gallery = await _galleryService.Get(uri);
 
             var vm = SinglePageGenerator.Generate(gallery);
-            vm.GalleryTitle = "Randomized";
+            if (!string.IsNullOrWhiteSpace(tags) && tagFilterMode == "custominclusive")
+                vm.GalleryTitle = tags;
+            else
+                vm.GalleryTitle = "Randomized";
 
             return View("Index", vm);
         }
