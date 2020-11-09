@@ -7,6 +7,6 @@ namespace Application.Services.Interfaces
     public interface ITagService
     {
         public Task Add(TagRequest request);
-        public Task<IEnumerable<string>> GetAll();
+        public Task<IEnumerable<TagResponse>> GetAll();
     }
 }

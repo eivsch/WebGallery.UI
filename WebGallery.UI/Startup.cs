@@ -52,6 +52,7 @@ namespace WebGallery.UI
             {
                 mc.AddProfile(new Mappings.AutoMapperGalleryProfile());
                 mc.AddProfile(new Mappings.AutoMapperPictureProfile());
+                mc.AddProfile(new Mappings.AutoMapperTagProfile());
             });
             services.AddSingleton(mapperConfig.CreateMapper());
         }

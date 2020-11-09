@@ -1,0 +1,59 @@
+﻿@using Microsoft.Extensions.Configuration
+
+@model List<WebGallery.UI.ViewModels.Tags.TagsViewModel>
+
+@inject IConfiguration Configuration
+
+@{
+    string fileServerUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
+}
+
+<main class="main-content">
+    <div class="container-fluid photos">
+        <div class="row pt-4 mb-5 text-center">
+            <div class="col-12">
+                <h2 class="text-white mb-4">Categories (@Model.Count total)</h2>
+            </div>
+        </div>
+        <div class="row align-items-stretch">
+
+            @foreach (var category in Model)
+            {
+                //string popUpDelayAtr = gallery.PopUpDelay == 0 ? "" : $"data-aos-delay={gallery.PopUpDelay}";
+                string coverImageUri = $"{fileServerUrl}/sha/{category.CoverImageId}";
+
+                <div class="col-lg-3 col-sm-4" data-aos="fade-up">
+                    <a href="/Tags/@category.CategoryName" class="d-block photo-item">
+                        @if (category.CoverImageMediaType == Application.Enums.MediaType.Video)
+                        {
+                            <video class="img-fluid" autoplay loop muted>
+                                <source src="@coverImageUri" type="video/mp4" />
+                            </video>
+                        }
+                        else
+                        {
+                            <img src="@coverImageUri" alt="Image" class="img-fluid">
+                        }
+                        <div class="photo-text-more">
+                            <div class="photo-text-more">
+                                <h3 class="heading">@category.CategoryName</h3>
+                                <span class="meta">@category.ItemCount Photos</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-12 text-center py-5">
+                <p>
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                    Copyright &copy;
+                    <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                </p>
+            </div>
+        </div>
+    </div>
+</main>

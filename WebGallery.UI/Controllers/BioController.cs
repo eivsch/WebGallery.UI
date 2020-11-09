@@ -29,7 +29,7 @@ namespace WebGallery.UI.Controllers
 
             var vm = new BioViewModel
             {
-                AllTags = tags.ToList(),
+                AllTags = tags.Select(s => s.TagName).ToList(),
                 BioPictureViewModel = new BioPictureViewModel
                 {
                     PictureId = picture.Id,
@@ -49,7 +49,7 @@ namespace WebGallery.UI.Controllers
 
             var vm = new BioViewModel
             {
-                AllTags = tags.ToList(),
+                AllTags = tags.Select(s => s.TagName).ToList(),
                 BioPictureViewModel = new BioPictureViewModel
                 {
                     PictureId = picture.Id,
