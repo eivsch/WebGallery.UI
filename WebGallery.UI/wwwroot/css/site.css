@@ -38,7 +38,7 @@
     color: gray;
 }
 
-.bio-nav-item, a {
+.bio-nav-item a {
     color: gray;
 }
 
@@ -70,4 +70,33 @@
 
 .fancybox-button--like {
     padding-top: 7px;
+}
+
+.main-landing {
+    width: calc(-250px + 100%);
+    margin-left: 50px;
+}
+
+.landing-section {
+    margin-bottom: 50px;
+}
+
+.landing-section--stats {
+    margin-top: 25px;
+    margin-left: 25px;
+}
+
+.stats-card {
+    margin-bottom: 35px;
+}
+
+.stats-card p {
+    margin-bottom: 0px;
+    font-size: 0.9rem;
+}
+
+.landing-img-banner {
+    height: 700px;
+    width: 100%;
+    object-fit: cover;
 }

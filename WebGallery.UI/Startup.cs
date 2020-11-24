@@ -6,10 +6,12 @@ using Application.Services;
 using Application.Services.Interfaces;
 using AutoMapper;
 using DomainModel.Aggregates.Gallery.Interfaces;
+using DomainModel.Aggregates.Metadata.Interfaces;
 using DomainModel.Aggregates.Picture.Interfaces;
 using DomainModel.Aggregates.Tags.Interfaces;
 using Infrastructure.Common;
 using Infrastructure.Galleries;
+using Infrastructure.Metadata;
 using Infrastructure.Pictures;
 using Infrastructure.Tags;
 using Microsoft.AspNetCore.Builder;
@@ -40,13 +42,15 @@ namespace WebGallery.UI
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
             });
             
-            services.AddTransient<IGalleryRepository, GalleryRepository>();
             services.AddTransient<IGalleryService, GalleryService>();
-            services.AddTransient<ITagService, TagService>();
-
             services.AddTransient<IPictureService, PictureService>();
+            services.AddTransient<ITagService, TagService>();
+            services.AddTransient<IMetadataService, MetadataService>();
+
+            services.AddTransient<IGalleryRepository, GalleryRepository>();
             services.AddTransient<IPictureRepository, PictureRepository>();
             services.AddTransient<ITagRepository, TagRepository>();
+            services.AddTransient<IMetadataRepository, MetadataRepository>();
 
             var mapperConfig = new MapperConfiguration(mc =>
             {

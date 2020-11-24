@@ -1,0 +1,79 @@
+﻿@using Microsoft.Extensions.Configuration
+
+@inject IConfiguration Configuration
+
+@{
+    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
+}
+
+<main class="main-landing">
+    <div class="row">
+        <div class="col-12">
+            <div class="row pt-4 mb-5 text-center">
+                <div class="col-12">
+                    <h2 class="text-white mb-4">Welcome</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="landing-section">
+        <div class="row">
+            <div class="col-2">
+                <img src="@baseUrl/sha/1" alt="Banner Image" class="landing-img-banner">
+            </div>
+            <div class="col-9">
+                <div class="landing-section--stats text-white">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="stats-card">
+                                <h4>Pictures</h4>
+                                <p>Total: 320354</p>
+                                <p>Most Recent: 'dfsfhdif.jpg' - 2020-09-13</p>
+                                <p>Most Liked: '45h.jpg' - 13 likes</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-card">
+                                <h4>Gifs</h4>
+                                <p>Total: 3040</p>
+                                <p>Most Recent: 'dfsfhdif.gif' - 2020-09-13</p>
+                                <p>Most Liked: 'deer.gif' - 13 likes</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-card">
+                                <h4>Videos</h4>
+                                <p>Total: 73</p>
+                                <p>Most Recent: 'dfsfhdif.mp4' - 2020-09-13</p>
+                                <p>Most Liked: 'cow.mp4' - 13 likes</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-card">
+                                <h4>Albums</h4>
+                                <p>Total: 320</p>
+                                <p>Most likes: 'Cars2018' - 13 likes</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-card">
+                                <h4>Tags</h4>
+                                <p>Total: 800</p>
+                                <p>Unique: 24</p>
+                                <p>Most popular: Bike</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row pt-4 mb-5 text-center">
+        <div class="col-12">
+            <h3 class="text-white mb-4">Popular Tags</h3>
+        </div>
+    </div>
+    <a href="/landing/stats">LINK</a>
+</main>
