@@ -1,59 +1,64 @@
 ﻿@using Microsoft.Extensions.Configuration
 
-@model WebGallery.UI.ViewModels.HomeViewModel
-
 @inject IConfiguration Configuration
 
 @{
-    string fileServerUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
+    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
 }
 
-<main class="main-content">
-    <div class="container-fluid photos">
-        <div class="row align-items-stretch">
-            @*
-            Each image row has a witdh of "12", meaning col-lg-x must add up to 12 to fit it on one row
+<main class="main-landing">
+    <div class="row">
+        <div class="col-12">
+            <div class="row pt-4 mb-5 text-center">
+                <div class="col-12">
+                    <h2 class="text-white mb-4">Welcome</h2>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            data-aos="fade-up" data-aos-delay="100" provides an animation while loading the picture
-            *@
-            @foreach (var gallery in Model.Galleries)
-            {
-                int offset = gallery.CoverImageIndex - 1;   // Index starts from 1
-                string popUpDelayAtr = gallery.PopUpDelay == 0 ? "" : $"data-aos-delay={gallery.PopUpDelay}";
-                string coverImageUri = $"{fileServerUrl}/sha/{gallery.CoverImageId}";
-
-                <div class="col-6 col-md-6 col-lg-@gallery.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                    <a href="/Single/@(gallery.GalleryId + "?offset=" + offset)" class="d-block photo-item">
-                    @if (gallery.CoverImageMediaType == Application.Enums.MediaType.Video)
-                    {
-                        <video class="img-fluid" autoplay loop muted>
-                            <source src="@coverImageUri" type="video/mp4" />
-                        </video>
-                    }
-                    else
-                    {
-                        <img src="@coverImageUri" alt="Image" class="img-fluid">
-                    }
-                        <div class="photo-text-more">
-                            <div class="photo-text-more">
-                                <h3 class="heading">Photos Title Here</h3>
-                                <span class="meta">42 Photos</span>
+    <div class="landing-section">
+        <div class="row">
+            <div class="col-2">
+                <img src="@baseUrl/sha/1" alt="Banner Image" class="landing-img-banner">
+            </div>
+            <div class="col-9">
+                <div class="landing-section--stats text-white">
+                    <div class="row">
+                        <div class="col-4">
+                            <div data-url="/home/stats?itemType=picture" data-async-view>
+                                *loading*...
                             </div>
                         </div>
-                    </a>
+                        <div class="col-4">
+                            <div data-url="/home/stats?itemType=gif" data-async-view>
+                                *loading*...
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div data-url="/home/stats?itemType=video" data-async-view>
+                                *loading*...
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div data-url="/home/stats?itemType=album" data-async-view>
+                                *loading*...
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div data-url="/home/stats?itemType=tag" data-async-view>
+                                *loading*...
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            }
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-md-12 text-center py-5">
-                <p>
-                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                    Copyright &copy;
-                    <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                </p>
             </div>
+        </div>
+    </div>
+
+    <div class="row pt-4 mb-5 text-center">
+        <div class="col-12">
+            <h3 class="text-white mb-4">Popular Tags</h3>
         </div>
     </div>
 </main>

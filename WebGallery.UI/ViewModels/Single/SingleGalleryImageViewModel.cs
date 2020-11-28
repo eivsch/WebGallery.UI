@@ -2,7 +2,7 @@
 
 namespace WebGallery.UI.ViewModels.Single
 {
-    public class SingleGalleryImageViewModel : ImageViewModelBase
+    public class SingleGalleryImageViewModel : GridImageViewModelBase
     {
         public string Id { get; set; }
         public int IndexGlobal { get; set; }

@@ -1,19 +1,16 @@
 ﻿using Application.Galleries;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using WebGallery.UI.Generators.Helpers;
-using WebGallery.UI.ViewModels;
+using WebGallery.UI.ViewModels.Albums;
 
 namespace WebGallery.UI.Generators
 {
-    public static class HomePageGenerator
+    public static class AlbumsPageGenerator
     {
-        public static HomeViewModel GenerateAllRandom(IList<GalleryResponse> input)
+        public static AlbumsViewModel GenerateAllRandom(IList<GalleryResponse> input)
         {
             input.ShuffleList();
-            var outList = new List<HomeGalleryViewModel>();
+            var outList = new List<AlbumViewModel>();
 
             int totalSizeOfRow = 0, indexer = 0;
             var rowFormat = RandomHelpers.GetRandomRowFormat;
@@ -28,7 +25,7 @@ namespace WebGallery.UI.Generators
 
                 var size = rowFormat[indexer];
                 var coverImageIndex = RandomHelpers.Rng.Next(1, gallery.ImageCount);
-                var vm = new HomeGalleryViewModel
+                var vm = new AlbumViewModel
                 {
                     GalleryId = gallery.Id,
                     ItemCount = gallery.ImageCount,
@@ -43,9 +40,9 @@ namespace WebGallery.UI.Generators
                 indexer++;
             }
 
-            return new HomeViewModel
+            return new AlbumsViewModel
             {
-                Galleries = outList
+                Albums = outList
             };
         }
 

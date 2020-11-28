@@ -1,48 +1,40 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using WebGallery.UI.Generators;
 using WebGallery.UI.ViewModels;
 
 namespace WebGallery.UI.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IGalleryService _galleryService;
-        private readonly IPictureService _pictureService;
+        private readonly IMetadataService _statisticsService;
 
-        public HomeController(ILogger<HomeController> logger, IGalleryService galleryService, IPictureService pictureService)
+        public HomeController(IMetadataService statisticsService)
         {
-            _logger = logger;
-            _galleryService = galleryService;
-            _pictureService = pictureService;
+            _statisticsService = statisticsService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             ViewBag.Current = "Home";
 
-            var allGalleries = await _galleryService.GetAllGalleriesWithoutItems();
-            var allGalleriesVm = HomePageGenerator.GenerateAllRandom(allGalleries.ToList());
-            
-            foreach (var galleryVm in allGalleriesVm.Galleries)
-            {
-                var picture = await _pictureService.Get(galleryVm.GalleryId, galleryVm.CoverImageIndex);
-                galleryVm.CoverImageMediaType = picture.MediaType;
-                galleryVm.CoverImageId = picture.Id;
-            }
-
-            return View(allGalleriesVm);
+            return View();
         }
 
-        public IActionResult Privacy()
+        [HttpGet("home/stats")]
+        public async Task<IActionResult> GetStatistics(string itemType)
         {
-            return View();
+            var stats = await _statisticsService.GetStatistics(itemType);
+
+            // TODO: Automapper
+            var vm = new StatsInfoCardViewModel
+            {
+                Header = stats.ShortDescription,
+                InfoItems = stats.InfoItems
+            };
+
+            return PartialView("_StatsInfoCard", vm);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

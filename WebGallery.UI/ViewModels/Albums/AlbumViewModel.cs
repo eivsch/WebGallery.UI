@@ -1,8 +1,8 @@
 ﻿using Application.Enums;
 
-namespace WebGallery.UI.ViewModels
+namespace WebGallery.UI.ViewModels.Albums
 {
-    public class HomeGalleryViewModel : ImageViewModelBase
+    public class AlbumViewModel : GridImageViewModelBase
     {
         public string GalleryId { get; set; }
         public int CoverImageIndex { get; set; }
