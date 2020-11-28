@@ -1,13 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Infrastructure.Metadata.DTO
 {
     class MetadataDTO
     {
-        [JsonPropertyName("shortDescription")]
-        public string ShortDescription { get; set; }
-        [JsonPropertyName("metrics")]
-        public Dictionary<string, string> Metrics { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("totalCount")]
+        public int TotalCount { get; set; }
+
+        [JsonPropertyName("details")]
+        public IDictionary<string, object> Details { get; set; }
     }
 }

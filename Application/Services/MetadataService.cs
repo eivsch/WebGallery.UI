@@ -3,9 +3,7 @@ using Application.Services.Interfaces;
 using DomainModel.Aggregates.Metadata;
 using DomainModel.Aggregates.Metadata.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -21,13 +19,22 @@ namespace Application.Services
 
         public async Task<MetadataResponse> GetStatistics(string itemType)
         {
-            Enum.TryParse(itemType, out MetadataType type);
+            MetadataType type = itemType.ToLower() switch
+            {
+                "album" => MetadataType.Album,
+                "gif" => MetadataType.Gif,
+                "picture" => MetadataType.Picture,
+                "video" => MetadataType.Video,
+                "tag" => MetadataType.Tag,
+                _ => throw new ArgumentException()
+            };
+
             var aggregate = await _metadataRepository.Get(type);
 
             return new MetadataResponse
             {
                 ShortDescription = aggregate.ShortDescription,
-                InfoItems = aggregate.Details.InfoItems
+                InfoItems = aggregate.MetadataDetails.InfoItems.ToList()
             };
         }
     }

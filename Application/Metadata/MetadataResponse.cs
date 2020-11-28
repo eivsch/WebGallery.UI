@@ -6,6 +6,6 @@ namespace Application.Metadata
     public class MetadataResponse
     {
         public string ShortDescription { get; set; }
-        public IReadOnlyCollection<string> InfoItems { get; set; }
+        public List<string> InfoItems { get; set; }
     }
 }

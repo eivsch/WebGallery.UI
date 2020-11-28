@@ -28,9 +28,12 @@ namespace Infrastructure.Metadata
             if (response.IsSuccessStatusCode)
             {
                 using var responseStream = await response.Content.ReadAsStreamAsync();
+
                 var data = await JsonSerializer.DeserializeAsync<MetadataDTO>(responseStream);
 
-                return DomainModel.Aggregates.Metadata.Metadata.Create(data.ShortDescription, type, data.Metrics);
+                var aggregate = DomainModel.Aggregates.Metadata.Metadata.Create(data.Name, type, data.TotalCount, data.Details);
+
+                return aggregate;
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
