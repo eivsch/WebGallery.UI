@@ -23,3 +23,7 @@ function initSlider() {
         slider.noUiSlider.on('slide', updateInput);
     }
 };
+
+jQuery(document).ready(function ($) {
+    initSlider();
+});

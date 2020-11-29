@@ -6,3 +6,7 @@
         }
     });
 }
+
+jQuery(document).ready(function ($) {
+    loadAsyncViews();
+});

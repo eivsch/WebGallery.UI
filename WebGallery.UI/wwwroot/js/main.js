@@ -139,11 +139,7 @@ jQuery(document).ready(function($) {
 	};
 	siteDatePicker();
 
-	initSlider();
-
 	$('[data-select-tags]').select2({
 		placeholder: "Search tags...",
 	});
-
-	loadAsyncViews();
 });
