@@ -24,6 +24,21 @@ function initSlider() {
     }
 };
 
+$('input:radio[name="RadioTagmodeOption"]').change(
+    function () {
+        if ($(this).is(':checked') && $(this).val() == 'custom') {
+            $('[data-tag-manager]').show();
+        }
+        else {
+            $('[data-tag-manager]').hide();
+        }
+    }
+);
+
 jQuery(document).ready(function ($) {
     initSlider();
+
+    $('[data-select-tags]').select2({
+        placeholder: "Search tags...",
+    });
 });

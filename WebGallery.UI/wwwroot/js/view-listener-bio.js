@@ -1,14 +1,4 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
-
-
-/**
- *  SECTION: Tags (Bio)
- */
-
-function tagExists(tag) {
+﻿function tagExists(tag) {
     var exists = false;
     var existingTags = $('#bioPictureTags').children();
     existingTags.each(function (index) {
@@ -115,26 +105,3 @@ function focusInput() {
 function bioSwitch(globalSortOrder) {
     window.history.pushState("", "", '/Bio/' + globalSortOrder);
 }
-
-/**
- *  END SECTION: Tags (Bio)
- */
-
-/**
- *  SECTION: Customizer
- */
-
-$('input:radio[name="RadioTagmodeOption"]').change(
-    function () {
-        if ($(this).is(':checked') && $(this).val() == 'custom') {
-            $('[data-tag-manager]').show();
-        }
-        else {
-            $('[data-tag-manager]').hide();
-        }
-    }
-);
-
-/**
- *  END SECTION: Customizer
- */

@@ -138,8 +138,4 @@ jQuery(document).ready(function($) {
 
 	};
 	siteDatePicker();
-
-	$('[data-select-tags]').select2({
-		placeholder: "Search tags...",
-	});
 });
