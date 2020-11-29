@@ -4,14 +4,7 @@
  	once: false
  });
 
-
-$.fancybox.defaults.btnTpl.like = '<button data-fancybox-like class="fancybox-button fancybox-button--like" title="Like">L</button>';
-$('body').on('click', '[data-fancybox-like]', function () {
-	console.log('clicked');
-});
-
 $.fancybox.defaults.buttons = [
-	"like",
 	"zoom",
 	//"share",
 	//"slideShow",

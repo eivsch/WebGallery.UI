@@ -83,7 +83,8 @@ namespace Infrastructure.Tags
             var dto = new TagDTO
             {
                 Name = aggregate.TagName,
-                MediaItems = aggregate.MediaItems.Select(s => Map(s))
+                MediaItems = aggregate.MediaItems.Select(s => Map(s)),
+                ItemCount = aggregate.ItemCount
             };
 
             var response = await _client.PostAsync("tags", new JsonContent(dto));
@@ -104,6 +105,7 @@ namespace Infrastructure.Tags
             {
                 Id = tagMediaItem.Id,
                 GlobalIndex = tagMediaItem.GlobalIndex,
+                Created = tagMediaItem.Created
             };
         }
     }

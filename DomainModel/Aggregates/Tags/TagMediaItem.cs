@@ -5,10 +5,10 @@ namespace DomainModel.Aggregates.Tags
 {
     public class TagMediaItem : Entity
     {
-        private DateTime? _created;
+        private DateTime _created;
         private int? _globalIndex;
 
-        public virtual DateTime? Created => _created;
+        public virtual DateTime Created => _created;
         public virtual int? GlobalIndex => _globalIndex;
 
         private TagMediaItem(string id)
@@ -23,7 +23,7 @@ namespace DomainModel.Aggregates.Tags
 
             return new TagMediaItem(itemId)
             {
-                _created = created,
+                _created = created ?? DateTime.UtcNow,
                 _globalIndex = globalIndex
             };
         }

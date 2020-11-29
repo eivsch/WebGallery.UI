@@ -67,9 +67,24 @@
 }
 
 
-
+@keyframes presslike {
+    from {
+        color: white;
+    }
+    to {
+        color: blue;
+    }
+}
 .fancybox-button--like {
     padding-top: 7px;
+}
+.fancybox-like__pressed {
+    color: blue;
+    animation-name: presslike;
+    animation-duration: 1.5s;
+}
+.fancybox-like__pressed:hover {
+    color: blue;
 }
 
 .main-landing {

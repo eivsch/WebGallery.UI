@@ -27,7 +27,11 @@
                 if (item.MediaType == MediaType.Video)
                 {
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="video" data-caption="<a href='/Bio/@item.IndexGlobal'>@item.Id</a>">
+                        <a href="@itemUrl"
+                           class="d-block photo-item"
+                           data-fancybox="gallery"
+                           data-type="video"
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/@item.IndexGlobal'>@item.Id</a></div>">
                             <video class="img-fluid" autoplay loop muted>
                                 <source src="@itemUrl" type="video/mp4" />
                             </video>
@@ -37,7 +41,12 @@
                 else
                 {
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                        <a href="@itemUrl" class="d-block photo-item" data-fancybox="gallery" data-type="image" data-caption="<a href='/Bio/@item.IndexGlobal'>@item.Id</a>">
+                        <a href="@itemUrl"
+                           class="d-block photo-item"
+                           data-fancybox="gallery"
+                           data-type="image"
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/@item.IndexGlobal'>@item.Id</a></div>">
+
                             <img src="@itemUrl" alt="Image" class="img-fluid">
                             <div class="photo-text-more">
                                 <span class="icon icon-search"></span>
@@ -61,3 +70,8 @@
         </div>
     </div>
 </main>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/view-listener-single.js">
+    </script>
+}
