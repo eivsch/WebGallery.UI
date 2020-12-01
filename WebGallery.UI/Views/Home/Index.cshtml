@@ -4,6 +4,7 @@
 
 @{
     string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
+    string bannerImageUrl = $"{baseUrl}/{Configuration.GetValue("HomeBannerImageIndex", "")}";
 }
 
 <main class="main-landing">
@@ -20,7 +21,7 @@
     <div class="landing-section">
         <div class="row">
             <div class="col-2">
-                <img src="@baseUrl/sha/1" alt="Banner Image" class="landing-img-banner">
+                <img src="@bannerImageUrl" alt="Banner Image" class="landing-img-banner">
             </div>
             <div class="col-9">
                 <div class="landing-section--stats text-white">
