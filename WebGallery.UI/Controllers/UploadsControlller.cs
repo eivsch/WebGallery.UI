@@ -13,32 +13,31 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class UploadsController : Controller
     {
-        public UploadsController()
+        private readonly IUploadService _uploadService;
+
+        public UploadsController(IUploadService uploadService)
         {
+            _uploadService = uploadService;
         }
 
         public async Task<IActionResult> Index()
         {
-            // var vm = new UploadsViewModel();
+            var vm = new UploadsViewModel();
 
-            return View();
+            return View(vm);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(IEnumerable<IFormFile> filesToUpload)
+        public async Task<IActionResult> Post(UploadsViewModel vm)
         {
-            var rootPath = "/var/www/pics";
-            var newFolder = "folder1";
-            
-            var newDir = Path.Combine(rootPath, newFolder);
-            Directory.CreateDirectory(newDir);
-
-            foreach (var file in filesToUpload)
+            if (!ModelState.IsValid)
             {
-                var filePath = Path.Combine(newDir, file.FileName);
-
-                file.CopyTo(new FileStream(filePath, FileMode.Create));
+                // TODO
+                throw new Exception("Invalid ModelState");
             }
+
+            await _uploadService.UploadFiles(vm.AlbumName, vm.FilesToUpload);
+            
 
             return View();
         }
