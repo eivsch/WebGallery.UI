@@ -30,5 +30,18 @@ namespace Infrastructure.Services
                 await folderFile.CopyToAsync(stream);
             }
         }
+
+        public async Task CopyFileToDisk(string folderName, string fileName, Stream stream)
+        {
+            var newDir = Path.Combine(_rootPath, folderName);
+            if (!Directory.Exists(newDir))
+                Directory.CreateDirectory(newDir);
+
+            var filePath = Path.Combine(newDir, fileName);
+            using (var fileStream = File.Create(filePath))
+            {
+                await stream.CopyToAsync(fileStream);
+            }
+        }   
     }
 }

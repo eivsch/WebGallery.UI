@@ -21,6 +21,24 @@ namespace Application.Services
             _pictureRepository = pictureRepository;
         }
 
+        public async Task UploadFile(string folderName, string fileName, int folderSortOrder, Stream file)
+        {
+            var picture = Picture.Create(
+                id: "placeholder",  // Handled by the API
+                name: fileName,
+                appPath: Path.Combine(folderName, fileName),
+                originalPath: $"/uploads/{fileName}",
+                folderName: folderName,
+                folderId: "",   // Handled by the API
+                folderSortOrder: folderSortOrder,   // TODO: Should be handled better
+                globalSortOrder: 0, // Handled by the API
+                size: (int) file.Length,
+                created: DateTime.UtcNow);
+
+            await _fileSystemService.CopyFileToDisk(folderName, fileName, file);
+            await _pictureRepository.Save(picture);
+        }
+
         public async Task UploadFiles(string folderName, IEnumerable<IFormFile> folderFiles)
         {
             int folderSortOrder = 1;
