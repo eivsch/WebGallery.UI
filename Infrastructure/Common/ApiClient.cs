@@ -19,8 +19,8 @@ namespace Infrastructure.Common
 
     public class JsonContent : StringContent
     {
-        public JsonContent(object obj) :
-            base(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json")
+        public JsonContent(object obj, JsonSerializerOptions opts = null) :
+            base(JsonSerializer.Serialize(obj, options: opts), Encoding.UTF8, "application/json")
         { }
     }
 }

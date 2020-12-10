@@ -43,11 +43,13 @@ namespace WebGallery.UI
             services.AddTransient<IPictureService, PictureService>();
             services.AddTransient<ITagService, TagService>();
             services.AddTransient<IMetadataService, MetadataService>();
+            services.AddTransient<IUploadService, UploadService>();
 
             services.AddTransient<IGalleryRepository, GalleryRepository>();
             services.AddTransient<IPictureRepository, PictureRepository>();
             services.AddTransient<ITagRepository, TagRepository>();
             services.AddTransient<IMetadataRepository, MetadataRepository>();
+            services.AddTransient<Infrastructure.Services.IFileSystemService, Infrastructure.Services.FileSystemService>();
 
             var mapperConfig = new MapperConfiguration(mc =>
             {

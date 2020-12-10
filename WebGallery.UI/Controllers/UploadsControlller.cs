@@ -38,8 +38,7 @@ namespace WebGallery.UI.Controllers
 
             await _uploadService.UploadFiles(vm.AlbumName, vm.FilesToUpload);
             
-
-            return View();
+            return View("success");
         }
     }
 }

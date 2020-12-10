@@ -3,30 +3,31 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Services
 {
     public class FileSystemService : IFileSystemService
     {
-        public FileSystemService()
+        private readonly string _rootPath;
+        
+        public FileSystemService(IConfiguration configuration)
         {
+            _rootPath = configuration.GetValue("ConnectionStrings:FileServerRoot", "");
+            if (string.IsNullOrEmpty(_rootPath))
+                throw new Exception("Missing file system root path. Check configuration.");
         }
 
-        public async Task CopyFilesToDisk(string folderName, IEnumerable<IFormFile> folderFiles)
+        public async Task CopyFileToDisk(string folderName, IFormFile folderFile)
         {
-            var rootPath = "/var/www/pics";
-            
-            var newDir = Path.Combine(rootPath, folderName);
+            var newDir = Path.Combine(_rootPath, folderName);
             if (!Directory.Exists(newDir))
                 Directory.CreateDirectory(newDir);
 
-            foreach (var file in folderFiles)
+            var filePath = Path.Combine(newDir, folderFile.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                var filePath = Path.Combine(newDir, file.FileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
+                await folderFile.CopyToAsync(stream);
             }
         }
     }
