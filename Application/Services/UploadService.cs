@@ -59,7 +59,7 @@ namespace Application.Services
                 folderName: folderName,
                 folderId: "",   // Handled by the API
                 folderSortOrder: folderSortOrder,   // TODO: Should be handled better
-                globalSortOrder: currentGlobalMax++,
+                globalSortOrder: ++currentGlobalMax,
                 size: (int) savedFileInfo.FileSize,
                 created: DateTime.UtcNow);
 
