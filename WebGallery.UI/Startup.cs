@@ -43,7 +43,7 @@ namespace WebGallery.UI
             services.AddTransient<IPictureService, PictureService>();
             services.AddTransient<ITagService, TagService>();
             services.AddTransient<IMetadataService, MetadataService>();
-            services.AddTransient<IUploadService, UploadService>();
+            services.AddScoped<IUploadService, UploadService>();
 
             services.AddTransient<IGalleryRepository, GalleryRepository>();
             services.AddTransient<IPictureRepository, PictureRepository>();
@@ -56,6 +56,7 @@ namespace WebGallery.UI
                 mc.AddProfile(new Mappings.AutoMapperGalleryProfile());
                 mc.AddProfile(new Mappings.AutoMapperPictureProfile());
                 mc.AddProfile(new Mappings.AutoMapperTagProfile());
+                mc.AddProfile(new Mappings.AutoMapperUploadProfile());
             });
             services.AddSingleton(mapperConfig.CreateMapper());
         }

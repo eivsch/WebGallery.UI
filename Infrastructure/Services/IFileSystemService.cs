@@ -9,6 +9,6 @@ namespace Infrastructure.Services
     {
         // Adds file to given folder on the local file system if exists, or creates new folder
         Task CopyFileToDisk(string folderName, IFormFile folderFile);
-        Task CopyFileToDisk(string folderName, string fileName, Stream file);
+        Task<SavedFileInfo> CopyFileToDisk(string folderName, string fileName, Stream file);
     }
 }

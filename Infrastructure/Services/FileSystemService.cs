@@ -9,7 +9,9 @@ namespace Infrastructure.Services
 {
     public class FileSystemService : IFileSystemService
     {
+
         private readonly string _rootPath;
+        private List<SavedFileInfo> _savedFiles;
         
         public FileSystemService(IConfiguration configuration)
         {
@@ -31,7 +33,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task CopyFileToDisk(string folderName, string fileName, Stream stream)
+        public async Task<SavedFileInfo> CopyFileToDisk(string folderName, string fileName, Stream stream)
         {
             var newDir = Path.Combine(_rootPath, folderName);
             if (!Directory.Exists(newDir))
@@ -41,6 +43,13 @@ namespace Infrastructure.Services
             using (var fileStream = File.Create(filePath))
             {
                 await stream.CopyToAsync(fileStream);
+
+                return new SavedFileInfo
+                    {
+                        FileName = fileName,
+                        FilePathFull = filePath,
+                        FileSize = stream.Length
+                    };
             }
         }   
     }

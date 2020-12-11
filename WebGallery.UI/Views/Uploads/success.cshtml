@@ -1,1 +1,22 @@
+@model WebGallery.UI.ViewModels.Uploads.UploadResultViewModel
+
 <h3>Success!</h3>
+<p>Uploaded album '@Model.UploadAlbumName' with @Model.UploadFileCount files</p>
+
+<table>
+    <tr>
+        <th>Filename</th>
+        <th>Global Index</th>
+        <th>Size (bytes)</th>
+        @* <th>Destination</th> *@
+    </tr>
+    @foreach (var file in Model.UploadedFiles)
+    {
+        <tr>
+            <td>@file.FileName</td>
+            <td>@file.GlobalIndex</td>
+            <td>@file.FileSizeInBytes</td>
+            @* <td>@file.UploadDestinationPath</td> *@
+        </tr>
+    }
+</table>

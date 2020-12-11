@@ -115,3 +115,7 @@
     width: 100%;
     object-fit: cover;
 }
+
+th, td {
+    padding: 15px;
+  }

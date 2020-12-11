@@ -141,7 +141,13 @@ namespace Infrastructure.Pictures
 
             if (response.IsSuccessStatusCode)
             {
-                return aggregate;
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
+
+                if (data.GlobalSortOrder < 1)
+                    throw new Exception("Invalid index received from the API when trying to save a Picture aggregate. Please investigate.");
+
+                return Map(data);
             }
             else
             {

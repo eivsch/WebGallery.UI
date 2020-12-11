@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -27,10 +28,12 @@ namespace WebGallery.UI.Controllers
             };
         
         private readonly IUploadService _uploadService;
+        private readonly IMapper _mapper;
 
-        public UploadsController(IUploadService uploadService)
+        public UploadsController(IUploadService uploadService, IMapper mapper)
         {
             _uploadService = uploadService;
+            _mapper = mapper;
         }
 
         public async Task<IActionResult> Index()
@@ -117,7 +120,10 @@ namespace WebGallery.UI.Controllers
                 section = await reader.ReadNextSectionAsync();
             }
 
-            return View("success");
+            var uploadResult = _uploadService.GetUploadRequestResult();
+            var vm = _mapper.Map<UploadResultViewModel>(uploadResult);
+
+            return View("success", vm);
         }
     }
 }
