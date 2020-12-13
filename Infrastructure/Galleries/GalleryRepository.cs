@@ -56,7 +56,7 @@ namespace Infrastructure.Galleries
                 using var responseStream = await response.Content.ReadAsStreamAsync();
                 var data = await JsonSerializer.DeserializeAsync<GalleryDTO>(responseStream);
 
-                Gallery gallery = Gallery.Create(data.Id, data.ImageCount);
+                Gallery gallery = Gallery.Create(data.Id, data.ImageCount, galleryName: data.GalleryName);
                 foreach (var item in data.GalleryPictures)
                     gallery.AddGalleryItem(
                         galleryItemId: item.Id, 
@@ -87,7 +87,7 @@ namespace Infrastructure.Galleries
                 List<Gallery> list = new List<Gallery>();
                 foreach(var i in data)
                 {
-                    list.Add(Gallery.Create(i.Id, i.ImageCount));
+                    list.Add(Gallery.Create(i.Id, i.ImageCount, galleryName: i.GalleryName));
                 }
 
                 return list;

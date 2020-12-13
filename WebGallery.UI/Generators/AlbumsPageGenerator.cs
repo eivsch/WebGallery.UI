@@ -32,6 +32,7 @@ namespace WebGallery.UI.Generators
                     CoverImageIndex = coverImageIndex,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,
+                    Title = gallery.GalleryName
                 };
 
                 outList.Add(vm);

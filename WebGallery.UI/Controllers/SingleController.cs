@@ -39,7 +39,6 @@ namespace WebGallery.UI.Controllers
             var galleryResponse = await _galleryService.Get(galleryId: id, itemIndexStart: offset + 1, numberOfItems: 48);
             
             var vm = SinglePageGenerator.Generate(galleryResponse);
-            vm.GalleryTitle = "Gallery";
 
             return View(vm);
         }

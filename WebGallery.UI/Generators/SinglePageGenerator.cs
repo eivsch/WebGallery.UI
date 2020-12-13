@@ -45,7 +45,8 @@ namespace WebGallery.UI.Generators
             return new SingleGalleryViewModel
             {
                 Id = galleryResponse.Id,
-                Images = outList
+                Images = outList,
+                GalleryTitle = galleryResponse.GalleryName
             };
         }
     }

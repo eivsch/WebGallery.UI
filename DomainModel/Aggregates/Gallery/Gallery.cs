@@ -10,20 +10,23 @@ namespace DomainModel.Aggregates.Gallery
     {
         private int _imageCount;
         private readonly List<GalleryItem> _galleryItems = new List<GalleryItem>();
+        private string _galleryName;
 
         public virtual int ImageCount => _imageCount;
         public virtual IReadOnlyCollection<GalleryItem> GalleryItems => _galleryItems.AsReadOnly();
+        public virtual string GalleryName => _galleryName;
 
         private Gallery(string id)
         {
             Id = id;
         }
 
-        public static Gallery Create(string id, int imageCount)
+        public static Gallery Create(string id, int imageCount, string galleryName = null)
         {
             return new Gallery(id)
             {
-                _imageCount = imageCount
+                _imageCount = imageCount,
+                _galleryName = galleryName
             };
         }
 
