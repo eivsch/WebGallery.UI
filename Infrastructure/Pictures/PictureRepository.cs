@@ -129,9 +129,30 @@ namespace Infrastructure.Pictures
             throw new NotImplementedException();
         }
 
-        public Task<Picture> Save(Picture aggregate)
+        public async Task<Picture> Save(Picture aggregate)
         {
-            throw new NotImplementedException();
+            var jsonOpts = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+            var jsonContent = new JsonContent(aggregate, jsonOpts);
+
+            var response = await _client.PostAsync("pictures", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
+
+                if (data.GlobalSortOrder < 1)
+                    throw new Exception("Invalid index received from the API when trying to save a Picture aggregate. Please investigate.");
+
+                return Map(data);
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
         }
     }
 }

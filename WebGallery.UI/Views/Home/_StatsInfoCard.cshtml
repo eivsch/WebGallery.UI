@@ -1,7 +1,14 @@
 ﻿@model WebGallery.UI.ViewModels.StatsInfoCardViewModel
 
 <div class="stats-card" data-aos="fade-up">
-    <h4>@Model.Header</h4>
+    @if (string.IsNullOrWhiteSpace(Model.Headerlink))
+    {
+        <h4>@Model.Header</h4>
+    }
+    else 
+    {
+        <h4><a href=@Model.Headerlink>@Model.Header</a></h4>
+    }
     @foreach (var infoItem in Model.InfoItems)
     {
         <p>@infoItem</p>

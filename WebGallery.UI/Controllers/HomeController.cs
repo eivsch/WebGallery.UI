@@ -27,10 +27,19 @@ namespace WebGallery.UI.Controllers
         {
             var stats = await _statisticsService.GetStatistics(itemType);
 
+            var headerLink = itemType switch
+            {
+                "picture" => "/single",
+                "album" => "/albums",
+                "tag" => "tags",
+                _ => "/single"
+            };
+
             // TODO: Automapper
             var vm = new StatsInfoCardViewModel
             {
                 Header = stats.ShortDescription,
+                Headerlink = headerLink,
                 InfoItems = stats.InfoItems
             };
 

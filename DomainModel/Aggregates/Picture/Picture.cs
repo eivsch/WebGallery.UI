@@ -16,6 +16,7 @@ namespace DomainModel.Aggregates.Picture
         private string _folderId;
         private int _globalSortOrder;
         private int _folderSortOrder;
+        // TODO: use long type
         private int _size;
         private DateTime _createTimestamp;
         private List<string> _tags = new List<string>();

@@ -44,5 +44,24 @@ namespace Infrastructure.Metadata
                 throw new Exception($"The API returned a {response.StatusCode} status code.");
             }
         }
+
+        public int GetMaxGlobalIndex()
+        {
+            var response = _client.GetAsync("metadata/global-max").Result;
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = response.Content;
+
+                var data = responseContent.ReadAsStringAsync().Result;
+                int result = Convert.ToInt32(data);
+
+                return result;
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
     }
 }
