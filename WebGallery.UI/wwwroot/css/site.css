@@ -89,11 +89,19 @@
 
 .main-landing {
     width: calc(-250px + 100%);
-    margin-left: 50px;
+}
+@media (max-width: 991.98px) {
+    .main-landing {
+      width: 100%;
+      position: relative;
+      float: none; 
+    } 
 }
 
 .landing-section {
     margin-bottom: 50px;
+    margin-left: 25px;
+    margin-right: 25px;
 }
 
 .landing-section--stats {
@@ -114,6 +122,13 @@
     height: 900px;
     width: 100%;
     object-fit: cover;
+}
+@media screen and (max-width: 600px){
+    .landing-img-banner {
+        max-height: 300px;
+        height: auto;
+        max-width: 100%;
+    }
 }
 
 th, td {
