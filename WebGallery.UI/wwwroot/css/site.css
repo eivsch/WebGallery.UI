@@ -118,6 +118,10 @@
     font-size: 0.9rem;
 }
 
+.stats-card a {
+    color: white;
+}
+
 .landing-img-banner {
     height: 900px;
     width: 100%;
