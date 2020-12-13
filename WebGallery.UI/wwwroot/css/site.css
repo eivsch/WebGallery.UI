@@ -119,3 +119,10 @@
 th, td {
     padding: 15px;
   }
+
+/* Shutter overrides */
+.main-content .photos .photo-item video {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
