@@ -3,7 +3,6 @@ using DomainModel.Common.Enums;
 using DomainModel.Common.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DomainModel.Aggregates.Gallery
 {
@@ -28,9 +27,14 @@ namespace DomainModel.Aggregates.Gallery
             };
         }
 
-        public virtual void AddGalleryItem(string galleryItemId, int indexGlobal, string mediaType, string tags = "")
+        public virtual void AddGalleryItem(string galleryItemId, string mediaType, string appPath, string tags = "", int? indexGlobal = null)
         {
-            var galleryItem = GalleryItem.Create(galleryItemId, indexGlobal, ParseMediaType(mediaType));
+            if (string.IsNullOrWhiteSpace(galleryItemId))
+                throw new ArgumentNullException(nameof(galleryItemId));
+            if (string.IsNullOrWhiteSpace(appPath))
+                throw new ArgumentNullException(nameof(appPath));
+
+            var galleryItem = GalleryItem.Create(galleryItemId, appPath, indexGlobal, ParseMediaType(mediaType));
 
             if (!string.IsNullOrWhiteSpace(tags))
             {

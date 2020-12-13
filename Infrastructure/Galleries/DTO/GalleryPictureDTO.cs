@@ -8,6 +8,9 @@ namespace Infrastructure.Galleries.DTO
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
+        [JsonPropertyName("appPath")]
+        public string AppPath { get; set; }
+
         [JsonPropertyName("indexGlobal")]
         public int IndexGlobal { get; set; }
 

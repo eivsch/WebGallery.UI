@@ -58,7 +58,12 @@ namespace Infrastructure.Galleries
 
                 Gallery gallery = Gallery.Create(data.Id, data.ImageCount);
                 foreach (var item in data.GalleryPictures)
-                    gallery.AddGalleryItem(galleryItemId: item.Id, indexGlobal: item.IndexGlobal, item.MediaType);
+                    gallery.AddGalleryItem(
+                        galleryItemId: item.Id, 
+                        mediaType: item.MediaType, 
+                        appPath: item.AppPath,
+                        indexGlobal: item.IndexGlobal
+                    );
 
                 return gallery;
             }
@@ -108,7 +113,12 @@ namespace Infrastructure.Galleries
 
                 Gallery gallery = Gallery.Create(data.Id, data.ImageCount);
                 foreach (var item in data.GalleryPictures)
-                    gallery.AddGalleryItem(galleryItemId: item.Id, indexGlobal: item.IndexGlobal, item.MediaType);
+                    gallery.AddGalleryItem(
+                        galleryItemId: item.Id, 
+                        mediaType: item.MediaType, 
+                        appPath: item.AppPath,
+                        indexGlobal: item.IndexGlobal
+                    );
 
                 return gallery;
             }
