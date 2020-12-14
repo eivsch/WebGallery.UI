@@ -2,34 +2,32 @@
 using DomainModel.Common.Enums;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DomainModel.Aggregates.Gallery
 {
     public class GalleryItem : Entity
     {
-        private int _indexGlobal;
+        private string _appPath;
+        private int? _indexGlobal;
         private List<string> _tags = new List<string>();
         private MediaType _mediaType;
 
-        public virtual int IndexGlobal => _indexGlobal;
+        public virtual int? IndexGlobal => _indexGlobal;
+        public virtual string AppPath => _appPath;
         public virtual IReadOnlyCollection<string> Tags => _tags;
         public virtual MediaType MediaType => _mediaType;
 
-        private GalleryItem(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-                Id = Guid.NewGuid().ToString();
-            else
-                Id = id;
-        }
+        private GalleryItem()
+        { }
 
-        internal static GalleryItem Create(string id, int indexGlobal, MediaType mediaType)
+        internal static GalleryItem Create(string id, string appPath, int? indexGlobal, MediaType mediaType)
         {
-            var item = new GalleryItem(id)
+            var item = new GalleryItem()
             {
+                Id = id,
                 _indexGlobal = indexGlobal,
                 _mediaType = mediaType,
+                _appPath = appPath
             };
 
             return item;

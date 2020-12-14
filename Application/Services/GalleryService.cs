@@ -1,13 +1,9 @@
-﻿using Application.Enums;
-using Application.Galleries;
+﻿using Application.Galleries;
 using Application.Services.Interfaces;
 using AutoMapper;
-using DomainModel.Aggregates.Gallery;
 using DomainModel.Aggregates.Gallery.Interfaces;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -30,26 +26,18 @@ namespace Application.Services
 
         public async Task<GalleryResponse> Get(string galleryUri)
         {
-            var response = await _galleryRepository.GetRandom(galleryUri);
+            var aggregate = await _galleryRepository.GetRandom(galleryUri);
+            var response = _mapper.Map<GalleryResponse>(aggregate);
 
-            return new GalleryResponse
-            {
-                Id = response.Id,
-                ImageCount = response.ImageCount,
-                GalleryItems = response.GalleryItems.Select(s => Map(s))
-            };
+            return response;
         }
 
         public async Task<GalleryResponse> Get(string galleryId, int itemIndexStart, int numberOfItems)
         {
             var aggregate = await _galleryRepository.Get(galleryId, itemIndexStart, numberOfItems);
+            var response = _mapper.Map<GalleryResponse>(aggregate);
 
-            return new GalleryResponse
-            {
-                Id = aggregate.Id,
-                ImageCount = aggregate.ImageCount,
-                GalleryItems = aggregate.GalleryItems.Select(s => Map(s))
-            };
+            return response;
         }
 
         public async Task<IEnumerable<GalleryResponse>> GetAllGalleriesWithoutItems()
@@ -61,31 +49,6 @@ namespace Application.Services
                 list.Add(_mapper.Map<GalleryResponse>(aggregate));
 
             return list;
-        }
-
-        private Galleries.GalleryItem Map(DomainModel.Aggregates.Gallery.GalleryItem item)
-        {
-            return new Galleries.GalleryItem
-            {
-                Id = item.Id,
-                IndexGlobal = item.IndexGlobal,
-                MediaType = Parse(item.MediaType),
-            };
-        }
-
-        private MediaType Parse(DomainModel.Common.Enums.MediaType mediaType)
-        {
-            switch (mediaType)
-            {
-                case DomainModel.Common.Enums.MediaType.Gif:
-                    return MediaType.Gif;
-                case DomainModel.Common.Enums.MediaType.Image:
-                    return MediaType.Image;
-                case DomainModel.Common.Enums.MediaType.Video:
-                    return MediaType.Video;
-                default:
-                    return MediaType.Image;
-            }
         }
     }
 }
