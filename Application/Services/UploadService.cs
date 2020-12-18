@@ -22,16 +22,12 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly List<Picture> _uploadedPictures;
         
-        private int currentGlobalMax;
-
         public UploadService(IFileSystemService fileSystemService, IPictureRepository pictureRepository, IMetadataRepository metadataRepository, IMapper mapper)
         {
             _fileSystemService = fileSystemService;
             _pictureRepository = pictureRepository;
             _mapper = mapper;
             _uploadedPictures = new List<Picture>();
-
-            currentGlobalMax = metadataRepository.GetMaxGlobalIndex();
         }
 
         public UploadResponse GetUploadRequestResult()
@@ -47,7 +43,7 @@ namespace Application.Services
             return _mapper.Map<UploadResponse>(aggregate);
         }
 
-        public async Task UploadFile(string folderName, string fileName, int folderSortOrder, Stream file)
+        public async Task UploadFile(string folderName, string fileName, Stream file)
         {
             var savedFileInfo = await _fileSystemService.CopyFileToDisk(folderName, fileName, file);
             
@@ -58,8 +54,8 @@ namespace Application.Services
                 originalPath: savedFileInfo.FilePathFull,
                 folderName: folderName,
                 folderId: "",   // Handled by the API
-                folderSortOrder: folderSortOrder,   // TODO: Should be handled better
-                globalSortOrder: ++currentGlobalMax,
+                folderSortOrder: 0,   // TODO: Should be handled better
+                globalSortOrder: 0,
                 size: (int) savedFileInfo.FileSize,
                 created: DateTime.UtcNow);
 
@@ -69,7 +65,6 @@ namespace Application.Services
 
         public async Task UploadFiles(string folderName, IEnumerable<IFormFile> folderFiles)
         {
-            int folderSortOrder = 1;
             foreach (var file in folderFiles)
             {
                 var picture = Picture.Create(
@@ -79,7 +74,7 @@ namespace Application.Services
                     originalPath: $"/uploads/{file.FileName}",
                     folderName: folderName,
                     folderId: "",   // Handled by the API
-                    folderSortOrder: folderSortOrder++,
+                    folderSortOrder: 0,
                     globalSortOrder: 0, // Handled by the API
                     size: (int) file.Length,
                     created: DateTime.UtcNow);
