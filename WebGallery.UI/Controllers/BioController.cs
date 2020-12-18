@@ -54,6 +54,21 @@ namespace WebGallery.UI.Controllers
             return View(vm);
         }
 
+        [HttpGet("id/{id}")]
+        public async Task<IActionResult> Index(string id)
+        {
+            var picture = await _pictureService.Get(id);
+            var tags = await _tagService.GetAll();
+
+            var vm = new BioViewModel
+            {
+                AllTags = tags.Select(s => s.TagName).ToList(),
+                BioPictureViewModel = _mapper.Map<BioPictureViewModel>(picture)
+            };
+
+            return View(vm);
+        }
+
         [HttpGet("switch/{id}")]
         public async Task<IActionResult> Switch(int id)
         {

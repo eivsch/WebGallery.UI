@@ -36,9 +36,23 @@ namespace Infrastructure.Pictures
             throw new NotImplementedException();
         }
 
-        public Task<Picture> FindById(string id)
+        public async Task<Picture> FindById(string id)
         {
-            throw new NotImplementedException();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures/sha/{id}");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
+
+                return Map(data);
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
         }
 
         public async Task<Picture> FindById(int id)
@@ -72,31 +86,6 @@ namespace Infrastructure.Pictures
                 var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
 
                 return Map(data);
-            }
-            else
-            {
-                throw new Exception($"The API returned a {response.StatusCode} status code.");
-            }
-        }
-
-        public async Task<IEnumerable<Picture>> GetPictures(string galleryId, int offset = 0)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures?galleryId={galleryId}&offset={offset}");
-            
-            var response = await _client.SendAsync(request);
-         
-            if (response.IsSuccessStatusCode)
-            {
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                var data = await JsonSerializer.DeserializeAsync<IEnumerable<PictureDTO>>(responseStream);
-
-                List<Picture> list = new List<Picture>();
-                foreach (var p in data)
-                {
-                    list.Add(Map(p));
-                }
-
-                return list;
             }
             else
             {
