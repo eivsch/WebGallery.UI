@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Application.Tags;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Models;
 using WebGallery.UI.ViewModels.Bio;
@@ -13,11 +14,13 @@ namespace WebGallery.UI.Controllers
     {
         private readonly IPictureService _pictureService;
         private readonly ITagService _tagService;
+        private readonly IMapper _mapper;
 
-        public BioController(IPictureService pictureService, ITagService tagService)
+        public BioController(IPictureService pictureService, ITagService tagService, IMapper mapper)
         {
             _pictureService = pictureService;
             _tagService = tagService;
+            _mapper = mapper;
         }
 
         public async Task<IActionResult> Index()
@@ -30,13 +33,7 @@ namespace WebGallery.UI.Controllers
             var vm = new BioViewModel
             {
                 AllTags = tags.Select(s => s.TagName).ToList(),
-                BioPictureViewModel = new BioPictureViewModel
-                {
-                    PictureId = picture.Id,
-                    AppPath = picture.AppPath,
-                    GlobalSortOrder = picture.GlobalSortOrder,
-                    Tags = picture.Tags.ToList()
-                }
+                BioPictureViewModel = _mapper.Map<BioPictureViewModel>(picture)
             };
 
             return View(vm);
@@ -51,13 +48,7 @@ namespace WebGallery.UI.Controllers
             var vm = new BioViewModel
             {
                 AllTags = tags.Select(s => s.TagName).ToList(),
-                BioPictureViewModel = new BioPictureViewModel
-                {
-                    PictureId = picture.Id,
-                    AppPath = picture.AppPath,
-                    GlobalSortOrder = picture.GlobalSortOrder,
-                    Tags = picture.Tags.ToList()
-                }
+                BioPictureViewModel = _mapper.Map<BioPictureViewModel>(picture)
             };
 
             return View(vm);
@@ -68,13 +59,7 @@ namespace WebGallery.UI.Controllers
         {
             var picture = await _pictureService.Get(id);
 
-            var vm = new BioPictureViewModel
-            {
-                PictureId = picture.Id,
-                AppPath = picture.AppPath,
-                GlobalSortOrder = picture.GlobalSortOrder,
-                Tags = picture.Tags.ToList()
-            };
+            var vm = _mapper.Map<BioPictureViewModel>(picture);
 
             return PartialView("_Picture", vm);
         }
