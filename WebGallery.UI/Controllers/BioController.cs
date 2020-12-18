@@ -33,6 +33,7 @@ namespace WebGallery.UI.Controllers
                 BioPictureViewModel = new BioPictureViewModel
                 {
                     PictureId = picture.Id,
+                    AppPath = picture.AppPath,
                     GlobalSortOrder = picture.GlobalSortOrder,
                     Tags = picture.Tags.ToList()
                 }
@@ -53,6 +54,7 @@ namespace WebGallery.UI.Controllers
                 BioPictureViewModel = new BioPictureViewModel
                 {
                     PictureId = picture.Id,
+                    AppPath = picture.AppPath,
                     GlobalSortOrder = picture.GlobalSortOrder,
                     Tags = picture.Tags.ToList()
                 }
@@ -69,6 +71,7 @@ namespace WebGallery.UI.Controllers
             var vm = new BioPictureViewModel
             {
                 PictureId = picture.Id,
+                AppPath = picture.AppPath,
                 GlobalSortOrder = picture.GlobalSortOrder,
                 Tags = picture.Tags.ToList()
             };
