@@ -5,7 +5,7 @@
 @inject IConfiguration Configuration
 
 @{
-    string fileServerUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
+    string fileServerUrl = $"/files";
 }
 
 <main class="main-content">
@@ -20,7 +20,7 @@
             {
                 int offset = album.CoverImageIndex - 1;   // Index starts from 1
                 string popUpDelayAtr = album.PopUpDelay == 0 ? "" : $"data-aos-delay={album.PopUpDelay}";
-                string coverImageUri = $"{fileServerUrl}/sha/{album.CoverImageId}";
+                string coverImageUri = $"{fileServerUrl}/{album.CoverImageAppPath}";
 
                 <div class="col-6 col-md-6 col-lg-@album.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
                     <a href="/Single/@(album.GalleryId + "?offset=" + offset)" class="d-block photo-item">

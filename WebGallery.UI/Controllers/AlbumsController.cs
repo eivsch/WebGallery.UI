@@ -34,6 +34,7 @@ namespace WebGallery.UI.Controllers
                 var picture = await _pictureService.Get(albumVm.GalleryId, albumVm.CoverImageIndex);
                 albumVm.CoverImageMediaType = picture.MediaType;
                 albumVm.CoverImageId = picture.Id;
+                albumVm.CoverImageAppPath = picture.AppPath;
             }
 
             return View(allAlbumsVm);

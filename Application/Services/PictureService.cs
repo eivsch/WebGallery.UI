@@ -1,11 +1,8 @@
 ﻿using Application.Pictures;
 using Application.Services.Interfaces;
 using AutoMapper;
-using DomainModel.Aggregates.Picture;
 using DomainModel.Aggregates.Picture.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -21,6 +18,13 @@ namespace Application.Services
             _mapper = mapper;
         }
 
+        public async Task<PictureResponse> Get(string id)
+        {
+            var aggregate = await _pictureRepository.FindById(id);
+
+            return _mapper.Map<PictureResponse>(aggregate);        
+        }
+
         public async Task<PictureResponse> Get(int index)
         {
             var aggregate = await _pictureRepository.FindById(index);
@@ -33,19 +37,6 @@ namespace Application.Services
             var aggregate = await _pictureRepository.GetPicture(galleryId, index);
 
             return _mapper.Map<PictureResponse>(aggregate);
-        }
-
-        public async Task<IEnumerable<PictureResponse>> GetPictures(string galleryId, int offset = 0)
-        {
-            var pictures = await _pictureRepository.GetPictures(galleryId, offset);
-
-            var list = new List<PictureResponse>();
-            foreach (var aggregate in pictures)
-            {
-                list.Add(_mapper.Map<PictureResponse>(aggregate));
-            }
-
-            return list;
         }
     }
 }

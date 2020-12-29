@@ -4,10 +4,10 @@
 
 @inject IConfiguration Configuration
 @{
-    string imageUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images/{Model.GlobalSortOrder}";
+    string imageUrl = $"/files/{Model.AppPath}";
 }
 
-<div id="image-id-placeholder" style="display:none">@Model.PictureId</div>
+<div id="image-id-placeholder" style="display:none">@Model.Id</div>
 
 <figure class="bio-figure" data-aos="fade-in">
     <a href="@imageUrl" data-fancybox data-type="image">

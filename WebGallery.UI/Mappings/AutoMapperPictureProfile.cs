@@ -6,7 +6,11 @@ namespace WebGallery.UI.Mappings
     {
         public AutoMapperPictureProfile()
         {
+            // Domain -> Application
             CreateMap<DomainModel.Aggregates.Picture.Picture, Application.Pictures.PictureResponse>();
+
+            // Application -> UI
+            CreateMap<Application.Pictures.PictureResponse, UI.ViewModels.Bio.BioPictureViewModel>();
         }
     }
 }

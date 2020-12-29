@@ -6,7 +6,7 @@
 @inject IConfiguration Configuration
 
 @{
-    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
+    string fileServerUrl = $"/files";
 }
 
 <main class="main-content">
@@ -21,7 +21,7 @@
         <div class="row align-items-stretch">
             @foreach (var item in Model.Images)
             {
-                string itemUrl = $"{baseUrl}/sha/{item.Id}";
+                string itemUrl = $"{fileServerUrl}/{item.AppPath}";
                 string popUpDelayAtr = item.PopUpDelay == 0 ? "" : $"data-aos-delay={item.PopUpDelay}";
 
                 if (item.MediaType == MediaType.Video)
@@ -31,7 +31,7 @@
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="video"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/@item.IndexGlobal'>@item.Id</a></div>">
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
                             <video class="img-fluid" autoplay loop muted>
                                 <source src="@itemUrl" type="video/mp4" />
                             </video>
@@ -45,7 +45,7 @@
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="image"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/@item.IndexGlobal'>@item.Id</a></div>">
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
 
                             <img src="@itemUrl" alt="Image" class="img-fluid">
                             <div class="photo-text-more">

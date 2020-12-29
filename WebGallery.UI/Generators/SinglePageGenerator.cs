@@ -29,6 +29,7 @@ namespace WebGallery.UI.Generators
                 var vm = new SingleGalleryImageViewModel
                 {
                     Id = galleryItem.Id,
+                    AppPath = galleryItem.AppPath,
                     GalleryIndex = galleryItem.IndexGlobal ?? -1,
                     IndexGlobal = galleryItem.IndexGlobal ?? -1,
                     LargeScreenSize = size,

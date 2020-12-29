@@ -72,7 +72,6 @@ namespace WebGallery.UI.Controllers
             );
 
             string albumName = "";
-            int fileCounter = 0;
 
             var reader = new MultipartReader(boundary, Request.Body);
             var section = await reader.ReadNextSectionAsync();
@@ -100,7 +99,6 @@ namespace WebGallery.UI.Controllers
                     }
                     else if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
-                        fileCounter++;
                         var fileName = contentDisposition.FileNameStar.ToString();
                         if (string.IsNullOrEmpty(fileName))
                         {
@@ -112,7 +110,7 @@ namespace WebGallery.UI.Controllers
 
                         using (var fileStream = section.Body)
                         {
-                            await _uploadService.UploadFile(albumName, fileName, fileCounter, fileStream);
+                            await _uploadService.UploadFile(albumName, fileName, fileStream);
                         }
                     }
                 }

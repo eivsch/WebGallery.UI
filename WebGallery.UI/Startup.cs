@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace WebGallery.UI
@@ -73,6 +74,11 @@ namespace WebGallery.UI
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Configuration.GetConnectionString("FileServerRoot")),
+                RequestPath = "/files"
+            });
 
             app.UseRouting();
 
