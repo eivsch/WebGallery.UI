@@ -29,7 +29,7 @@ namespace DomainModel.Aggregates.Upload
             };
         }
 
-        public void AddUploadedFile(string fileName, string uploadDestinationPath, long fileSizeInBytes, int globalIndex)
+        public void AddUploadedFile(string fileName, string uploadDestinationPath, long fileSizeInBytes)
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentNullException(nameof(fileName));
@@ -38,7 +38,7 @@ namespace DomainModel.Aggregates.Upload
             if (fileSizeInBytes < 1)
                 throw new ArgumentException("A file must be bigger than 0 bytes");
 
-            var uploadFile = UploadFile.Create(fileName, uploadDestinationPath, fileSizeInBytes, globalIndex);
+            var uploadFile = UploadFile.Create(fileName, uploadDestinationPath, fileSizeInBytes);
             
             _uploadedFiles.Add(uploadFile);
         }

@@ -38,7 +38,7 @@ namespace Application.Services
             var aggregate = Upload.Create(_uploadedPictures.First().FolderName);
 
             foreach (var uploadedPicture in _uploadedPictures)
-                aggregate.AddUploadedFile(uploadedPicture.Name, uploadedPicture.OriginalPath, uploadedPicture.Size, uploadedPicture.GlobalSortOrder);
+                aggregate.AddUploadedFile(uploadedPicture.Name, uploadedPicture.OriginalPath, uploadedPicture.Size);
 
             return _mapper.Map<UploadResponse>(aggregate);
         }
@@ -48,14 +48,10 @@ namespace Application.Services
             var savedFileInfo = await _fileSystemService.CopyFileToDisk(folderName, fileName, file);
             
             var picture = Picture.Create(
-                id: "placeholder",  // Handled by the API
                 name: fileName,
                 appPath: Path.Combine(folderName, fileName),
                 originalPath: savedFileInfo.FilePathFull,
                 folderName: folderName,
-                folderId: "",   // Handled by the API
-                folderSortOrder: 0,   // TODO: Should be handled better
-                globalSortOrder: 0,
                 size: (int) savedFileInfo.FileSize,
                 created: DateTime.UtcNow);
 
@@ -68,14 +64,10 @@ namespace Application.Services
             foreach (var file in folderFiles)
             {
                 var picture = Picture.Create(
-                    id: "placeholder",  // Handled by the API
                     name: file.FileName,
                     appPath: Path.Combine(folderName, file.FileName),
                     originalPath: $"/uploads/{file.FileName}",
                     folderName: folderName,
-                    folderId: "",   // Handled by the API
-                    folderSortOrder: 0,
-                    globalSortOrder: 0, // Handled by the API
                     size: (int) file.Length,
                     created: DateTime.UtcNow);
 

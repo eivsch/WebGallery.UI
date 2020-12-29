@@ -14,8 +14,8 @@ namespace DomainModel.Aggregates.Picture
         private string _name;
         private string _folderName;
         private string _folderId;
-        private int _globalSortOrder;
-        private int _folderSortOrder;
+        private int? _globalSortOrder;
+        private int? _folderSortOrder;
         // TODO: use long type
         private int _size;
         private DateTime _createTimestamp;
@@ -27,8 +27,8 @@ namespace DomainModel.Aggregates.Picture
         public virtual string OriginalPath => _originalPath;
         public virtual string FolderName => _folderName;
         public virtual string FolderId => _folderId;
-        public virtual int GlobalSortOrder => _globalSortOrder;
-        public virtual int FolderSortOrder => _folderSortOrder;
+        public virtual int? GlobalSortOrder => _globalSortOrder;
+        public virtual int? FolderSortOrder => _folderSortOrder;
         public virtual int Size => _size;
         public virtual DateTime CreateTimestamp => _createTimestamp;
         public virtual IReadOnlyCollection<string> Tags => _tags;
@@ -55,6 +55,10 @@ namespace DomainModel.Aggregates.Picture
             if (string.IsNullOrWhiteSpace(id) && globalSortOrder < 1)
                 throw new ArgumentException("Either a valid id or global index must be provided");
 
+            // TODO: add validation for illegal characters
+            if (string.IsNullOrWhiteSpace(appPath))
+                throw new ArgumentNullException(nameof(appPath));
+
             var mediaType = ParseMediaType(name);
 
             return new Picture(id) 
@@ -66,6 +70,37 @@ namespace DomainModel.Aggregates.Picture
                 _folderId = folderId,
                 _folderSortOrder = folderSortOrder,
                 _globalSortOrder = globalSortOrder,
+                _size = size,
+                _createTimestamp = created,
+                _mediaType = mediaType
+            };
+        }
+
+        public static Picture Create(
+            string name,
+            string appPath,
+            string originalPath,
+            string folderName,
+            int size,
+            DateTime created
+        )
+        {
+            // TODO: add validation for illegal characters etc.
+            if (string.IsNullOrWhiteSpace(appPath))
+                throw new ArgumentNullException(nameof(appPath));
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
+            if (string.IsNullOrWhiteSpace(folderName))
+                throw new ArgumentNullException(nameof(folderName));
+
+            var mediaType = ParseMediaType(name);
+
+            return new Picture("")
+            {
+                _name = name,
+                _appPath = appPath,
+                _originalPath = originalPath,
+                _folderName = folderName,
                 _size = size,
                 _createTimestamp = created,
                 _mediaType = mediaType
