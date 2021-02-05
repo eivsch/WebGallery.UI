@@ -24,12 +24,10 @@ namespace WebGallery.UI.Generators
                 }
 
                 var size = rowFormat[indexer];
-                var coverImageIndex = RandomHelpers.Rng.Next(1, gallery.ImageCount);
                 var vm = new AlbumViewModel
                 {
                     GalleryId = gallery.Id,
                     ItemCount = gallery.ImageCount,
-                    CoverImageIndex = coverImageIndex,
                     LargeScreenSize = size,
                     PopUpDelay = 100 * indexer,
                     Title = gallery.GalleryName

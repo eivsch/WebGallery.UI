@@ -6,6 +6,6 @@ namespace DomainModel.Aggregates.Picture.Interfaces
 {
     public interface IPictureRepository : IRepository<Picture>
     {
-        Task<Picture> GetPicture(string galleryId, int index = 0);
+        Task<Picture> GetRandomPicture(string galleryId);
     }
 }

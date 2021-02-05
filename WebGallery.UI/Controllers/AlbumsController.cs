@@ -31,10 +31,11 @@ namespace WebGallery.UI.Controllers
             
             foreach (var albumVm in allAlbumsVm.Albums)
             {
-                var picture = await _pictureService.Get(albumVm.GalleryId, albumVm.CoverImageIndex);
+                var picture = await _pictureService.GetRandom(albumVm.GalleryId);
                 albumVm.CoverImageMediaType = picture.MediaType;
                 albumVm.CoverImageId = picture.Id;
                 albumVm.CoverImageAppPath = picture.AppPath;
+                albumVm.CoverImageIndex = picture.FolderSortOrder;
             }
 
             return View(allAlbumsVm);

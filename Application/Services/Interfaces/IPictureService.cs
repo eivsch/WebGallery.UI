@@ -10,6 +10,6 @@ namespace Application.Services.Interfaces
     {
         Task<PictureResponse> Get(string id);
         Task<PictureResponse> Get(int index);
-        Task<PictureResponse> Get(string galleryId, int index);
+        Task<PictureResponse> GetRandom(string albumId);
     }
 }

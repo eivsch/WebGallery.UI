@@ -74,25 +74,6 @@ namespace Infrastructure.Pictures
             }
         }
 
-        public async Task<Picture> GetPicture(string galleryId, int index = 0)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures/{galleryId}/{index}");
-
-            var response = await _client.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
-
-                return Map(data);
-            }
-            else
-            {
-                throw new Exception($"The API returned a {response.StatusCode} status code.");
-            }
-        }
-
         private Picture Map(PictureDTO dto)
         {
             var aggregate = Picture.Create(
@@ -127,6 +108,25 @@ namespace Infrastructure.Pictures
             var jsonContent = new JsonContent(aggregate, jsonOpts);
 
             var response = await _client.PostAsync("pictures", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<PictureDTO>(responseStream);
+
+                return Map(data);
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
+
+        public async Task<Picture> GetRandomPicture(string galleryId)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures/random?albumId={galleryId}");
+
+            var response = await _client.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {

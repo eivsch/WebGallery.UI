@@ -32,9 +32,9 @@ namespace Application.Services
             return _mapper.Map<PictureResponse>(aggregate);
         }
 
-        public async Task<PictureResponse> Get(string galleryId, int index)
+        public async Task<PictureResponse> GetRandom(string albumId)
         {
-            var aggregate = await _pictureRepository.GetPicture(galleryId, index);
+            var aggregate = await _pictureRepository.GetRandomPicture(albumId);
 
             return _mapper.Map<PictureResponse>(aggregate);
         }
