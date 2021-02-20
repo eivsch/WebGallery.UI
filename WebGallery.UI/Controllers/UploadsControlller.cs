@@ -27,10 +27,10 @@ namespace WebGallery.UI.Controllers
                 MultipartBodyLengthLimit = MaxFileSize,
             };
         
-        private readonly IUploadService _uploadService;
+        private readonly IFileService _uploadService;
         private readonly IMapper _mapper;
 
-        public UploadsController(IUploadService uploadService, IMapper mapper)
+        public UploadsController(IFileService uploadService, IMapper mapper)
         {
             _uploadService = uploadService;
             _mapper = mapper;

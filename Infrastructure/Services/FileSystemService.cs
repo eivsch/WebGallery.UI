@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -51,6 +52,50 @@ namespace Infrastructure.Services
                         FileSize = stream.Length
                     };
             }
-        }   
+        }
+
+        public async Task<byte[]> DownloadImageFromFileServer(string imageIdentifier)
+        {
+            using (var httpClientHandler = new HttpClientHandler())
+            {
+                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+                
+                using (var client = new HttpClient(httpClientHandler))
+                {
+                    var response = await client.GetAsync("https://localhost:5001/files?file=pic1.jpg");
+                    
+                    return await response.Content.ReadAsByteArrayAsync();
+                }
+            }
+        }
+
+        // TODO: Handle HttpClient and cert validation in a better way
+        public async Task<SavedFileInfo> UploadFileToFileServer(string albumname, string filename, Stream file)
+        {
+            using (var httpClientHandler = new HttpClientHandler())
+            {
+                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+                
+                using (var client = new HttpClient(httpClientHandler))
+                using (var content = new MultipartFormDataContent())
+                {
+                    content.Add(new StreamContent(file), albumname, filename);
+
+                    // TODO: Handle file server connection string
+                    using (var message = await client.PostAsync("https://localhost:5001/files", content))
+                    {
+                        var input = await message.Content.ReadAsStringAsync();
+
+                        // TODO:
+                        return new SavedFileInfo
+                        {
+                            FileName = "test",
+                            FilePathFull = "test",
+                            FileSize = 1
+                        };
+                    }
+                }
+            }
+        }
     }
 }

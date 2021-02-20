@@ -44,7 +44,7 @@ namespace WebGallery.UI
             services.AddTransient<IPictureService, PictureService>();
             services.AddTransient<ITagService, TagService>();
             services.AddTransient<IMetadataService, MetadataService>();
-            services.AddScoped<IUploadService, UploadService>();
+            services.AddScoped<IFileService, FileService>();
 
             services.AddTransient<IGalleryRepository, GalleryRepository>();
             services.AddTransient<IPictureRepository, PictureRepository>();
