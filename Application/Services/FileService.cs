@@ -12,17 +12,18 @@ using Application.Uploads;
 using AutoMapper;
 using System.Linq;
 using DomainModel.Aggregates.Metadata.Interfaces;
+using Application.Enums;
 
 namespace Application.Services
 {
-    public class UploadService : IUploadService
+    public class FileService : IFileService
     {
         private readonly IFileSystemService _fileSystemService;
         private readonly IPictureRepository _pictureRepository;
         private readonly IMapper _mapper;
         private readonly List<Picture> _uploadedPictures;
         
-        public UploadService(IFileSystemService fileSystemService, IPictureRepository pictureRepository, IMetadataRepository metadataRepository, IMapper mapper)
+        public FileService(IFileSystemService fileSystemService, IPictureRepository pictureRepository, IMetadataRepository metadataRepository, IMapper mapper)
         {
             _fileSystemService = fileSystemService;
             _pictureRepository = pictureRepository;
@@ -45,11 +46,11 @@ namespace Application.Services
 
         public async Task UploadFile(string folderName, string fileName, Stream file)
         {
-            var savedFileInfo = await _fileSystemService.CopyFileToDisk(folderName, fileName, file);
+            var savedFileInfo = await _fileSystemService.UploadFileToFileServer(folderName, fileName, file);
             
             var picture = Picture.Create(
-                name: fileName,
-                appPath: Path.Combine(folderName, fileName),
+                name: savedFileInfo.FileName,
+                appPath: Path.Combine(folderName, savedFileInfo.FileName),
                 originalPath: savedFileInfo.FilePathFull,
                 folderName: folderName,
                 size: (int) savedFileInfo.FileSize,
@@ -75,5 +76,18 @@ namespace Application.Services
                 await _pictureRepository.Save(picture);
             }
         }
+
+        public async Task<byte[]> DownloadFile(string identifier, MediaType mediaType)
+        {
+            switch (mediaType){
+                case MediaType.Gif:
+                case MediaType.Image:
+                    return await _fileSystemService.DownloadImageFromFileServer(identifier);
+                case MediaType.Video:
+                    return await _fileSystemService.DownloadVideoFromFileServer(identifier);
+                default:
+                    return await _fileSystemService.DownloadImageFromFileServer(identifier);
+            }
+        }  
     }
 }

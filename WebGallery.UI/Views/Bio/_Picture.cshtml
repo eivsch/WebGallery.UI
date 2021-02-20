@@ -4,14 +4,16 @@
 
 @inject IConfiguration Configuration
 @{
-    string imageUrl = $"/files/{Model.AppPath}";
+    var appPathBytes = System.Text.Encoding.UTF8.GetBytes(Model.AppPath);
+    string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
+    string imageUri = $"/files/image/{appPathBase64}";
 }
 
 <div id="image-id-placeholder" style="display:none">@Model.Id</div>
 
 <figure class="bio-figure" data-aos="fade-in">
-    <a href="@imageUrl" data-fancybox data-type="image">
-        <img src="@imageUrl" alt="Image" class="bio-img">
+    <a href="@imageUri" data-fancybox data-type="image">
+        <img src="@imageUri" alt="Image" class="bio-img">
     </a>
 </figure>
 

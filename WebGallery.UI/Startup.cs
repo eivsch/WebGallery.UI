@@ -44,7 +44,7 @@ namespace WebGallery.UI
             services.AddTransient<IPictureService, PictureService>();
             services.AddTransient<ITagService, TagService>();
             services.AddTransient<IMetadataService, MetadataService>();
-            services.AddScoped<IUploadService, UploadService>();
+            services.AddScoped<IFileService, FileService>();
 
             services.AddTransient<IGalleryRepository, GalleryRepository>();
             services.AddTransient<IPictureRepository, PictureRepository>();
@@ -74,11 +74,11 @@ namespace WebGallery.UI
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
-            app.UseFileServer(new FileServerOptions
-            {
-                FileProvider = new PhysicalFileProvider(Configuration.GetConnectionString("FileServerRoot")),
-                RequestPath = "/files"
-            });
+            // app.UseFileServer(new FileServerOptions
+            // {
+            //     FileProvider = new PhysicalFileProvider(Configuration.GetConnectionString("FileServerRoot")),
+            //     RequestPath = "/files"
+            // });
 
             app.UseRouting();
 

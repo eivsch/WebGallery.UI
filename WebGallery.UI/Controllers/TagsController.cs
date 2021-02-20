@@ -35,7 +35,7 @@ namespace WebGallery.UI.Controllers
                 var vm = new TagsViewModel
                 {
                     CategoryName = tag.TagName,
-                    CoverImageId = coverImage.Id,
+                    CoverImageAppPath = coverImage.AppPath,
                     CoverImageMediaType = coverImage.MediaType,
                     ItemCount = tag.ItemCount,
                 };

@@ -27,12 +27,12 @@ namespace WebGallery.UI.Controllers
                 MultipartBodyLengthLimit = MaxFileSize,
             };
         
-        private readonly IUploadService _uploadService;
+        private readonly IFileService _fileService;
         private readonly IMapper _mapper;
 
-        public UploadsController(IUploadService uploadService, IMapper mapper)
+        public UploadsController(IFileService uploadService, IMapper mapper)
         {
-            _uploadService = uploadService;
+            _fileService = uploadService;
             _mapper = mapper;
         }
 
@@ -52,7 +52,7 @@ namespace WebGallery.UI.Controllers
                 throw new Exception("Invalid ModelState");
             }
 
-            await _uploadService.UploadFiles(vm.AlbumName, vm.FilesToUpload);
+            await _fileService.UploadFiles(vm.AlbumName, vm.FilesToUpload);
             
             return View("success");
         }
@@ -110,7 +110,7 @@ namespace WebGallery.UI.Controllers
 
                         using (var fileStream = section.Body)
                         {
-                            await _uploadService.UploadFile(albumName, fileName, fileStream);
+                            await _fileService.UploadFile(albumName, fileName, fileStream);
                         }
                     }
                 }
@@ -118,7 +118,7 @@ namespace WebGallery.UI.Controllers
                 section = await reader.ReadNextSectionAsync();
             }
 
-            var uploadResult = _uploadService.GetUploadRequestResult();
+            var uploadResult = _fileService.GetUploadRequestResult();
             var vm = _mapper.Map<UploadResultViewModel>(uploadResult);
 
             return View("success", vm);
