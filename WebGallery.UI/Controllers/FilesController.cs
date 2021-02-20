@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.Enums;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -26,10 +27,20 @@ namespace WebGallery.UI.Controllers
             _fileService = fileService;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet("image/{base64EncodedAppPath}")]
+        public async Task<IActionResult> ShowImage(string base64EncodedAppPath)
         {
-            var file = await _fileService.DownloadFile("todo");
+            var file = await _fileService.DownloadFile(base64EncodedAppPath, MediaType.Image);
             FileContentResult result = new FileContentResult(file, "image/jpeg"); 
+
+            return result;
+        }
+
+        [HttpGet("video/{base64EncodedAppPath}")]
+        public async Task<IActionResult> ShowVideo(string base64EncodedAppPath)
+        {
+            var file = await _fileService.DownloadFile(base64EncodedAppPath, MediaType.Video);
+            FileContentResult result = new FileContentResult(file, "video/mp4"); 
 
             return result;
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +13,7 @@ namespace Infrastructure.Services
     {
 
         private readonly string _rootPath;
+        private readonly string _fileServerUrl;
         private List<SavedFileInfo> _savedFiles;
         
         public FileSystemService(IConfiguration configuration)
@@ -19,6 +21,8 @@ namespace Infrastructure.Services
             _rootPath = configuration.GetValue("ConnectionStrings:FileServerRoot", "");
             if (string.IsNullOrEmpty(_rootPath))
                 throw new Exception("Missing file system root path. Check configuration.");
+
+            _fileServerUrl = configuration.GetConnectionString("FileServerUrl");
         }
 
         public async Task CopyFileToDisk(string folderName, IFormFile folderFile)
@@ -62,7 +66,22 @@ namespace Infrastructure.Services
                 
                 using (var client = new HttpClient(httpClientHandler))
                 {
-                    var response = await client.GetAsync("https://localhost:5001/files?file=pic1.jpg");
+                    var response = await client.GetAsync($"{_fileServerUrl}/files/image?file={imageIdentifier}");
+                    
+                    return await response.Content.ReadAsByteArrayAsync();
+                }
+            }
+        }
+
+        public async Task<byte[]> DownloadVideoFromFileServer(string videoIdentifier)
+        {
+            using (var httpClientHandler = new HttpClientHandler())
+            {
+                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+                
+                using (var client = new HttpClient(httpClientHandler))
+                {
+                    var response = await client.GetAsync($"{_fileServerUrl}/files/video?file={videoIdentifier}");
                     
                     return await response.Content.ReadAsByteArrayAsync();
                 }
@@ -81,19 +100,21 @@ namespace Infrastructure.Services
                 {
                     content.Add(new StreamContent(file), albumname, filename);
 
-                    // TODO: Handle file server connection string
-                    using (var message = await client.PostAsync("https://localhost:5001/files", content))
+                    var response = await client.PostAsync($"{_fileServerUrl}/files", content);
+                    if (response.IsSuccessStatusCode)
                     {
-                        var input = await message.Content.ReadAsStringAsync();
+                        using var responseStream = await response.Content.ReadAsStreamAsync();
+                        var responseData = await JsonSerializer.DeserializeAsync<SavedFileInfo>(responseStream);
 
-                        // TODO:
                         return new SavedFileInfo
                         {
-                            FileName = "test",
-                            FilePathFull = "test",
-                            FileSize = 1
+                            FileName = responseData.FileName,
+                            FilePathFull = responseData.FilePathFull,
+                            FileSize = responseData.FileSize
                         };
                     }
+                    
+                    throw new Exception($"The API returned a {response.StatusCode} status code.");
                 }
             }
         }

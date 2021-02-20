@@ -12,6 +12,7 @@ using Application.Uploads;
 using AutoMapper;
 using System.Linq;
 using DomainModel.Aggregates.Metadata.Interfaces;
+using Application.Enums;
 
 namespace Application.Services
 {
@@ -48,8 +49,8 @@ namespace Application.Services
             var savedFileInfo = await _fileSystemService.UploadFileToFileServer(folderName, fileName, file);
             
             var picture = Picture.Create(
-                name: fileName,
-                appPath: Path.Combine(folderName, fileName),
+                name: savedFileInfo.FileName,
+                appPath: Path.Combine(folderName, savedFileInfo.FileName),
                 originalPath: savedFileInfo.FilePathFull,
                 folderName: folderName,
                 size: (int) savedFileInfo.FileSize,
@@ -76,9 +77,17 @@ namespace Application.Services
             }
         }
 
-        public async Task<byte[]> DownloadFile(string identifier)
+        public async Task<byte[]> DownloadFile(string identifier, MediaType mediaType)
         {
-            return await _fileSystemService.DownloadImageFromFileServer(identifier);
+            switch (mediaType){
+                case MediaType.Gif:
+                case MediaType.Image:
+                    return await _fileSystemService.DownloadImageFromFileServer(identifier);
+                case MediaType.Video:
+                    return await _fileSystemService.DownloadVideoFromFileServer(identifier);
+                default:
+                    return await _fileSystemService.DownloadImageFromFileServer(identifier);
+            }
         }  
     }
 }

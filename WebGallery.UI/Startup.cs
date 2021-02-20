@@ -74,11 +74,11 @@ namespace WebGallery.UI
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
-            app.UseFileServer(new FileServerOptions
-            {
-                FileProvider = new PhysicalFileProvider(Configuration.GetConnectionString("FileServerRoot")),
-                RequestPath = "/files"
-            });
+            // app.UseFileServer(new FileServerOptions
+            // {
+            //     FileProvider = new PhysicalFileProvider(Configuration.GetConnectionString("FileServerRoot")),
+            //     RequestPath = "/files"
+            // });
 
             app.UseRouting();
 

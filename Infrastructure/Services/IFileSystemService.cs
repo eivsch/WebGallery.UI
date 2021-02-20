@@ -12,5 +12,6 @@ namespace Infrastructure.Services
         Task<SavedFileInfo> CopyFileToDisk(string folderName, string fileName, Stream file);
         Task<SavedFileInfo> UploadFileToFileServer(string albumname, string filename, Stream file);
         Task<byte[]> DownloadImageFromFileServer(string imageIdentifier);
+        Task<byte[]> DownloadVideoFromFileServer(string videoIdentifier);
     }
 }
