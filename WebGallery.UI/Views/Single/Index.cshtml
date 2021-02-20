@@ -3,12 +3,6 @@
 
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
-@inject IConfiguration Configuration
-
-@{
-    string fileServerUrl = $"/files";
-}
-
 <main class="main-content">
     <div class="container-fluid photos">
 
@@ -21,33 +15,37 @@
         <div class="row align-items-stretch">
             @foreach (var item in Model.Images)
             {
-                string itemUrl = $"{fileServerUrl}/{item.AppPath}";
+                var appPathBytes = System.Text.Encoding.UTF8.GetBytes(item.AppPath);
+                string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
+
                 string popUpDelayAtr = item.PopUpDelay == 0 ? "" : $"data-aos-delay={item.PopUpDelay}";
 
                 if (item.MediaType == MediaType.Video)
                 {
+                    string videoUri = $"/files/video/{appPathBase64}";
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                        <a href="@itemUrl"
+                        <a href="@videoUri"
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="video"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
                             <video class="img-fluid" autoplay loop muted>
-                                <source src="@itemUrl" type="video/mp4" />
+                                <source src="@videoUri" type="video/mp4" />
                             </video>
                         </a>
                     </div>
                 }
                 else
                 {
+                    string imageUri = $"/files/image/{appPathBase64}";
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                        <a href="@itemUrl"
+                        <a href="@imageUri"
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="image"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
 
-                            <img src="@itemUrl" alt="Image" class="img-fluid">
+                            <img src="@imageUri" alt="Image" class="img-fluid">
                             <div class="photo-text-more">
                                 <span class="icon icon-search"></span>
                             </div>
