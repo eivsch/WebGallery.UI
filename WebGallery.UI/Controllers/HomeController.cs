@@ -1,11 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.ViewModels;
 
 namespace WebGallery.UI.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly IMetadataService _statisticsService;
@@ -17,6 +19,9 @@ namespace WebGallery.UI.Controllers
 
         public IActionResult Index()
         {
+            //if (!HttpContext.User.Identity.IsAuthenticated)
+            //    return RedirectToAction("Index", "Login");
+
             ViewBag.Current = "Home";
 
             return View();

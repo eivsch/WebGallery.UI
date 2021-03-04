@@ -11,6 +11,7 @@ using Infrastructure.Galleries;
 using Infrastructure.Metadata;
 using Infrastructure.Pictures;
 using Infrastructure.Tags;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -32,6 +33,18 @@ namespace WebGallery.UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+            
+            // Authentication
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                options.Cookie.Name = "WebGallery.Cookies";
+                options.LoginPath = "/Login";
+                options.AccessDeniedPath = "/accessdenied";
+                options.ExpireTimeSpan = TimeSpan.FromSeconds(3600);
+                options.SlidingExpiration = true;
+            });
+
             services.AddControllersWithViews();
 
             services.AddHttpClient<ApiClient>(c => 
@@ -73,6 +86,7 @@ namespace WebGallery.UI
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
             app.UseStaticFiles();
             // app.UseFileServer(new FileServerOptions
             // {
@@ -81,7 +95,7 @@ namespace WebGallery.UI
             // });
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
