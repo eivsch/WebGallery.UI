@@ -3,12 +3,14 @@ using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Application.Tags;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Models;
 using WebGallery.UI.ViewModels.Bio;
 
 namespace WebGallery.UI.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     public class BioController : Controller
     {

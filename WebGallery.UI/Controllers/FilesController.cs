@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Enums;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ using WebGallery.UI.ViewModels.Uploads;
 
 namespace WebGallery.UI.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     public class FilesController : Controller
     {

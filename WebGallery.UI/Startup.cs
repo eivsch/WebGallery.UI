@@ -11,6 +11,7 @@ using Infrastructure.Galleries;
 using Infrastructure.Metadata;
 using Infrastructure.Pictures;
 using Infrastructure.Tags;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,9 +23,13 @@ namespace WebGallery.UI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IWebHostEnvironment HostingEnvironment { get; }
+        private bool IsDevelopmentEnv => HostingEnvironment?.EnvironmentName?.ToUpper() == "DEVELOPMENT";
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            HostingEnvironment = env;
         }
 
         public IConfiguration Configuration { get; }
@@ -32,6 +37,18 @@ namespace WebGallery.UI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+            
+            // Authentication
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                options.Cookie.Name = "WebGallery.Cookies";
+                options.LoginPath = "/Login";
+                options.AccessDeniedPath = "/accessdenied";
+                options.ExpireTimeSpan = TimeSpan.FromSeconds(3600);
+                options.SlidingExpiration = true;
+            });
+
             services.AddControllersWithViews();
 
             services.AddHttpClient<ApiClient>(c => 
@@ -60,6 +77,9 @@ namespace WebGallery.UI
                 mc.AddProfile(new Mappings.AutoMapperUploadProfile());
             });
             services.AddSingleton(mapperConfig.CreateMapper());
+
+            if (!IsDevelopmentEnv)
+                services.AddApplicationInsightsTelemetry();     // Should automatically get the key from configuration
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,6 +93,7 @@ namespace WebGallery.UI
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
             app.UseStaticFiles();
             // app.UseFileServer(new FileServerOptions
             // {
@@ -81,7 +102,7 @@ namespace WebGallery.UI
             // });
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

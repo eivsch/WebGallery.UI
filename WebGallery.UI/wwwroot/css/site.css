@@ -139,6 +139,12 @@ th, td {
     padding: 15px;
   }
 
+.login-form {
+    width: 25%;
+    margin: auto;
+    margin-top: 150px;
+}
+
 /* Shutter overrides */
 .main-content .photos .photo-item video {
     width: 100%;

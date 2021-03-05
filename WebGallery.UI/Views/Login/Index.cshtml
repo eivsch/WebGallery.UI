@@ -1,0 +1,24 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model WebGallery.UI.ViewModels.Login.LoginFormViewModel;
+
+<div class="login-form">
+    <form asp-controller="Login" asp-action="Login">
+
+        <div asp-validation-summary="All" class="form-messages"></div>
+
+        <div class="form-group">
+            <label asp-for="Username"></label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="form--error"></span>
+            @*<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>*@
+        </div>
+        <div class="form-group">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="form--error"></span>
+        </div>
+        <button>Login</button>
+
+    </form>
+</div>

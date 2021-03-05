@@ -1,11 +1,13 @@
 ﻿using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Application.Tags;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Generators;
 
 namespace WebGallery.UI.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     public class SingleController : Controller
     {

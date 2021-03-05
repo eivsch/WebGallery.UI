@@ -43,21 +43,25 @@
 
             <div class="d-inline-block d-xl-none ml-md-0 ml-auto py-3" style="position: relative; top: 3px;"><a href="#" class="site-menu-toggle js-menu-toggle text-white"><span class="icon-menu h3"></span></a></div>
 
-            <div class="main-menu">
-                <ul class="js-clone-nav">
-                    <li class="@(currentView.ToLower() == "home" ? "active": "")"><a href="/Home">Home</a></li>
-                    <li class="@(currentView.ToLower() == "albums" ? "active": "")"><a href="/Albums">Albums</a></li>
-                    <li class="@(currentView.ToLower() == "random" || currentView.ToLower() == "single" ? "active": "")"><a href="/Single">Single</a></li>
-                    <li class="@(currentView.ToLower() == "bio" ? "active": "")"><a href="/Bio">Bio</a></li>
-                    <li class="@(currentView.ToLower() == "tags" ? "active": "")"><a href="/Tags">Tags</a></li>
-                    <li class="@(currentView.ToLower() == "customizer" ? "active": "")"><a href="/Customizer">Customizer</a></li>
-                </ul>
-                <ul class="social js-clone-nav">
-                    <li><a href="#"><span class="icon-facebook"></span></a></li>
-                    <li><a href="#"><span class="icon-twitter"></span></a></li>
-                    <li><a href="#"><span class="icon-instagram"></span></a></li>
-                </ul>
-            </div>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="main-menu">
+                    <ul class="js-clone-nav">
+                        <li class="@(currentView.ToLower() == "home" ? "active": "")"><a href="/Home">Home</a></li>
+                        <li class="@(currentView.ToLower() == "albums" ? "active": "")"><a href="/Albums">Albums</a></li>
+                        <li class="@(currentView.ToLower() == "random" || currentView.ToLower() == "single" ? "active": "")"><a href="/Single">Single</a></li>
+                        <li class="@(currentView.ToLower() == "bio" ? "active": "")"><a href="/Bio">Bio</a></li>
+                        <li class="@(currentView.ToLower() == "tags" ? "active": "")"><a href="/Tags">Tags</a></li>
+                        <li class="@(currentView.ToLower() == "customizer" ? "active": "")"><a href="/Customizer">Customizer</a></li>
+                        <li><a href="/Logout">Logout</a></li>
+                    </ul>
+                    <ul class="social js-clone-nav">
+                        <li><a href="#"><span class="icon-facebook"></span></a></li>
+                        <li><a href="#"><span class="icon-twitter"></span></a></li>
+                        <li><a href="#"><span class="icon-instagram"></span></a></li>
+                    </ul>
+                </div>
+            }
         </header>
 
         @RenderBody()
