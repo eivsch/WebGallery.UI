@@ -73,6 +73,7 @@ namespace WebGallery.UI
                 mc.AddProfile(new Mappings.AutoMapperUploadProfile());
             });
             services.AddSingleton(mapperConfig.CreateMapper());
+            services.AddApplicationInsightsTelemetry();     // Should automatically get the key from configuration
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
