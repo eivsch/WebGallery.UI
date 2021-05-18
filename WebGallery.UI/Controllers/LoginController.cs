@@ -39,7 +39,7 @@ namespace WebGallery.UI.Controllers
                 if (vm.Username == _configuration.GetValue("Auth:Username", "") 
                     && vm.Password == _configuration.GetValue("Auth:Password", ""))
                 {
-                    await _loginManager.LoginAsync("1");
+                    await _loginManager.LoginAsync(vm.Username);
             
                     return RedirectToAction("Index", "Home");
                 }

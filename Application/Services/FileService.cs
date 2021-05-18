@@ -1,5 +1,4 @@
 using Application.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -31,19 +30,6 @@ namespace Application.Services
             _uploadedPictures = new List<Picture>();
         }
 
-        public UploadResponse GetUploadRequestResult()
-        {
-            if (_uploadedPictures.Count == 0)
-                throw new Exception("0 files have been uploaded.");
-
-            var aggregate = Upload.Create(_uploadedPictures.First().FolderName);
-
-            foreach (var uploadedPicture in _uploadedPictures)
-                aggregate.AddUploadedFile(uploadedPicture.Name, uploadedPicture.OriginalPath, uploadedPicture.Size);
-
-            return _mapper.Map<UploadResponse>(aggregate);
-        }
-
         public async Task UploadFile(string folderName, string fileName, Stream file)
         {
             var savedFileInfo = await _fileSystemService.UploadFileToFileServer(folderName, fileName, file);
@@ -60,23 +46,6 @@ namespace Application.Services
             _uploadedPictures.Add(picture);
         }
 
-        public async Task UploadFiles(string folderName, IEnumerable<IFormFile> folderFiles)
-        {
-            foreach (var file in folderFiles)
-            {
-                var picture = Picture.Create(
-                    name: file.FileName,
-                    appPath: Path.Combine(folderName, file.FileName),
-                    originalPath: $"/uploads/{file.FileName}",
-                    folderName: folderName,
-                    size: (int) file.Length,
-                    created: DateTime.UtcNow);
-
-                await _fileSystemService.CopyFileToDisk(folderName, file);
-                await _pictureRepository.Save(picture);
-            }
-        }
-
         public async Task<byte[]> DownloadFile(string identifier, MediaType mediaType)
         {
             switch (mediaType){
@@ -88,6 +57,19 @@ namespace Application.Services
                 default:
                     return await _fileSystemService.DownloadImageFromFileServer(identifier);
             }
-        }  
+        }
+
+        public UploadResponse GetUploadRequestResult()
+        {
+            if (_uploadedPictures.Count == 0)
+                throw new Exception("0 files have been uploaded.");
+
+            var aggregate = Upload.Create(_uploadedPictures.First().FolderName);
+
+            foreach (var uploadedPicture in _uploadedPictures)
+                aggregate.AddUploadedFile(uploadedPicture.Name, uploadedPicture.OriginalPath, uploadedPicture.Size);
+
+            return _mapper.Map<UploadResponse>(aggregate);
+        }
     }
 }

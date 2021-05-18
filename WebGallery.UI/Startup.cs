@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using Application.Services;
 using Application.Services.Interfaces;
 using AutoMapper;
@@ -55,6 +56,10 @@ namespace WebGallery.UI
             {
                 c.BaseAddress = new Uri(Configuration.GetValue("ConnectionStrings:ApiEndpoint", ""));
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+            services.AddHttpClient<FileServerClient>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {   
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
             });
             
             services.AddTransient<IGalleryService, GalleryService>();

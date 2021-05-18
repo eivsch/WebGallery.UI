@@ -45,20 +45,6 @@ namespace WebGallery.UI.Controllers
             return View(vm);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post(UploadsViewModel vm)
-        {
-            if (!ModelState.IsValid)
-            {
-                // TODO
-                throw new Exception("Invalid ModelState");
-            }
-
-            await _fileService.UploadFiles(vm.AlbumName, vm.FilesToUpload);
-            
-            return View("success");
-        }
-
         [DisableFormValueModelBinding]
         [RequestSizeLimit(MaxFileSize)]
         [RequestFormLimits(MultipartBodyLengthLimit = MaxFileSize)]

@@ -2,12 +2,14 @@
 using DomainModel.Aggregates.Gallery.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text.Json;
 using Infrastructure.Galleries.DTO;
 using Infrastructure.Common;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using System.Linq;
 
 namespace Infrastructure.Galleries
 {
@@ -15,10 +17,21 @@ namespace Infrastructure.Galleries
     {
         HttpClient _client;
 
-        public GalleryRepository(ApiClient client)
+        public GalleryRepository(ApiClient client, IHttpContextAccessor httpContext)
         {
             _client = client?.Client ?? throw new ArgumentNullException(nameof(client));
+
+            //AddUserContextToApiClient();
+
+            void AddUserContextToApiClient()
+            {
+                var user = httpContext.HttpContext.User;
+                var userId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid).Value;
+                if (!string.IsNullOrWhiteSpace(userId))
+                    _client.DefaultRequestHeaders.Add("Gallery-User", userId);
+            }
         }
+
 
         public Task<Gallery> Find(Gallery aggregate)
         {
