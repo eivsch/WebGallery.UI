@@ -16,7 +16,7 @@ namespace Infrastructure.Pictures
     {
         HttpClient _client;
 
-        public PictureRepository(ApiClient client)
+        public PictureRepository(WebGalleryApiClient client)
         {
             _client = client?.Client ?? throw new ArgumentNullException(nameof(client));
         }

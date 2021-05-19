@@ -15,7 +15,7 @@ namespace Infrastructure.Metadata
     {
         HttpClient _client;
 
-        public MetadataRepository(ApiClient client)
+        public MetadataRepository(WebGalleryApiClient client)
         {
             _client = client.Client;
         }

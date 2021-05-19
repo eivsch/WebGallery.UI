@@ -17,7 +17,7 @@ namespace Infrastructure.Galleries
     {
         HttpClient _client;
 
-        public GalleryRepository(ApiClient client, IHttpContextAccessor httpContext)
+        public GalleryRepository(WebGalleryApiClient client, IHttpContextAccessor httpContext)
         {
             _client = client?.Client ?? throw new ArgumentNullException(nameof(client));
 

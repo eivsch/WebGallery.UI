@@ -52,12 +52,12 @@ namespace WebGallery.UI
 
             services.AddControllersWithViews();
 
-            services.AddHttpClient<ApiClient>(c => 
+            services.AddHttpClient<WebGalleryApiClient>(c => 
             {
                 c.BaseAddress = new Uri(Configuration.GetValue("ConnectionStrings:ApiEndpoint", ""));
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
             });
-            services.AddHttpClient<FileServerClient>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            services.AddHttpClient<WebGalleryFileServerClient>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {   
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
             });

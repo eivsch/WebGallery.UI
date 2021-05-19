@@ -15,7 +15,7 @@ namespace Infrastructure.Services
         private readonly string _rootPath;
         private readonly string _fileServerUrl;
         
-        public FileSystemService(IConfiguration configuration, FileServerClient fileServerClient)
+        public FileSystemService(IConfiguration configuration, WebGalleryFileServerClient fileServerClient)
         {
             _rootPath = configuration.GetValue("ConnectionStrings:FileServerRoot", "");
             if (string.IsNullOrEmpty(_rootPath))

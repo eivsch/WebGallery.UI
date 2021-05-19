@@ -17,7 +17,7 @@ namespace Infrastructure.Tags
     {
         HttpClient _client;
 
-        public TagRepository(ApiClient client)
+        public TagRepository(WebGalleryApiClient client)
         {
             _client = client.Client;
         }
