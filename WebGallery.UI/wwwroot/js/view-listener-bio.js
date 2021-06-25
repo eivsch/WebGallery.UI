@@ -30,7 +30,7 @@ function addTag(tag) {
     if (!exists) {
         $.post(
             // Url
-            "/bio",
+            "/bio/tag",
             // Data
             {
                 tag: tag,
@@ -45,6 +45,23 @@ function addTag(tag) {
     }
 
     return false;
+}
+
+function deleteTag(tag, picId) {
+    $.post(
+        // Url
+        "/bio/tag/delete",
+        // Data
+        {
+            tag: tag,
+            pictureId: picId
+        }
+        // OnSuccess
+        , function () {
+            var el = $("[data-tag-name='" + tag + "']");
+            el.addClass("tag-list__strikethrough");
+            setTimeout(() => { el.remove() }, 2000);
+    });
 }
 
 $('#myInput').keyup(function (e) {
