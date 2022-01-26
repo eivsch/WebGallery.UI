@@ -81,8 +81,8 @@ namespace WebGallery.UI.Controllers
             return PartialView("_Picture", vm);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddTag(AddTagAjaxRequest data)
+        [HttpPost("tag")]
+        public async Task<IActionResult> AddTag(TagAjaxRequest data)
         {
             var request = new TagRequest
             {
@@ -91,6 +91,14 @@ namespace WebGallery.UI.Controllers
             };
 
             await _tagService.Add(request);
+
+            return Ok();
+        }
+
+        [HttpPost("tag/delete")]
+        public async Task<IActionResult> DeleteTag(TagAjaxRequest data)
+        {
+            await _tagService.DeleteTag(data.PictureId, data.Tag);
 
             return Ok();
         }

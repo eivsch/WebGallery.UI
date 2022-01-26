@@ -8,5 +8,6 @@ namespace Application.Services.Interfaces
     {
         public Task Add(TagRequest request);
         public Task<IEnumerable<TagResponse>> GetAll();
+        Task DeleteTag(string pictureId, string tagName);
     }
 }

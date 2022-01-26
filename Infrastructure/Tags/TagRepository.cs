@@ -22,6 +22,16 @@ namespace Infrastructure.Tags
             _client = client.Client;
         }
 
+        public async Task DeleteTag(string pictureId, string tagName)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"tags/{pictureId}/{tagName}");
+
+            var response = await _client.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+
         public Task<Tag> Find(Tag aggregate)
         {
             throw new NotImplementedException();

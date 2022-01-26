@@ -1,6 +1,6 @@
 ﻿namespace WebGallery.UI.Models
 {
-    public class AddTagAjaxRequest
+    public class TagAjaxRequest
     {
         public string PictureId { get; set; }
         public string Tag { get; set; }

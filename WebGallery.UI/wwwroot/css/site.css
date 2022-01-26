@@ -24,6 +24,25 @@
     margin-right: 3%;
 }
 
+.tag-list-item i {
+    cursor: pointer;  
+}
+
+.tag-list__strikethrough {
+    text-decoration: line-through;
+    animation-name: strikethrough;
+    animation-duration: 1.5s;
+}
+@keyframes strikethrough {
+    from {
+        text-decoration: none;
+    }
+
+    to {
+        text-decoration: line-through;
+    }
+}
+
 .bio-nav-container {
     margin-top: 15px;
 }
