@@ -3,6 +3,7 @@ using Application.Tags;
 using AutoMapper;
 using DomainModel.Aggregates.Tags;
 using DomainModel.Aggregates.Tags.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +27,16 @@ namespace Application.Services
             tag.AddMediaItem(request.PictureId, globalIndex: request.PictureIndex);
 
             await _tagRepository.Save(tag);
+        }
+
+        public async Task DeleteTag(string pictureId, string tagName)
+        {
+            if (string.IsNullOrWhiteSpace(pictureId))
+                throw new ArgumentNullException($"Parameter 'pictureId' is empty.");
+            if (string.IsNullOrWhiteSpace(tagName))
+                throw new ArgumentNullException($"Parameter 'tagName' is empty.");
+
+            await _tagRepository.DeleteTag(pictureId, tagName);
         }
 
         public async Task<IEnumerable<TagResponse>> GetAll()

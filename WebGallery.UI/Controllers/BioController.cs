@@ -98,6 +98,7 @@ namespace WebGallery.UI.Controllers
         [HttpPost("tag/delete")]
         public async Task<IActionResult> DeleteTag(TagAjaxRequest data)
         {
+            await _tagService.DeleteTag(data.PictureId, data.Tag);
 
             return Ok();
         }

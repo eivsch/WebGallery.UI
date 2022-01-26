@@ -7,5 +7,6 @@ namespace DomainModel.Aggregates.Tags.Interfaces
     public interface ITagRepository : IRepository<Tag>
     {
         Task<IEnumerable<Tag>> GetAll();
+        Task DeleteTag(string pictureId, string tagName);
     }
 }
