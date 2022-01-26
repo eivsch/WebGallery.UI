@@ -3,8 +3,14 @@
 @inject IConfiguration Configuration
 
 @{
-    string baseUrl = $"{Configuration.GetValue("ConnectionStrings:ApiEndpoint", "")}/images";
-    string bannerImageUrl = $"{baseUrl}/{Configuration.GetValue("HomeBannerImageIndex", "")}";
+    string bannerImageUri = "";
+    string appPath = Configuration.GetValue("HomeBannerImageAppPath", "");
+    if (!string.IsNullOrWhiteSpace(appPath))
+    {
+        var appPathBytes = System.Text.Encoding.UTF8.GetBytes(appPath);
+        string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
+        bannerImageUri = $"/files/image/{appPathBase64}";
+    }
 }
 
 <main class="main-landing">
@@ -21,7 +27,7 @@
     <div class="landing-section">
         <div class="row">
             <div class="col-md-2">
-                <img src="@bannerImageUrl" alt="Banner Image" class="landing-img-banner">
+                <img src="@bannerImageUri" alt="Banner Image" class="landing-img-banner">
             </div>
             <div class="col-md-9">
                 <div class="landing-section--stats text-white">
