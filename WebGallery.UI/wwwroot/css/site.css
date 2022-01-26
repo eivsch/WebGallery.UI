@@ -24,6 +24,10 @@
     margin-right: 3%;
 }
 
+.tag-list-item i {
+    cursor: pointer;  
+}
+
 .tag-list__strikethrough {
     text-decoration: line-through;
     animation-name: strikethrough;
