@@ -51,6 +51,13 @@ namespace WebGallery.UI.Controllers
             return PartialView("_StatsInfoCard", vm);
         }
 
+        [HttpGet("home/search")]
+        public async Task<IActionResult> Search(string query)
+        {
+            return null;
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

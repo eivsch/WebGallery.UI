@@ -1,4 +1,5 @@
 ﻿using Application.Galleries;
+using Application.Pictures;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,5 +11,6 @@ namespace Application.Services.Interfaces
         Task<string> GenerateGalleryUri(int imageCount, string tags = "", string tagFilterMode = "", string mediaFilterMode = "");
         Task<GalleryResponse> Get(string galleryUri);
         Task<IEnumerable<GalleryResponse>> GetAllGalleriesWithoutItems();
+        Task<GalleryResponse> ConvertFromPictureList(List<PictureResponse> pictures);
     }
 }
