@@ -12,5 +12,6 @@ namespace Application.Services.Interfaces
         Task<PictureResponse> Get(int index);
         Task<PictureResponse> GetRandom(string albumId);
         Task<List<PictureResponse>> GetMany(string query);
+        Task Delete(string id);
     }
 }

@@ -109,7 +109,10 @@ namespace WebGallery.UI.Controllers
         [HttpGet("picture/delete/{id}")]
         public async Task<IActionResult> DeletePicture(string id)
         {
-            //await _tagService.DeleteTag(data.PictureId, data.Tag);
+            if (string.IsNullOrWhiteSpace(id))
+                return NotFound();
+
+            await _pictureService.Delete(id);
 
             return View("Deleted", new BioPictureViewModel { GlobalSortOrder = 0});
         }

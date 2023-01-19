@@ -19,6 +19,14 @@ namespace Application.Services
             _mapper = mapper;
         }
 
+        public async Task Delete(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return;
+
+            await _pictureRepository.Remove(id);
+        }
+
         public async Task<PictureResponse> Get(string id)
         {
             var aggregate = await _pictureRepository.FindById(id);

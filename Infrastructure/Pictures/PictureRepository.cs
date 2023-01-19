@@ -161,5 +161,15 @@ namespace Infrastructure.Pictures
                 throw new Exception($"The API returned a {response.StatusCode} status code.");
             }
         }
+
+        public async Task Remove(string id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"pictures/sha/{id}");
+            var response = await _client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
     }
 }

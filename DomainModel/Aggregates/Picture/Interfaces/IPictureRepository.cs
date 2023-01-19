@@ -8,5 +8,6 @@ namespace DomainModel.Aggregates.Picture.Interfaces
     {
         Task<Picture> GetRandomPicture(string galleryId);
         Task<List<Picture>> SearchPictures(string query);
+        Task Remove(string id);
     }
 }
