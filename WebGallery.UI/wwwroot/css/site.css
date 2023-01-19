@@ -7,6 +7,10 @@
     max-width: 850px;
 }
 
+.bio-content__deletebtn {
+    margin-top: 25px;
+}
+
 .bio-figure {
     height: 600px;
 }

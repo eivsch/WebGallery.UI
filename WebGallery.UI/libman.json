@@ -3,10 +3,6 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "jqueryui@1.12.1",
-      "destination": "wwwroot/lib/jqueryui/"
-    },
-    {
       "library": "magnific-popup.js@1.1.0",
       "destination": "wwwroot/lib/magnific-popup.js/"
     },
@@ -23,7 +19,7 @@
       "destination": "wwwroot/lib/jquery-ajax-unobtrusive/"
     },
     {
-      "library": "noUiSlider@14.6.0",
+      "library": "noUiSlider@15.6.1",
       "destination": "wwwroot/lib/nouislider/"
     },
     {

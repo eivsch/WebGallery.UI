@@ -74,6 +74,9 @@ namespace WebGallery.UI.Controllers
         [HttpGet("switch/{id}")]
         public async Task<IActionResult> Switch(int id)
         {
+            if (id < 1)
+                id = -1;    // random
+
             var picture = await _pictureService.Get(id);
 
             var vm = _mapper.Map<BioPictureViewModel>(picture);
@@ -101,6 +104,14 @@ namespace WebGallery.UI.Controllers
             await _tagService.DeleteTag(data.PictureId, data.Tag);
 
             return Ok();
+        }
+
+        [HttpGet("picture/delete/{id}")]
+        public async Task<IActionResult> DeletePicture(string id)
+        {
+            //await _tagService.DeleteTag(data.PictureId, data.Tag);
+
+            return View("Deleted", new BioPictureViewModel { GlobalSortOrder = 0});
         }
     }
 }

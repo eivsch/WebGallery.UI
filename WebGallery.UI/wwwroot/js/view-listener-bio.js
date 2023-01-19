@@ -122,3 +122,13 @@ function focusInput() {
 function bioSwitch(globalSortOrder) {
     window.history.pushState("", "", '/Bio/' + globalSortOrder);
 }
+
+//function deletePic(pictureId) {
+//    $.get(
+//        // Url
+//        "/bio/picture/delete/"+ pictureId
+//        // OnSuccess
+//        , function () {
+//            console.log('deleted');
+//        });
+//}
