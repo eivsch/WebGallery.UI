@@ -1,0 +1,10 @@
+﻿@model WebGallery.UI.ViewModels.Bio.BioPictureViewModel
+
+@{
+    string returnUrl = Model.GlobalSortOrder > 0 ? $"/bio/{Model.GlobalSortOrder}" : "/bio";
+}
+
+<p>Deleted!</p>
+<span class="btn btn-dark btn-sm">
+    <a href=@returnUrl>Return</a>
+</span>

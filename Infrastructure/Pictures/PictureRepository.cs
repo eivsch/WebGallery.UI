@@ -140,5 +140,36 @@ namespace Infrastructure.Pictures
                 throw new Exception($"The API returned a {response.StatusCode} status code.");
             }
         }
+
+        public async Task<List<Picture>> SearchPictures(string query)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"pictures/search?query={query}");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<IEnumerable<PictureDTO>>(responseStream);
+
+                var result = data.Select(s => Map(s));
+
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
+
+        public async Task Remove(string id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"pictures/sha/{id}");
+            var response = await _client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"The API returned a {response.StatusCode} status code.");
+            }
+        }
     }
 }

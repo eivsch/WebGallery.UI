@@ -3,6 +3,7 @@ using Application.Services.Interfaces;
 using AutoMapper;
 using DomainModel.Aggregates.Picture.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -18,6 +19,14 @@ namespace Application.Services
             _mapper = mapper;
         }
 
+        public async Task Delete(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return;
+
+            await _pictureRepository.Remove(id);
+        }
+
         public async Task<PictureResponse> Get(string id)
         {
             var aggregate = await _pictureRepository.FindById(id);
@@ -30,6 +39,13 @@ namespace Application.Services
             var aggregate = await _pictureRepository.FindById(index);
 
             return _mapper.Map<PictureResponse>(aggregate);
+        }
+
+        public async Task<List<PictureResponse>> GetMany(string searchQuery)
+        {
+            var aggregates = await _pictureRepository.SearchPictures(searchQuery);
+
+            return _mapper.Map<List<PictureResponse>>(aggregates);
         }
 
         public async Task<PictureResponse> GetRandom(string albumId)

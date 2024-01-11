@@ -39,5 +39,8 @@ namespace Infrastructure.Pictures.DTO
 
         [JsonPropertyName("tags")]
         public IEnumerable<string> Tags { get; set; }
+
+        [JsonPropertyName("detectedObjects")]
+        public IEnumerable<string> DetectedObjects { get; set; }
     }
 }
