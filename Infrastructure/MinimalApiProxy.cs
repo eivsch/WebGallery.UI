@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -26,10 +27,31 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
     }
+
+    public async Task<List<AlbumMetaDTO>> GetAlbums(string username)
+    {
+        HttpResponseMessage response =  await _client.GetAsync($"/users/{username}/albums");
+        if (response.IsSuccessStatusCode)
+        {
+            string responseStr = await response.Content.ReadAsStringAsync();
+            List<AlbumMetaDTO> data = JsonSerializer.Deserialize<List<AlbumMetaDTO>>(responseStr, _jsonOpts);
+
+            return data;
+        }
+        else
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
 public class CredentialsDTO
 {
     public string Username {get;set;}
     public string Password {get;set;}
+}
+
+public class AlbumMetaDTO
+{
+    public string AlbumName {get;set;}
 }

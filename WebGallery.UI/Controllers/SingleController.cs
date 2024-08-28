@@ -1,7 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Application.Services.Interfaces;
 using Application.Tags;
+using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Generators;
 
@@ -13,18 +18,26 @@ namespace WebGallery.UI.Controllers
     {
         private readonly IGalleryService _galleryService;
         private readonly ITagService _tagService;
+        readonly MinimalApiProxy _minimalApiProxy;
+        readonly string _username;
 
-        public SingleController(IGalleryService galleryService, ITagService tagService)
+        public SingleController(IGalleryService galleryService, ITagService tagService, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
             _galleryService = galleryService;
             _tagService = tagService;
+            _minimalApiProxy = minimalApiProxy;
+            Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
+            _username = claim.Value;
         }
 
         public async Task<IActionResult> Index()
         {
             ViewBag.Current = "Random";
 
-            var uri = await _galleryService.GenerateGalleryUri(24);
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            
+
+
             var gallery = await _galleryService.Get(uri);
 
             var vm = SinglePageGenerator.Generate(gallery);
