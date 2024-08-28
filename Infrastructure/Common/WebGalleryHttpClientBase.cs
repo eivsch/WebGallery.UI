@@ -14,10 +14,10 @@ namespace Infrastructure.Common
 
             void SetUserIdHeader()
             {
-                var user = httpContext.HttpContext.User;
-                var userId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid).Value;
-                if (!string.IsNullOrWhiteSpace(userId))
-                    client.DefaultRequestHeaders.Add("Gallery-User", userId);
+                Claim userId = httpContext.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.Sid);
+                if (userId == null) return;
+                if (!string.IsNullOrWhiteSpace(userId.Value))
+                    client.DefaultRequestHeaders.Add("Gallery-User", userId.Value);
             }
         }
 
