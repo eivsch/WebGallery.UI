@@ -40,8 +40,9 @@ namespace WebGallery.UI.Controllers
             if (ModelState.IsValid)
             {
                 CredentialsDTO creds = await _apiProxy.GetCredentials(vm.Username);
+                string hashedPw = GetHash(vm.Password);
                 if (vm.Username == creds.Username 
-                    && vm.Password == creds.Password)
+                    && hashedPw == creds.Password)
                 {
                     await _loginManager.LoginAsync(vm.Username);
             
@@ -54,6 +55,35 @@ namespace WebGallery.UI.Controllers
             }
 
             return View("Index", vm);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("/register")]
+        public IActionResult Register()
+        {
+            return View("Register");
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("/register")]
+        public async Task<IActionResult> Register(RegisterUserViewModel vm)
+        {
+            if (ModelState.IsValid)
+            {
+                string hashedPw = GetHash(vm.Password);
+                await _apiProxy.PostUser(vm.Username, hashedPw);
+
+                return View("Register_Success", vm);
+            }
+            else
+            {
+                ModelState.AddModelError("invalidCredentials", "Invalid registration info.");
+                
+                return View("Register", vm);
+            }
         }
 
         [Authorize]
@@ -81,14 +111,6 @@ namespace WebGallery.UI.Controllers
             }
 
             return sBuilder.ToString();
-        }
-
-        static bool VerifyHash(HashAlgorithm hashAlgorithm, string input, string hash)
-        {
-            byte[] data = SHA256.HashData(Encoding.UTF8.GetBytes(input));
-            string hashOfInput = GetHash(input);
-
-            return hashOfInput == hash;
         }
     }
 }

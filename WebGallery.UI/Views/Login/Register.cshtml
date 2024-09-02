@@ -1,9 +1,10 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-@model WebGallery.UI.ViewModels.Login.LoginFormViewModel;
+@model WebGallery.UI.ViewModels.Login.RegisterUserViewModel;
 
 <div class="login-form">
-    <form asp-controller="Login" asp-action="Login">
+    <h3>Register new user</h3>
+    <form asp-controller="Login" asp-action="Register">
 
         <div asp-validation-summary="All" class="form-messages"></div>
 
@@ -18,8 +19,7 @@
             <input asp-for="Password" class="form-control" />
             <span asp-validation-for="Password" class="form--error"></span>
         </div>
-        <button>Login</button>
+        <button>Register</button>
 
     </form>
-    <a href="/register">Register new user</a>
 </div>

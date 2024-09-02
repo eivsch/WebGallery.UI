@@ -28,6 +28,22 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
+    public async Task PostUser(string username, string password)
+    {
+        var body = new
+        {
+            username = username,
+            password = password
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PostAsync("users", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
     public async Task<List<AlbumMetaDTO>> GetAlbums(string username)
     {
         HttpResponseMessage response =  await _client.GetAsync($"/users/{username}/albums");

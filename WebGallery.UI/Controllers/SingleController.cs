@@ -30,21 +30,21 @@ namespace WebGallery.UI.Controllers
             _username = claim.Value;
         }
 
-        public async Task<IActionResult> Index()
-        {
-            ViewBag.Current = "Random";
+        //public async Task<IActionResult> Index()
+        //{
+        //    ViewBag.Current = "Random";
 
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+        //    List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
             
 
 
-            var gallery = await _galleryService.Get(uri);
+        //    var gallery = await _galleryService.Get(uri);
 
-            var vm = SinglePageGenerator.Generate(gallery);
-            vm.GalleryTitle = "Randomized";
+        //    var vm = SinglePageGenerator.Generate(gallery);
+        //    vm.GalleryTitle = "Randomized";
 
-            return View("Index", vm);
-        }
+        //    return View("Index", vm);
+        //}
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Index(string id, int offset)
