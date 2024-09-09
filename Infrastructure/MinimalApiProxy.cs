@@ -91,6 +91,22 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
     }
+
+    public async Task<AlbumContentsDTO> GetAlbumContents(string username, string albumName, int from, int to)
+    {
+        HttpResponseMessage response =  await _client.GetAsync($"/users/{username}/albums/{albumName}?from={from}&to={to}");
+        if (response.IsSuccessStatusCode)
+        {
+            string responseStr = await response.Content.ReadAsStringAsync();
+            AlbumContentsDTO data = JsonSerializer.Deserialize<AlbumContentsDTO>(responseStr, _jsonOpts);
+
+            return data;
+        }
+        else
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
 public record CredentialsDTO
@@ -102,4 +118,32 @@ public record CredentialsDTO
 public record AlbumMetaDTO
 {
     public string AlbumName {get;set;}
+    public DateTime Created {get;set;}
+    public List<TagMetaDTO> Tags {get;set;}
+    public int TotalCount{get;set;}
+}
+
+public record TagMetaDTO
+{
+    public string TagName {get;set;}
+    public int Count {get;set;}
+}
+
+public record AlbumContentsDTO
+{
+    public int TotalCount {get;set;}
+    public List<MediaDTO> Items {get;set;}
+}
+
+public record MediaDTO
+{
+    public string Id {get;set;}
+    public  string Name {get;set;}
+    public List<TagDTO> Tags {get;set;}
+}
+
+public record TagDTO
+{
+    public string TagName {get;set;}
+    public DateTimeOffset Created {get;set;}
 }
