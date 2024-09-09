@@ -74,6 +74,7 @@ namespace WebGallery.UI
             services.AddTransient<IMetadataRepository, MetadataRepository>();
             services.AddTransient<Infrastructure.Services.IFileSystemService, Infrastructure.Services.FileSystemService>();
             services.AddTransient<Infrastructure.MinimalApi.MinimalApiProxy>();
+            services.AddTransient<Infrastructure.Common.UsernameResolver>();
 
             var mapperConfig = new MapperConfiguration(mc =>
             {

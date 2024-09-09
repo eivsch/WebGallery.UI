@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Application.Uploads;
+using Infrastructure.Services;
 
 namespace WebGallery.UI.ViewModels.Uploads
 {
@@ -7,6 +8,6 @@ namespace WebGallery.UI.ViewModels.Uploads
     {
         public string UploadAlbumName { get; set; }
         public int UploadFileCount { get; set; }
-        public List<UploadFile> UploadedFiles { get; set;}
+        public List<SavedFileInfo> UploadedFiles { get; set;}
     }
 }

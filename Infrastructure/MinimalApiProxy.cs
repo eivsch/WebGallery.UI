@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Infrastructure.Common;
+using Infrastructure.Services;
 
 namespace Infrastructure.MinimalApi;
 
@@ -59,15 +60,46 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
     }
+
+    public async Task CreateAlbum(string username, string albumName)
+    {
+        var body = new
+        {
+            AlbumName = albumName,
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PostAsync($"users/{username}/albums", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }        
+    }
+
+    public async Task PostMediaItem(string username, string albumName, SavedFileInfo savedFileInfo)
+    {
+        var body = new
+        {
+            Name = savedFileInfo.FileName,
+            Size = savedFileInfo.FileSize
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PostAsync($"users/{username}/albums/{albumName}/media-items", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
-public class CredentialsDTO
+public record CredentialsDTO
 {
     public string Username {get;set;}
     public string Password {get;set;}
 }
 
-public class AlbumMetaDTO
+public record AlbumMetaDTO
 {
     public string AlbumName {get;set;}
 }
