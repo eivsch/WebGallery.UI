@@ -40,16 +40,16 @@ namespace WebGallery.UI.Controllers
             // Get a random picture
             Random rnd = new();
             AlbumMetaDTO album;
-            int mediaIndex;
+            int albumMediaIndex;
             
             List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
             if (albums == null) return null;
             
-            int albumIndex  = rnd.Next(0, albums.Count-1);  // creates a number between 0 and albums.Count
+            int albumIndex  = rnd.Next(0, albums.Count); 
             album = albums[albumIndex];
-            mediaIndex = rnd.Next(0, album.TotalCount-1);
+            albumMediaIndex = rnd.Next(0, album.TotalCount);
 
-            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album.AlbumName, albumIndex, albumIndex+1);
+            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album.AlbumName, albumMediaIndex, 1);
             MediaDTO media = albumContents.Items[0];
 
             // Get all unique tags for user
@@ -65,23 +65,36 @@ namespace WebGallery.UI.Controllers
                     Name = media.Name,
                     AppPath = $"{album.AlbumName}/{media.Name}",
                     Tags = media.Tags.Select(s => s.TagName).ToList(),             
-                    GlobalSortOrder = -1,
+                    AlbumMediaIndex = albumMediaIndex,
+                    Album = album.AlbumName,
                 }
             };
 
             return View(vm);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Index(int id)
+        [HttpGet("{album}/{id}")]
+        public async Task<IActionResult> Index(string album, int id)
         {
-            var picture = await _pictureService.Get(id);
-            var tags = await _tagService.GetAll();
+            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, id, 1);
+            MediaDTO media = albumContents.Items[0];
 
-            var vm = new BioViewModel
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            IEnumerable<TagMetaDTO> tags = albums.SelectMany(s => s.Tags);
+            IEnumerable<string> allTags = tags.Select(s => s.TagName).Distinct();
+
+            BioViewModel vm = new()
             {
-                AllTags = tags.Select(s => s.TagName).ToList(),
-                BioPictureViewModel = _mapper.Map<BioPictureViewModel>(picture)
+                AllTags = allTags.ToList(),
+                BioPictureViewModel = new BioPictureViewModel
+                {
+                    Id = media.Id,
+                    Name = media.Name,
+                    AppPath = $"{album}/{media.Name}",
+                    Tags = media.Tags.Select(s => s.TagName).ToList(),
+                    AlbumMediaIndex = id,
+                    Album = album,
+                }
             };
 
             return View(vm);
@@ -90,6 +103,8 @@ namespace WebGallery.UI.Controllers
         [HttpGet("id/{id}")]
         public async Task<IActionResult> Index(string id)
         {
+            throw new NotImplementedException();
+
             var picture = await _pictureService.Get(id);
             var tags = await _tagService.GetAll();
 
@@ -102,15 +117,21 @@ namespace WebGallery.UI.Controllers
             return View(vm);
         }
 
-        [HttpGet("switch/{id}")]
-        public async Task<IActionResult> Switch(int id)
+        [HttpGet("switch/{album}/{id}")]
+        public async Task<IActionResult> Switch(string album, int id)
         {
-            if (id < 1)
-                id = -1;    // random
+            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, id, 1);
+            MediaDTO media = albumContents.Items[0];
 
-            var picture = await _pictureService.Get(id);
-
-            var vm = _mapper.Map<BioPictureViewModel>(picture);
+            BioPictureViewModel vm = new()
+            {
+                Album = album,
+                AlbumMediaIndex = id,
+                AppPath = $"{album}/{media.Name}",
+                Id = media.Id,
+                Name = media.Name,
+                Tags = media.Tags.Select(s => s.TagName).ToList(),
+            };
 
             return PartialView("_Picture", vm);
         }
@@ -118,13 +139,7 @@ namespace WebGallery.UI.Controllers
         [HttpPost("tag")]
         public async Task<IActionResult> AddTag(TagAjaxRequest data)
         {
-            var request = new TagRequest
-            {
-                PictureId = data.PictureId,
-                TagName = data.Tag
-            };
-
-            await _tagService.Add(request);
+            await _minimalApiProxy.PostTag(_username, data.Album, data.PictureId, data.Tag);
 
             return Ok();
         }
@@ -132,9 +147,10 @@ namespace WebGallery.UI.Controllers
         [HttpPost("tag/delete")]
         public async Task<IActionResult> DeleteTag(TagAjaxRequest data)
         {
-            await _tagService.DeleteTag(data.PictureId, data.Tag);
+            bool success = await _minimalApiProxy.DeleteTag(_username, data.Album, data.PictureId, data.Tag);
 
-            return Ok();
+            if (success) return Ok();
+            else throw new Exception("Deletion failed.");
         }
 
         [HttpGet("picture/delete/{id}")]
@@ -145,7 +161,7 @@ namespace WebGallery.UI.Controllers
 
             await _pictureService.Delete(id);
 
-            return View("Deleted", new BioPictureViewModel { GlobalSortOrder = 0});
+            return View("Deleted", new BioPictureViewModel { AlbumMediaIndex = 0});
         }
     }
 }

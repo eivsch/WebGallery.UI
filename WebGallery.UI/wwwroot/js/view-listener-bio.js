@@ -12,19 +12,11 @@
     return exists;
 }
 
-function formatTag(tag) {
-    if (!tag.startsWith('#')) {
-        tag = '#' + tag;
-    }
-
-    return tag;
-}
-
 function addTag(tag) {
     $('#myInput').val('');
-    tag = formatTag(tag);
     var exists = tagExists(tag);
     var picId = $('#image-id-placeholder').text();
+    var album = $('#album-id-placeholder').text();
 
     // Add
     if (!exists) {
@@ -34,7 +26,8 @@ function addTag(tag) {
             // Data
             {
                 tag: tag,
-                pictureId: picId
+                pictureId: picId,
+                album: album,
             }
             // OnSuccess
             , function () {
@@ -47,14 +40,16 @@ function addTag(tag) {
     return false;
 }
 
-function deleteTag(tag, picId) {
+function deleteTag(tag, picId, album) {
+    tag = tag.replace("#", "");
     $.post(
         // Url
         "/bio/tag/delete",
         // Data
         {
             tag: tag,
-            pictureId: picId
+            pictureId: picId,
+            album: album,
         }
         // OnSuccess
         , function () {
@@ -119,6 +114,6 @@ function focusInput() {
     $('#myInput').focus();
 }
 
-function bioSwitch(globalSortOrder) {
-    window.history.pushState("", "", '/Bio/' + globalSortOrder);
+function bioSwitch(album, sortOrder) {
+    window.history.pushState("", "", '/Bio/' + album + '/' + sortOrder);
 }

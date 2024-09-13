@@ -92,9 +92,9 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<AlbumContentsDTO> GetAlbumContents(string username, string albumName, int from, int to)
+    public async Task<AlbumContentsDTO> GetAlbumContents(string username, string albumName, int from, int numberOfItems)
     {
-        HttpResponseMessage response =  await _client.GetAsync($"/users/{username}/albums/{albumName}?from={from}&to={to}");
+        HttpResponseMessage response =  await _client.GetAsync($"/users/{username}/albums/{albumName}?from={from}&size={numberOfItems}");
         if (response.IsSuccessStatusCode)
         {
             string responseStr = await response.Content.ReadAsStringAsync();
@@ -106,6 +106,28 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         {
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
+    }
+
+    public async Task PostTag(string username, string albumName, string mediaLocator, string tag)
+    {
+        var body = new
+        {
+            TagName = tag,
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PostAsync($"users/{username}/albums/{albumName}/{mediaLocator}/tags", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task<bool> DeleteTag(string username, string albumName, string mediaLocator, string tag)
+    {
+        var response = await _client.DeleteAsync($"users/{username}/albums/{albumName}/{mediaLocator}/tags/{tag}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return true;
+        else return false;
     }
 }
 

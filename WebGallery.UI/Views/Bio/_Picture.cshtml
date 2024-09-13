@@ -10,6 +10,7 @@
 }
 
 <div id="image-id-placeholder" style="display:none">@Model.Id</div>
+<div id="album-id-placeholder" style="display:none">@Model.Album</div>
 
 <figure class="bio-figure" data-aos="fade-in">
     <a href="@imageUri" data-fancybox data-type="image">
@@ -25,17 +26,17 @@
             if (!tag.StartsWith('#'))
                 tagStr = "#" + tag;
 
-            <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id')" class="far fa-minus-square"></i></li>
+            <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id', '@Model.Album')" class="far fa-minus-square"></i></li>
         }
     </ul>
 </div>
 
 <div class="bio-nav-container">
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch(@(Model.GlobalSortOrder - 1))"><<<  </a>
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))"><<<  </a>
     </div>
-    <div class="bio-nav-item" id="bioImgCounter">#@Model.GlobalSortOrder</div>
+    <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - @Model.Album</div>
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch(@(Model.GlobalSortOrder + 1))">  >>></a>
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">  >>></a>
     </div>
 </div>
