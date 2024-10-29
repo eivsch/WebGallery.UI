@@ -4,7 +4,7 @@
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
 @{
-    bool hasPreviousPage = Model.CurrentOffset != 0; 
+    bool hasPreviousPage = Model.CurrentOffset != 0;
     bool hasNextPage = Model.CurrentOffset + Model.CurrentDisplayCount < Model.TotalImageCount;
 }
 
@@ -62,11 +62,16 @@
 
         @if (hasPreviousPage)
         {
-            <p>Previous</p>
+            int nextOffset = Model.CurrentOffset - Model.CurrentDisplayCount;
+            if (nextOffset < 0) nextOffset = 0;
+            string uri = $"/single/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
+            <a href="@uri">Previous</a>
         }
         @if (hasNextPage)
         {
-            <p>Next</p>
+            int nextOffset = Model.CurrentOffset + Model.CurrentDisplayCount;
+            string uri = $"/single/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
+            <a href="@uri">Next</a>
         }
 
         <div class="row justify-content-center">

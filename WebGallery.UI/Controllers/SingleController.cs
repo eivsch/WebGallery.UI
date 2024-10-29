@@ -75,19 +75,20 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Index(string id, int offset)
+        public async Task<IActionResult> Index(string id, int offset = 0, int displayCount = 12)
         {
             ViewBag.Current = "Single";
-            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: 48);
+            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: displayCount);
 
             List<SingleGalleryImageViewModel> items = new();
+            int indexCounter = offset;
             foreach (var media in data.Items)
             {
                 SingleGalleryImageViewModel imageVm = new()
                 {
                     Id = media.Id,
                     AppPath = Path.Combine(id, media.Name),
-                    GalleryIndex = offset++,
+                    GalleryIndex = indexCounter++,
                     IndexGlobal = -1,
                     MediaType = Utils.DetermineMediaType(media.Name),
                 };
@@ -95,10 +96,11 @@ namespace WebGallery.UI.Controllers
             }
 
             var vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.Id = id;
             vm.GalleryTitle = id;
             vm.TotalImageCount = data.TotalCount;
             vm.CurrentOffset = offset;
-            vm.CurrentDisplayCount = 48;
+            vm.CurrentDisplayCount = displayCount;
 
             return View(vm);
         }

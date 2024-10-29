@@ -51,6 +51,12 @@ namespace WebGallery.UI.Controllers
                 case "album":
                     vm = await GetAlbumStats();
                     break;
+                case "tag":
+                    vm = await GetTagStats();
+                    break;
+                case "media":
+                    vm = await GetMediaStats();
+                    break;
                 default:
                     return null;
             }
@@ -84,7 +90,7 @@ namespace WebGallery.UI.Controllers
             infos.Add($"Most likes in total: '{mostLikesTotal.AlbumName}' - {mostLikesTotal.TotalLikes}");
 
             AlbumMetaDTO mostUniqueLikes = a.OrderBy(x => x.TotalUniqueLikes).ToList()[0];
-            infos.Add($"Most unique likes: '{mostUniqueLikes.AlbumName}' - {mostUniqueLikes.TotalUniqueLikes}");
+            infos.Add($"Most unique item likes: '{mostUniqueLikes.AlbumName}' - {mostUniqueLikes.TotalUniqueLikes}");
 
             StatsInfoCardViewModel vm = new()
             {
@@ -113,9 +119,42 @@ namespace WebGallery.UI.Controllers
                     TagName = sl.First().TagName,
                     Count = sl.Sum(c => c.Count)
                 });
-            TagMetaDTO r = grouped.OrderByDescending(o => o.Count).Take(1).ToList()[0];
-            infos.Add($"Most popular: {uniqueTags}");
 
+            if (grouped.Any())
+            {
+                TagMetaDTO r = grouped.OrderByDescending(o => o.Count).Take(1).ToList()[0];
+                infos.Add($"Most popular tag: {r.Count}");
+            }
+
+            StatsInfoCardViewModel vm = new()
+            {
+                Header = "Tags",
+                Headerlink = "/tags",
+                InfoItems = infos
+            };
+
+            return vm;
+        }
+
+        async Task<StatsInfoCardViewModel> GetMediaStats()
+        {
+            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
+            List<string> infos = [];
+            int totalItems = a.Select(s => s.TotalCount).Sum();
+            infos.Add($"Total: {totalItems}");
+
+            // TODO: most recent
+
+            // TODO: most liked
+
+            StatsInfoCardViewModel vm = new()
+            {
+                Header = "Media",
+                Headerlink = "/single",
+                InfoItems = infos
+            };
+
+            return vm;
         }
 
         string GetHeaderLink(string itemType)
