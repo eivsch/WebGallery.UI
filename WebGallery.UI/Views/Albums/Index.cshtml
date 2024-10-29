@@ -21,7 +21,7 @@
                 var appPathBytes = System.Text.Encoding.UTF8.GetBytes(album.CoverImageAppPath);
                 string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
                 
-                int offset = album.CoverImageIndex - 1;   // Index starts from 1
+                int offset = album.CoverImageIndex;
                 string popUpDelayAtr = album.PopUpDelay == 0 ? "" : $"data-aos-delay={album.PopUpDelay}";
 
                 <div class="col-6 col-md-6 col-lg-@album.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -9,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Generators;
+using WebGallery.UI.Helpers;
+using WebGallery.UI.ViewModels.Single;
 
 namespace WebGallery.UI.Controllers
 {
@@ -30,30 +34,71 @@ namespace WebGallery.UI.Controllers
             _username = claim.Value;
         }
 
-        //public async Task<IActionResult> Index()
-        //{
-        //    ViewBag.Current = "Random";
+        public async Task<IActionResult> Index()
+        {
+            ViewBag.Current = "Random";
+            int totalCount = 24, currentCount = 0;
+            Random rnd = new();
 
-        //    List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
-            
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            if (albums == null) return null;
 
+            List<SingleGalleryImageViewModel> items = new();
+            while (currentCount < totalCount)
+            {
+                int randomAlbumIndex = rnd.Next(0, albums.Count);
+                AlbumMetaDTO album = albums[randomAlbumIndex];
+                int randomMediaIndex = rnd.Next(0, album.TotalCount);
 
-        //    var gallery = await _galleryService.Get(uri);
+                AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, album.AlbumName, randomMediaIndex, 1);
+                MediaDTO media = data.Items[0];
+                SingleGalleryImageViewModel imageVm = new()
+                {
+                    Id = media.Id,
+                    AppPath = Path.Combine(album.AlbumName, media.Name),
+                    GalleryIndex = randomMediaIndex,
+                    IndexGlobal = -1,
+                    MediaType = Utils.DetermineMediaType(media.Name),
+                };
+                items.Add(imageVm);
 
-        //    var vm = SinglePageGenerator.Generate(gallery);
-        //    vm.GalleryTitle = "Randomized";
+                currentCount++;
+            }
 
-        //    return View("Index", vm);
-        //}
+            var vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.GalleryTitle = "Randomized album";
+            vm.TotalImageCount = totalCount;
+            vm.CurrentOffset = 0;
+            vm.CurrentDisplayCount = totalCount;
+
+            return View("Index", vm);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Index(string id, int offset)
         {
             ViewBag.Current = "Single";
+            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: 48);
 
-            var galleryResponse = await _galleryService.Get(galleryId: id, itemIndexStart: offset + 1, numberOfItems: 48);
-            
-            var vm = SinglePageGenerator.Generate(galleryResponse);
+            List<SingleGalleryImageViewModel> items = new();
+            foreach (var media in data.Items)
+            {
+                SingleGalleryImageViewModel imageVm = new()
+                {
+                    Id = media.Id,
+                    AppPath = Path.Combine(id, media.Name),
+                    GalleryIndex = offset++,
+                    IndexGlobal = -1,
+                    MediaType = Utils.DetermineMediaType(media.Name),
+                };
+                items.Add(imageVm);
+            }
+
+            var vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.GalleryTitle = id;
+            vm.TotalImageCount = data.TotalCount;
+            vm.CurrentOffset = offset;
+            vm.CurrentDisplayCount = 48;
 
             return View(vm);
         }

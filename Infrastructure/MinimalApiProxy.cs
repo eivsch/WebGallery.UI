@@ -142,7 +142,9 @@ public record AlbumMetaDTO
     public string AlbumName {get;set;}
     public DateTime Created {get;set;}
     public List<TagMetaDTO> Tags {get;set;}
-    public int TotalCount{get;set;}
+    public int TotalCount {get;set;}
+    public int TotalLikes { get;set;}
+    public int TotalUniqueLikes { get;set;}
 }
 
 public record TagMetaDTO
@@ -160,7 +162,7 @@ public record AlbumContentsDTO
 public record MediaDTO
 {
     public string Id {get;set;}
-    public  string Name {get;set;}
+    public string Name {get;set;}
     public List<TagDTO> Tags {get;set;}
 }
 

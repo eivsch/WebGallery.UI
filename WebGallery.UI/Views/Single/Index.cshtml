@@ -3,12 +3,17 @@
 
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
+@{
+    bool hasPreviousPage = Model.CurrentOffset != 0; 
+    bool hasNextPage = Model.CurrentOffset + Model.CurrentDisplayCount < Model.TotalImageCount;
+}
+
 <main class="main-content">
     <div class="container-fluid photos">
 
         <div class="row pt-4 mb-5 text-center">
             <div class="col-12">
-                <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @Model.Images.Count Photos</h2>
+                <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @Model.Images.Count of @Model.TotalImageCount Photos</h2>
             </div>
         </div>
 
@@ -55,6 +60,14 @@
             }
         </div>
 
+        @if (hasPreviousPage)
+        {
+            <p>Previous</p>
+        }
+        @if (hasNextPage)
+        {
+            <p>Next</p>
+        }
 
         <div class="row justify-content-center">
             <div class="col-md-12 text-center py-5">
