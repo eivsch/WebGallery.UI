@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using NuGet.LibraryModel;
 using WebGallery.UI.Generators;
 using WebGallery.UI.Generators.Helpers;
 using WebGallery.UI.Helpers;
 using WebGallery.UI.ViewModels.Albums;
+using WebGallery.UI.ViewModels.Single;
 
 namespace WebGallery.UI.Controllers
 {
@@ -72,6 +72,36 @@ namespace WebGallery.UI.Controllers
                 albumVms.ShuffleList();
 
             return View(vm);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAlbum(string id, int offset = 0, int displayCount = 12)
+        {
+            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: displayCount);
+
+            List<SingleGalleryImageViewModel> items = new();
+            int indexCounter = offset;
+            foreach (var media in data.Items)
+            {
+                SingleGalleryImageViewModel imageVm = new()
+                {
+                    Id = media.Id,
+                    AppPath = Path.Combine(id, media.Name),
+                    GalleryIndex = indexCounter++,
+                    IndexGlobal = -1,
+                    MediaType = Utils.DetermineMediaType(media.Name),
+                };
+                items.Add(imageVm);
+            }
+
+            var vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.Id = id;
+            vm.GalleryTitle = id;
+            vm.TotalImageCount = data.TotalCount;
+            vm.CurrentOffset = offset;
+            vm.CurrentDisplayCount = displayCount;
+
+            return View("Album", vm);
         }
     }
 }

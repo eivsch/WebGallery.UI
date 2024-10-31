@@ -74,37 +74,6 @@ namespace WebGallery.UI.Controllers
             return View("Index", vm);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Index(string id, int offset = 0, int displayCount = 12)
-        {
-            ViewBag.Current = "Single";
-            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: displayCount);
-
-            List<SingleGalleryImageViewModel> items = new();
-            int indexCounter = offset;
-            foreach (var media in data.Items)
-            {
-                SingleGalleryImageViewModel imageVm = new()
-                {
-                    Id = media.Id,
-                    AppPath = Path.Combine(id, media.Name),
-                    GalleryIndex = indexCounter++,
-                    IndexGlobal = -1,
-                    MediaType = Utils.DetermineMediaType(media.Name),
-                };
-                items.Add(imageVm);
-            }
-
-            var vm = SinglePageGenerator.SetDisplayProperties(items);
-            vm.Id = id;
-            vm.GalleryTitle = id;
-            vm.TotalImageCount = data.TotalCount;
-            vm.CurrentOffset = offset;
-            vm.CurrentDisplayCount = displayCount;
-
-            return View(vm);
-        }
-
         [HttpGet("custom")]
         public async Task<IActionResult> Custom(int nbr, string tags, string tagFilterMode, string mediaFilterMode)
         {
