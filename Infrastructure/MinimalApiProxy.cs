@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Infrastructure.Common;
 using Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.MinimalApi;
 
@@ -125,9 +126,18 @@ public class MinimalApiProxy(WebGalleryApiClient client)
 
     public async Task<bool> DeleteTag(string username, string albumName, string mediaLocator, string tag)
     {
-        var response = await _client.DeleteAsync($"users/{username}/albums/{albumName}/{mediaLocator}/tags/{tag}");
+        HttpResponseMessage response = await _client.DeleteAsync($"users/{username}/albums/{albumName}/{mediaLocator}/tags/{tag}");
         if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return true;
         else return false;
+    }
+
+    public async Task PatchAddLike(string username, string album, string mediaLocator)
+    {
+        HttpResponseMessage response = await _client.PatchAsync($"users/{username}/albums/{album}/{mediaLocator}/likes", null);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
     }
 }
 

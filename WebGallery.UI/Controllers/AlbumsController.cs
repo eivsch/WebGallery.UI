@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Application.Services;
 using Application.Services.Interfaces;
+using Application.Tags;
 using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -102,6 +104,14 @@ namespace WebGallery.UI.Controllers
             vm.CurrentDisplayCount = displayCount;
 
             return View("Album", vm);
+        }
+
+        [HttpPost("{album}/{media}/add-like")]
+        public async Task<IActionResult> AddLike(string album, string media)
+        {
+            await _minimalApiProxy.PatchAddLike(_username, album, media);
+
+            return Ok();
         }
     }
 }

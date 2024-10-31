@@ -25,7 +25,7 @@
                 string popUpDelayAtr = album.PopUpDelay == 0 ? "" : $"data-aos-delay={album.PopUpDelay}";
 
                 <div class="col-6 col-md-6 col-lg-@album.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
-                    <a href="/Single/@(album.GalleryId + "?offset=" + offset)" class="d-block photo-item">
+                    <a href="/Albums/@(album.GalleryId + "?offset=" + offset)" class="d-block photo-item">
                     @if (album.CoverImageMediaType == Application.Enums.MediaType.Video)
                     {
                         string videoUri = $"/files/video/{appPathBase64}";

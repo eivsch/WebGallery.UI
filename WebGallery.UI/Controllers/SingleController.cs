@@ -90,19 +90,5 @@ namespace WebGallery.UI.Controllers
 
             return View("Index", vm);
         }
-
-        [HttpPost("add-like/{id}")]
-        public async Task<IActionResult> AddLike(string id)
-        {
-            var request = new TagRequest
-            {
-                PictureId = id,
-                TagName = "like",
-            };
-
-            await _tagService.Add(request);
-
-            return Ok();
-        }
     }
 }
