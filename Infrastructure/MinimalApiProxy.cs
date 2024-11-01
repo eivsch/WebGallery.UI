@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DomainModel.Aggregates.Tags;
 using Infrastructure.Common;
 using Infrastructure.Services;
 using Microsoft.Extensions.Logging;
@@ -138,6 +139,13 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         {
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
+    }
+
+    public async Task<bool> DeleteMedia(string username, string albumName, string mediaLocator)
+    {
+        HttpResponseMessage response = await _client.DeleteAsync($"users/{username}/albums/{albumName}/{mediaLocator}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return true;
+        else return false;
     }
 }
 

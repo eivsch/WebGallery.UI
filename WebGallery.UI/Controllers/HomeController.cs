@@ -83,13 +83,13 @@ namespace WebGallery.UI.Controllers
             List<string> infos = [];
             infos.Add($"Total: {a.Count}");
             
-            AlbumMetaDTO lastAdded = a.OrderBy(x => x.Created).ToList()[0];
+            AlbumMetaDTO lastAdded = a.OrderByDescending(x => x.Created).ToList()[0];
             infos.Add($"Most Recent: '{lastAdded.AlbumName}' - {lastAdded.Created.ToString()[..10]}");
 
-            AlbumMetaDTO mostLikesTotal = a.OrderBy(x => x.TotalLikes).ToList()[0];
+            AlbumMetaDTO mostLikesTotal = a.OrderByDescending(x => x.TotalLikes).ToList()[0];
             infos.Add($"Most likes in total: '{mostLikesTotal.AlbumName}' - {mostLikesTotal.TotalLikes}");
 
-            AlbumMetaDTO mostUniqueLikes = a.OrderBy(x => x.TotalUniqueLikes).ToList()[0];
+            AlbumMetaDTO mostUniqueLikes = a.OrderByDescending(x => x.TotalUniqueLikes).ToList()[0];
             infos.Add($"Most unique item likes: '{mostUniqueLikes.AlbumName}' - {mostUniqueLikes.TotalUniqueLikes}");
 
             StatsInfoCardViewModel vm = new()

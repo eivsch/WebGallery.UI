@@ -53,6 +53,7 @@ namespace WebGallery.UI.Controllers
             {
                 int i = randomCoverImage ? rnd.Next(0, album.TotalCount) : 0;
                 AlbumContentsDTO c = await _minimalApiProxy.GetAlbumContents(_username, album.AlbumName, from: i, numberOfItems: 1);
+                if (c.Items.Count == 0) continue;
                 MediaDTO coverImg = c.Items[0];
 
                 AlbumViewModel albumVm = new()

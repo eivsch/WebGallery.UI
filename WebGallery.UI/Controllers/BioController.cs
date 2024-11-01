@@ -44,39 +44,18 @@ namespace WebGallery.UI.Controllers
             
             List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
             if (albums == null) return null;
-            
-            int albumIndex  = rnd.Next(0, albums.Count); 
+
+            int albumIndex = rnd.Next(0, albums.Count); 
             album = albums[albumIndex];
             albumMediaIndex = rnd.Next(0, album.TotalCount);
 
-            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album.AlbumName, albumMediaIndex, 1);
-            MediaDTO media = albumContents.Items[0];
-
-            // Get all unique tags for user
-            IEnumerable<TagMetaDTO> tags = albums.SelectMany(s => s.Tags);
-            IEnumerable<string> allTags = tags.Select(s => s.TagName).Distinct();
-
-            BioViewModel vm = new()
-            {
-                AllTags = allTags.ToList(),
-                BioPictureViewModel = new BioPictureViewModel
-                {
-                    Id = media.Id,
-                    Name = media.Name,
-                    AppPath = $"{album.AlbumName}/{media.Name}",
-                    Tags = media.Tags.Select(s => s.TagName).ToList(),             
-                    AlbumMediaIndex = albumMediaIndex,
-                    Album = album.AlbumName,
-                }
-            };
-
-            return View(vm);
+            return RedirectToAction("Index", "Bio", new { album = album.AlbumName, index = albumMediaIndex });
         }
 
-        [HttpGet("{album}/{id}")]
-        public async Task<IActionResult> Index(string album, int id)
+        [HttpGet("{album}/{index}")]
+        public async Task<IActionResult> Index(string album, int index)
         {
-            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, id, 1);
+            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, index, 1);
             MediaDTO media = albumContents.Items[0];
 
             List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
@@ -92,7 +71,7 @@ namespace WebGallery.UI.Controllers
                     Name = media.Name,
                     AppPath = $"{album}/{media.Name}",
                     Tags = media.Tags.Select(s => s.TagName).ToList(),
-                    AlbumMediaIndex = id,
+                    AlbumMediaIndex = index,
                     Album = album,
                 }
             };
@@ -153,13 +132,10 @@ namespace WebGallery.UI.Controllers
             else throw new Exception("Deletion failed.");
         }
 
-        [HttpGet("picture/delete/{id}")]
-        public async Task<IActionResult> DeletePicture(string id)
+        [HttpGet("picture/delete/{album}/{media}")]
+        public async Task<IActionResult> DeletePicture(string album, string media)
         {
-            if (string.IsNullOrWhiteSpace(id))
-                return NotFound();
-
-            await _pictureService.Delete(id);
+            await _minimalApiProxy.DeleteMedia(_username, album, media);
 
             return View("Deleted", new BioPictureViewModel { AlbumMediaIndex = 0});
         }
