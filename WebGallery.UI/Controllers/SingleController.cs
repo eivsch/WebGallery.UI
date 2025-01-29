@@ -90,5 +90,11 @@ namespace WebGallery.UI.Controllers
 
             return View("Index", vm);
         }
+
+        [HttpGet("custom-js")]
+        public async Task<IActionResult> CustomJs(int mediaCount, string tags, string tagFilterMode, string mediaFilterMode)
+        {
+            return View("CustomJs");
+        }
     }
 }
