@@ -1,15 +1,15 @@
-﻿var container = document.querySelectorAll('main.main-content');
-const albums = await getAlbums();
-//const thmb = await getThumbnailImage("man", albums[0]);
-//console.log(thmb);
+﻿const headline = document.querySelector('h2.text-white');
+headline.textContent = "Tags: ";
 
+const tagsContainer = document.querySelector('div.row.align-items-stretch');
+
+const albums = await getAlbums();
 const tags = await getTags();
 for (const i in tags) {
     const albumWithTag = findAlbumWithTag(tags[i]);
-    const thmb = await getThumbnailImage(tags[i].tagName, albumWithTag);
-//    console.log(tags[i]);
-//    console.log(albumWithTag);
-    console.log(thmb);
+    const mediaWithTag = await getThumbnailImageFromAlbum(tags[i].tagName, albumWithTag);
+    const thumbnailElem = createThumbnailElem(mediaWithTag, albumWithTag, tags[i]);
+    tagsContainer.appendChild(thumbnailElem);
 }
 
 function findAlbumWithTag(tag) {
@@ -24,7 +24,7 @@ function findAlbumWithTag(tag) {
     return tagAlbums[0];    // TODO: ranomize?
 }
 
-function createThumbnailElem(thmb, album) {
+function createThumbnailElem(mediaWithTag, album, tag) {
     const col = document.createElement("div");
     col.classList.add("col-lg-3");
     col.classList.add("col-sm-4");
@@ -34,9 +34,9 @@ function createThumbnailElem(thmb, album) {
     a.classList.add("d-block");
     a.classList.add("photo-item");
 
-    if (thmb.endsWith(".mp4")) {
+    if (mediaWithTag.name.endsWith(".mp4")) {
         const uriPrefix = "/files/video/";
-        const mediaUri = uriPrefix + album.albumName + "/" + thmb.name;
+        const mediaUri = album.albumName + "/" + mediaWithTag.name;
         const mediaUrib64 = window.btoa(mediaUri);
 
         const vid = document.createElement("video");
@@ -46,25 +46,41 @@ function createThumbnailElem(thmb, album) {
         vid.setAttribute("muted");
 
         const srcEl = document.createElement("source");
-        srcEl.src = mediaUrib64;
+        srcEl.src = uriPrefix + mediaUrib64;
         srcEl.setAttribute("type", "video/mp4");
+
+        vid.appendChild(srcEl);
+        a.appendChild(vid);
     }
     else {
         const uriPrefix = "/files/image/";
-        const mediaUri = uriPrefix + album.albumName + "/" + thmb.name;
+        const mediaUri = album.albumName + "/" + mediaWithTag.name;
         const mediaUrib64 = window.btoa(mediaUri);
 
         const img = document.createElement("img");
-        img.src = mediaUrib64;
+        img.src = uriPrefix + mediaUrib64;
         img.alt = "Image";
         img.classList.add("img-fluid");
+
+        a.appendChild(img);
     }
 
     const heading1 = document.createElement("div");
     heading1.classList.add("photo-text-more");
     const h3 = document.createElement("h3");
     h3.classList.add("heading");
-    h3.textContent = "";
+    h3.textContent = tag.tagName;
+    const spanEl = document.createElement("span");
+    spanEl.classList.add("meta");
+    spanEl.textContent = tag.count + " items";
+
+    heading1.appendChild(h3);
+    heading1.appendChild(spanEl);
+    a.appendChild(heading1);
+
+    col.appendChild(a);
+
+    return col;
 }
 
 async function getAlbums() {
@@ -79,7 +95,7 @@ async function getTags() {
     return myJson;
 }
 
-async function getThumbnailImage(tagName, album) {
+async function getThumbnailImageFromAlbum(tagName, album) {
     var from = 0;
     var scrollSize = 50;
     var maxItemsToRead = scrollSize * 100;
