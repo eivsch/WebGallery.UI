@@ -69,7 +69,40 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = "Randomized album";
             vm.TotalImageCount = totalCount;
             vm.CurrentOffset = 0;
-            vm.CurrentDisplayCount = totalCount;
+            vm.CurrentDisplayCount = 12;
+
+            return View("Index", vm);
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtension = null, string mediaNameContains = null, int? maxSize = null)
+        {
+            // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
+            ViewBag.Current = "Search";
+            // TODO: decide how to scroll over many search hits
+            const int sizeLimit = 256;
+            //const int viewDisplayLimit = 32;
+            maxSize = maxSize > sizeLimit ? sizeLimit : maxSize;
+
+            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtension, mediaNameContains, maxSize);
+            List<SingleGalleryImageViewModel> items = [];
+            foreach (SearchHitDTO hit in hits)
+            {
+                SingleGalleryImageViewModel imageVm = new()
+                {
+                    Id = hit.MediaItem.Id,
+                    AppPath = Path.Combine(hit.AlbumName, hit.MediaItem.Name),
+                    MediaType = Utils.DetermineMediaType(hit.MediaItem.Name),
+                };
+
+                items.Add(imageVm);
+            }
+
+            SingleGalleryViewModel vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.GalleryTitle = "Search results";
+            vm.TotalImageCount = hits.Count;
+            vm.CurrentOffset = 0;
+            vm.CurrentDisplayCount = hits.Count;
 
             return View("Index", vm);
         }

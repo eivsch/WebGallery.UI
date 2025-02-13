@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using DomainModel.Aggregates.Tags;
 using Infrastructure.Common;
 using Infrastructure.Services;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.MinimalApi;
 
@@ -147,6 +145,44 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return true;
         else return false;
     }
+
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize)
+    {
+        string uri = $"users/{username}/search";
+        Dictionary<string, string> paramss = [];
+        if (albums is not null)
+            paramss.Add("albums", albums);
+        if (tags is not null)
+            paramss.Add("tags", tags);
+        if (fileExtension is not null)
+            paramss.Add("fileExtension", fileExtension);
+        if (mediaNameContains is not null)
+            paramss.Add("mediaNameContains", mediaNameContains);
+        if (maxSize is not null)
+            paramss.Add("maxSize", maxSize.ToString());
+
+        bool isFirstParam = true;
+        foreach (KeyValuePair<string, string> param in paramss)
+        {
+            if (isFirstParam) uri += $"?{param.Key}={param.Value}";
+            else uri += $"&{param.Key}={param.Value}";
+
+            isFirstParam = false;
+        }
+
+        HttpResponseMessage response = await _client.GetAsync(uri);
+        if (response.IsSuccessStatusCode)
+        {
+            string responseStr = await response.Content.ReadAsStringAsync();
+            List<SearchHitDTO> data = JsonSerializer.Deserialize<List<SearchHitDTO>>(responseStr, _jsonOpts);
+
+            return data;
+        }
+        else
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
 public record CredentialsDTO
@@ -182,10 +218,18 @@ public record MediaDTO
     public string Id {get;set;}
     public string Name {get;set;}
     public List<TagDTO> Tags {get;set;}
+    public string AlbumName { get; set; }
 }
 
 public record TagDTO
 {
     public string TagName {get;set;}
     public DateTimeOffset Created {get;set;}
+}
+
+public record SearchHitDTO
+{
+    public int MediaAlbumIndex { get; set; }
+    public required string AlbumName { get; set; }
+    public required MediaDTO MediaItem { get; set; }
 }

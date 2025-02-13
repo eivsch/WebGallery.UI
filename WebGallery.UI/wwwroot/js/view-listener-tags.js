@@ -30,7 +30,7 @@ function createThumbnailElem(mediaWithTag, album, tag) {
     col.classList.add("col-sm-4");
     col.setAttribute("data-aos", "fade-up");
     const a = document.createElement("a");
-    a.href = "tbc";
+    a.href = "single/search?tags=" + tag.tagName;
     a.classList.add("d-block");
     a.classList.add("photo-item");
 

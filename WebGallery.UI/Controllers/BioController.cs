@@ -82,30 +82,41 @@ namespace WebGallery.UI.Controllers
         [HttpGet("id/{id}")]
         public async Task<IActionResult> Index(string id)
         {
-            throw new NotImplementedException();
+            List<SearchHitDTO> result = await _minimalApiProxy.GetSearch(_username, null, null, null, id, 1);
+            if (result.Count == 0) return NoContent();
+            SearchHitDTO searchHit = result[0];
 
-            var picture = await _pictureService.Get(id);
-            var tags = await _tagService.GetAll();
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            IEnumerable<TagMetaDTO> tags = albums.SelectMany(s => s.Tags);
+            IEnumerable<string> allTags = tags.Select(s => s.TagName).Distinct();
 
-            var vm = new BioViewModel
+            BioViewModel vm = new()
             {
-                AllTags = tags.Select(s => s.TagName).ToList(),
-                BioPictureViewModel = _mapper.Map<BioPictureViewModel>(picture)
+                AllTags = allTags.ToList(),
+                BioPictureViewModel = new BioPictureViewModel
+                {
+                    Id = searchHit.MediaItem.Id,
+                    Name = searchHit.MediaItem.Name,
+                    AppPath = $"{searchHit.AlbumName}/{searchHit.MediaItem.Name}",
+                    Tags = searchHit.MediaItem.Tags.Select(s => s.TagName).ToList(),
+                    AlbumMediaIndex = searchHit.MediaAlbumIndex,
+                    Album = searchHit.AlbumName,
+                }
             };
 
             return View(vm);
         }
 
-        [HttpGet("switch/{album}/{id}")]
-        public async Task<IActionResult> Switch(string album, int id)
+        [HttpGet("switch/{album}/{index}")]
+        public async Task<IActionResult> Switch(string album, int index)
         {
-            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, id, 1);
+            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, index, 1);
             MediaDTO media = albumContents.Items[0];
 
             BioPictureViewModel vm = new()
             {
                 Album = album,
-                AlbumMediaIndex = id,
+                AlbumMediaIndex = index,
                 AppPath = $"{album}/{media.Name}",
                 Id = media.Id,
                 Name = media.Name,
