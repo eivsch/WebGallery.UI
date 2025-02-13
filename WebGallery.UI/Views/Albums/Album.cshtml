@@ -63,13 +63,13 @@
         {
             int nextOffset = Model.CurrentOffset - Model.CurrentDisplayCount;
             if (nextOffset < 0) nextOffset = 0;
-            string uri = $"/single/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
+            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
             <a href="@uri">Previous</a>
         }
         @if (hasNextPage)
         {
             int nextOffset = Model.CurrentOffset + Model.CurrentDisplayCount;
-            string uri = $"/single/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
+            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
             <a href="@uri">Next</a>
         }
 
