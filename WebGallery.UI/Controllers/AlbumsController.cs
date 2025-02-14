@@ -78,7 +78,7 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAlbum(string id, int offset = 0, int displayCount = 12)
+        public async Task<IActionResult> GetAlbum(string id, int offset = 0, int displayCount = 32)
         {
             AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: displayCount);
 

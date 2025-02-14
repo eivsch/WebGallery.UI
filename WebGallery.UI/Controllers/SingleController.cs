@@ -37,7 +37,7 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.Current = "Random";
-            int totalCount = 24, currentCount = 0;
+            int totalCount = 32, currentCount = 0;
             Random rnd = new();
 
             List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);

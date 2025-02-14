@@ -110,7 +110,7 @@ async function getThumbnailImageFromAlbum(tagName, album) {
             }
         });
 
-        if (itemsWithTag) {
+        if (itemsWithTag.length > 0) {
             return itemsWithTag[0]; // TODO: randomize?
         }
 
