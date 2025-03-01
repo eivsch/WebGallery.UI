@@ -219,6 +219,7 @@ public record MediaDTO
     public string Name {get;set;}
     public List<TagDTO> Tags {get;set;}
     public string AlbumName { get; set; }
+    public int? Index {get;set;}
 }
 
 public record TagDTO

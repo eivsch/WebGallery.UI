@@ -29,7 +29,7 @@
                     @if (album.CoverImageMediaType == Application.Enums.MediaType.Video)
                     {
                         string videoUri = $"/files/video/{appPathBase64}";
-                        <video class="img-fluid" autoplay loop muted>
+                        <video class="img-fluid" muted>
                             <source src="@videoUri" type="video/mp4" />
                         </video>
                     }
