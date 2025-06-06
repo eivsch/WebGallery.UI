@@ -302,7 +302,6 @@
     outline: none; /* Remove default outline */
 }
 
-/* Style the checkbox */
 .search-form .form-check-input {
     width: 20px;
     height: 20px;
@@ -359,7 +358,6 @@ th, td {
     padding: 15px;
   }
 
-/* Center the login form and add spacing */
 .login-form {
     width: 30%; /* Slightly wider for better usability */
     margin: auto;
@@ -370,7 +368,6 @@ th, td {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
 }
 
-/* Style the form labels */
 .login-form label {
     color: #fff; /* White text for contrast */
     font-size: 0.9rem; /* Slightly smaller font size */
@@ -378,7 +375,6 @@ th, td {
     letter-spacing: 0.05em; /* Add slight spacing for readability */
 }
 
-/* Style the input fields */
 .login-form input {
     background: none; /* Transparent background */
     color: #fff; /* White text for contrast */
@@ -395,14 +391,12 @@ th, td {
     outline: none; /* Remove default outline */
 }
 
-/* Style the validation error messages */
 .login-form .form--error {
     color: #ef6c57; /* Accent color for errors */
     font-size: 0.8rem; /* Smaller font size */
     margin-top: 5px; /* Add spacing above the error message */
 }
 
-/* Style the validation summary */
 .login-form .form-messages {
     color: #ef6c57; /* Accent color for error messages */
     font-size: 0.9rem; /* Slightly larger font size */
@@ -410,7 +404,6 @@ th, td {
     text-align: center; /* Center-align the messages */
 }
 
-/* Style the login button */
 .login-form button {
     background-color: #fff; /* White background */
     color: #000; /* Black text for contrast */
@@ -434,7 +427,6 @@ th, td {
     transform: scale(0.95); /* Slight shrink effect */
 }
 
-/* Style the register link */
 .login-form a {
     display: block; /* Make it a block element */
     margin-top: 20px; /* Add spacing above the link */
@@ -447,6 +439,64 @@ th, td {
 
 .login-form a:hover {
     color: #ef6c57; /* Accent color on hover */
+}
+
+.upload-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #222;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+    color: #fff; /* White text for contrast */
+}
+
+.upload-form .form-label {
+    font-weight: bold;
+    color: #fff; /* White text for labels */
+}
+
+.upload-form .form-control {
+    background-color: #333; /* Darker background for input fields */
+    color: #fff; /* White text for input fields */
+    border: 1px solid #444; /* Subtle border for input fields */
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.upload-form .form-control::placeholder {
+    color: #aaa; /* Light gray placeholder text */
+}
+
+.upload-form .btn-primary {
+    background-color: #ef6c57; /* Accent color for the button */
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.upload-form .btn-primary:hover {
+    background-color: #d94c3a; /* Slightly darker shade on hover */
+    transform: scale(1.05); /* Subtle zoom effect */
+}
+
+.upload-form .btn-primary:active {
+    background-color: #c74332; /* Even darker shade when clicked */
+    transform: scale(0.95); /* Slight shrink effect */
+}
+
+@media (max-width: 768px) {
+    .upload-form {
+        padding: 15px;
+    }
+
+    .upload-form .btn-primary {
+        width: 100%; /* Full-width button on smaller screens */
+    }
 }
 
 /* Shutter overrides */
