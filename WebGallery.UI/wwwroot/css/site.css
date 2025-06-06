@@ -241,6 +241,11 @@
     margin-right: 25px;
 }
 
+.form-control::placeholder {
+    color: #aaa;
+    opacity: 1;
+}
+
 .landing-section--stats {
     margin-top: 25px;
     margin-left: 25px;

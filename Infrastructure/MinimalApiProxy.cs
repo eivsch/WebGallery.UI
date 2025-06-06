@@ -165,7 +165,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         if (tags is not null)
             paramss.Add("tags", tags);
         if (fileExtension is not null)
-            paramss.Add("fileExtension", fileExtension);
+            paramss.Add("fileExtensions", fileExtension);
         if (mediaNameContains is not null)
             paramss.Add("mediaNameContains", mediaNameContains);
         if (maxSize is not null)

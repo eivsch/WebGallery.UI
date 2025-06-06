@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Services.Interfaces;
 using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,13 +15,11 @@ namespace WebGallery.UI.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly IMetadataService _statisticsService;
         private readonly MinimalApiProxy _minimalApiProxy;
         readonly string _username;
 
-        public HomeController(IMetadataService statisticsService, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
+        public HomeController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
-            _statisticsService = statisticsService;
             _minimalApiProxy = minimalApiProxy;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
@@ -63,13 +60,6 @@ namespace WebGallery.UI.Controllers
 
             return PartialView("_StatsInfoCard", vm);
         }
-
-        [HttpGet("home/search")]
-        public async Task<IActionResult> Search(string query)
-        {
-            return null;
-        }
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

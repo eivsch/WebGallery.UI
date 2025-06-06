@@ -37,7 +37,7 @@
                                 *loading*...
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        @* <div class="col-md-4">
                             <div data-url="/home/stats?itemType=gif" data-async-view>
                                 *loading*...
                             </div>
@@ -46,7 +46,7 @@
                             <div data-url="/home/stats?itemType=video" data-async-view>
                                 *loading*...
                             </div>
-                        </div>
+                        </div> *@
                         <div class="col-md-4">
                             <div data-url="/home/stats?itemType=album" data-async-view>
                                 *loading*...
@@ -71,11 +71,38 @@
 
     <div class="row pt-4 mb-5 text-center">
         <div class="col-12">
-                <a href="/uploads"><h3 class="text-white mb-4">Upload</h3></a>
+                <h3 class="text-white mb-4"><a href="/uploads" style="color: white;">Upload</a></h3>
         </div>
     </div>
-</main>
 
+    <!-- Search Section -->
+    <div class="row pt-4 mb-5 text-center">
+        <div class="col-12">
+            <!-- Collapsible Header -->
+            <h3 class="text-white mb-4" data-bs-toggle="collapse" data-bs-target="#searchForm" aria-expanded="false" aria-controls="searchForm" style="cursor: pointer;">
+                Search
+            </h3>
+            <!-- Collapsible Form -->
+            <div class="collapse" id="searchForm">
+                <form method="get" action="/single/search" class="search-form">
+                    <div class="form-group">
+                        <input type="text" name="albums" class="form-control" placeholder="Albums (comma-separated)">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="tags" class="form-control" placeholder="Tags (comma-separated) (AND-mode)">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="fileExtensions" class="form-control" placeholder="File Extensions (e.g., jpg, png)">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="mediaNameContains" class="form-control" placeholder="Filename (partial match)">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
 @section Scripts {
     <script type="text/javascript" src="~/js/view-listener-home.js"></script>
 }
