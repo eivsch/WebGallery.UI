@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Services.Interfaces;
-using Application.Tags;
 using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,15 +18,11 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class SingleController : Controller
     {
-        private readonly IGalleryService _galleryService;
-        private readonly ITagService _tagService;
         readonly MinimalApiProxy _minimalApiProxy;
         readonly string _username;
 
-        public SingleController(IGalleryService galleryService, ITagService tagService, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
+        public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
-            _galleryService = galleryService;
-            _tagService = tagService;
             _minimalApiProxy = minimalApiProxy;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
@@ -75,7 +69,7 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtension = null, string mediaNameContains = null, int? maxSize = null)
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = null, bool? allTagsMustMatch = false)
         {
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
@@ -84,7 +78,7 @@ namespace WebGallery.UI.Controllers
             //const int viewDisplayLimit = 32;
             maxSize = maxSize > sizeLimit ? sizeLimit : maxSize;
 
-            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtension, mediaNameContains, maxSize);
+            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true);
             List<SingleGalleryImageViewModel> items = [];
             foreach (SearchHitDTO hit in hits)
             {
@@ -103,23 +97,6 @@ namespace WebGallery.UI.Controllers
             vm.TotalImageCount = hits.Count;
             vm.CurrentOffset = 0;
             vm.CurrentDisplayCount = hits.Count;
-
-            return View("Index", vm);
-        }
-
-        [HttpGet("custom")]
-        public async Task<IActionResult> Custom(int nbr, string tags, string tagFilterMode, string mediaFilterMode)
-        {
-            ViewBag.Current = "Random";
-
-            var uri = await _galleryService.GenerateGalleryUri(nbr, tags, tagFilterMode, mediaFilterMode);
-            var gallery = await _galleryService.Get(uri);
-
-            var vm = SinglePageGenerator.Generate(gallery);
-            if (!string.IsNullOrWhiteSpace(tags) && tagFilterMode == "custominclusive")
-                vm.GalleryTitle = tags;
-            else
-                vm.GalleryTitle = "Randomized";
 
             return View("Index", vm);
         }

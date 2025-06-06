@@ -18,7 +18,17 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         HttpResponseMessage response =  await _client.GetAsync($"/users/{username}");
         if (response.IsSuccessStatusCode)
         {
+            if (response.Content == null || response.Content.Headers.ContentLength == 0)
+            {
+                return null;
+            }
+
             string responseStr = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(responseStr))
+            {
+                return null;
+            }
+
             CredentialsDTO data = JsonSerializer.Deserialize<CredentialsDTO>(responseStr, _jsonOpts);
 
             return data;
@@ -146,7 +156,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         else return false;
     }
 
-    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize)
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch)
     {
         string uri = $"users/{username}/search";
         Dictionary<string, string> paramss = [];
@@ -155,11 +165,13 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         if (tags is not null)
             paramss.Add("tags", tags);
         if (fileExtension is not null)
-            paramss.Add("fileExtension", fileExtension);
+            paramss.Add("fileExtensions", fileExtension);
         if (mediaNameContains is not null)
             paramss.Add("mediaNameContains", mediaNameContains);
         if (maxSize is not null)
             paramss.Add("maxSize", maxSize.ToString());
+
+        paramss.Add("allTagsMustMatch", allTagsMustMatch.ToString().ToLowerInvariant());
 
         bool isFirstParam = true;
         foreach (KeyValuePair<string, string> param in paramss)

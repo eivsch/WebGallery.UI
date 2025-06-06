@@ -37,24 +37,31 @@ namespace WebGallery.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginFormViewModel vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                CredentialsDTO creds = await _apiProxy.GetCredentials(vm.Username);
-                string hashedPw = GetHash(vm.Password);
-                if (vm.Username == creds.Username 
-                    && hashedPw == creds.Password)
-                {
-                    await _loginManager.LoginAsync(vm.Username);
-            
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    ModelState.AddModelError("invalidCredentials", "Invalid credentials.");
-                }
+                return View("Index", vm);
             }
 
-            return View("Index", vm);
+            CredentialsDTO creds = await _apiProxy.GetCredentials(vm.Username);
+            if (!AreCredentialsValid(vm, creds))
+            {
+                ModelState.AddModelError("invalidCredentials", "Invalid credentials.");
+                return View("Index", vm);
+            }
+
+            await _loginManager.LoginAsync(vm.Username);
+            return RedirectToAction("Index", "Home");
+
+            bool AreCredentialsValid(LoginFormViewModel vm, CredentialsDTO creds)
+            {
+                if (creds == null)
+                {
+                    return false;
+                }
+
+                string hashedPw = GetHash(vm.Password);
+                return vm.Username == creds.Username && hashedPw == creds.Password;
+            }
         }
 
         [AllowAnonymous]

@@ -1,14 +1,69 @@
-
 @model WebGallery.UI.ViewModels.Uploads.UploadsViewModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-<p>Upload Images</p>
-<form action="uploads/large" method="post" enctype="multipart/form-data">
-    Album name:
-    <input asp-for="AlbumName">
-    Select image to upload:
-    @* <input type="file" name="FilesToUpload" multiple> *@
-    <input asp-for="FilesToUpload" multiple>
-    
-    <input type="submit" value="Upload Images" name="submit">
-</form>
+<div class="container mt-5">
+    <h3 class="text-center mb-4">Upload Images</h3>
+    <p class="text-muted text-center">
+        Please select an album name and upload one or more images, videos, gifs etc.
+    </p>
+    <form action="uploads/large" method="post" enctype="multipart/form-data" class="upload-form">
+        <div class="form-group mb-3">
+            <label for="AlbumName" class="form-label">Album Name:</label>
+            <input asp-for="AlbumName" class="form-control" id="AlbumName" placeholder="Enter album name">
+        </div>
+        <div class="form-group mb-3">
+            <label for="FilesToUpload" class="form-label">Select Images to Upload:</label>
+            <input asp-for="FilesToUpload" class="form-control" id="FilesToUpload" type="file" multiple>
+        </div>
+        <div class="form-group text-center">
+            <input type="submit" value="Upload Images" name="submit" class="btn btn-primary">
+        </div>
+    </form>
+    <div class="progress mt-3" id="uploadProgress" style="display: none;">
+        <div class="progress-bar" role="progressbar" style="width: 0%;" id="progressBar"></div>
+    </div>
+</div>
+
+<script>
+    const form = document.querySelector('.upload-form');
+    form.addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent the default form submission
+
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('uploadProgress');
+        progressContainer.style.display = 'block';
+
+        const formData = new FormData(form);
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('POST', form.action, true);
+
+        // Update the progress bar during the upload
+        xhr.upload.onprogress = function (e) {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                progressBar.style.width = percentComplete + '%';
+                progressBar.textContent = Math.round(percentComplete) + '%';
+            }
+        };
+
+        // Handle the response after the upload completes
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Redirect to the success page
+                document.open();
+                document.write(xhr.responseText);
+                document.close();
+            } else {
+                alert('Upload failed. Please try again.');
+            }
+        };
+
+        // Handle errors during the upload
+        xhr.onerror = function () {
+            alert('An error occurred during the upload. Please try again.');
+        };
+
+        xhr.send(formData); // Send the form data
+    });
+</script>

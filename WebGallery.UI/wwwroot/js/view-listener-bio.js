@@ -110,8 +110,18 @@ function hideAll() {
 }
 
 function focusInput() {
-    $('#myInput').toggle();
-    $('#myInput').focus();
+    const input = document.getElementById("myInput");
+    const dropdown = document.getElementById("myDropdown");
+
+    // Toggle visibility of the input and dropdown
+    if (input.style.display === "none") {
+        input.style.display = "block";
+        dropdown.style.display = "block";
+        input.focus(); // Focus on the input field
+    } else {
+        input.style.display = "none";
+        dropdown.style.display = "none";
+    }
 }
 
 function bioSwitch(album, sortOrder) {
