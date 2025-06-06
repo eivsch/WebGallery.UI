@@ -7,7 +7,7 @@
         </div>
         <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
         <div id="myDropdown">
-            <input type="text" placeholder="Search.." id="myInput" style="display:none" />
+            <input type="text" placeholder="Search or add a tag..." id="myInput" style="display:none" />
             @foreach (var tag in Model.AllTags)
             {
                 <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>

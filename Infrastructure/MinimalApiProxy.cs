@@ -18,7 +18,17 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         HttpResponseMessage response =  await _client.GetAsync($"/users/{username}");
         if (response.IsSuccessStatusCode)
         {
+            if (response.Content == null || response.Content.Headers.ContentLength == 0)
+            {
+                return null;
+            }
+
             string responseStr = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(responseStr))
+            {
+                return null;
+            }
+
             CredentialsDTO data = JsonSerializer.Deserialize<CredentialsDTO>(responseStr, _jsonOpts);
 
             return data;
