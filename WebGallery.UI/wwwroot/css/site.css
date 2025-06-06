@@ -277,6 +277,84 @@
     }
 }
 
+.search-form {
+    max-width: 600px; /* Limit the width for better readability */
+    margin: 0 auto; /* Center the form */
+    padding: 20px; /* Add padding inside the form */
+    background-color: #222; /* Dark background to match the site's theme */
+    border-radius: 10px; /* Rounded corners for a modern look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+.search-form .form-control {
+    background: none; /* Transparent background */
+    color: #fff; /* White text for contrast */
+    border: none; /* Remove default border */
+    border-bottom: 2px solid gray; /* Add a bottom border */
+    border-radius: 0; /* No rounded corners */
+    padding: 10px 5px; /* Add padding for usability */
+    width: 100%; /* Full width for alignment */
+    transition: border-color 0.3s ease; /* Smooth transition on focus */
+}
+
+.search-form .form-control:focus {
+    border-color: #ef6c57; /* Accent color on focus */
+    outline: none; /* Remove default outline */
+}
+
+/* Style the checkbox */
+.search-form .form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px; /* Add spacing between checkbox and label */
+}
+
+.search-form .form-check {
+    display: flex; /* Use flexbox for horizontal alignment */
+    align-items: center; /* Vertically align the checkbox and label */
+}
+
+.search-form .form-check-label {
+    color: #fff; /* White text for contrast */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    letter-spacing: 0.05em; /* Add slight spacing for readability */
+    margin-bottom: 0; /* Remove any default bottom margin */
+    text-align: left; /* Ensure the label text aligns properly */
+}
+
+.search-form button {
+    background-color: #ef6c57;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    text-transform: uppercase; /* Consistent with other buttons */
+    letter-spacing: 0.1em; /* Add slight spacing for readability */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
+}
+
+.search-form button:hover {
+    background-color: #d94c3a; /* Slightly darker shade on hover */
+    transform: scale(1.05); /* Subtle zoom effect */
+}
+
+.search-form button:active {
+    background-color: #c74332; /* Even darker shade when clicked */
+    transform: scale(0.95); /* Slight shrink effect */
+}
+
+.search-form .form-group,
+.search-form .form-check {
+    margin-bottom: 20px;
+}
+
+#searchForm {
+    margin-top: 20px;
+}
+
+
 th, td {
     padding: 15px;
   }

@@ -82,7 +82,7 @@ namespace WebGallery.UI.Controllers
         [HttpGet("id/{id}")]
         public async Task<IActionResult> Index(string id)
         {
-            List<SearchHitDTO> result = await _minimalApiProxy.GetSearch(_username, null, null, null, id, 1);
+            List<SearchHitDTO> result = await _minimalApiProxy.GetSearch(_username, null, null, null, id, 1, false);
             if (result.Count == 0) return NoContent();
             SearchHitDTO searchHit = result[0];
 

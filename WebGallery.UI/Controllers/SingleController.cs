@@ -69,7 +69,7 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = null)
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = null, bool? allTagsMustMatch = false)
         {
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
@@ -78,7 +78,7 @@ namespace WebGallery.UI.Controllers
             //const int viewDisplayLimit = 32;
             maxSize = maxSize > sizeLimit ? sizeLimit : maxSize;
 
-            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize);
+            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true);
             List<SingleGalleryImageViewModel> items = [];
             foreach (SearchHitDTO hit in hits)
             {
