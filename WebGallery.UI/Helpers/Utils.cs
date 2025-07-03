@@ -18,5 +18,7 @@ namespace WebGallery.UI.Helpers
                     return MediaType.Image;
             }
         }
+
+        public const string ThumbnailFolder = "thumbs";
     }
 }

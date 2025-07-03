@@ -26,6 +26,7 @@
 
                 if (item.MediaType == MediaType.Video)
                 {
+                    @* OLD STYLE w/o thumbnail 
                     string videoUri = $"/files/video/{appPathBase64}";
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
                         <a href="@videoUri"
@@ -33,11 +34,37 @@
                            data-fancybox="gallery"
                            data-type="video"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
-                            <video class="img-fluid" loop muted>
+                            <video class="img-fluid" loop muted preload="metadata" controls>
                                 <source src="@videoUri" type="video/mp4" />
                             </video>
                         </a>
+                    </div> *@
+
+                    string thumbsName = System.IO.Path.GetFileNameWithoutExtension(item.AppPath) + ".jpg";
+                    string thumbsDir = System.IO.Path.GetDirectoryName(item.AppPath);
+                    string thumbsPath = System.IO.Path.Combine(thumbsDir, WebGallery.UI.Helpers.Utils.ThumbnailFolder, thumbsName);
+                    byte[] thumbsPathBytes = System.Text.Encoding.UTF8.GetBytes(thumbsPath);
+                    string thumbsBase64 = System.Convert.ToBase64String(thumbsPathBytes);
+                    string thumbsUri = $"/files/image/{thumbsBase64}";
+                    string videoUri = $"/files/video/{appPathBase64}";
+
+                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                        <a href="@videoUri"
+                           class="d-block photo-item"fg
+                           data-fancybox="gallery"
+                           data-type="video"
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
+
+                            <img src="@thumbsUri" alt="Image" class="img-fluid">
+                        </a>
+                         <div class="play-icon-overlay">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="white" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.4)"/>
+                                <polygon points="12,9 24,16 12,23" fill="white"/>
+                            </svg>
+                        </div>
                     </div>
+
                 }
                 else
                 {
