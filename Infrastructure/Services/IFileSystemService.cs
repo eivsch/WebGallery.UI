@@ -10,5 +10,6 @@ namespace Infrastructure.Services
         Task<SavedFileInfo> UploadFileToFileServer(string albumname, string filename, Stream file);
         Task<byte[]> DownloadImageFromFileServer(string imageIdentifier);
         Task<byte[]> DownloadVideoFromFileServer(string videoIdentifier);
+        Task DeleteFileFromFileServer(string albumName, string fileName);
     }
 }

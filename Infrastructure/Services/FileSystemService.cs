@@ -25,6 +25,20 @@ namespace Infrastructure.Services
             _client = fileServerClient.Client;
         }
 
+        public async Task DeleteFileFromFileServer(string albumName, string fileName)
+        {
+            // Construct the file path as on the file server
+            var filePath = Path.Combine(albumName, fileName);
+            var filePathBytes = System.Text.Encoding.UTF8.GetBytes(filePath);
+            var filePathBase64 = System.Convert.ToBase64String(filePathBytes);
+
+            var response = await _client.DeleteAsync($"{_fileServerUrl}/files/delete?file={filePathBase64}");
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to delete file. The API returned a {response.StatusCode} status code.");
+            }
+        }
+
         public async Task<byte[]> DownloadImageFromFileServer(string imageIdentifier)
         {
             var response = await _client.GetAsync($"{_fileServerUrl}/files/image?file={imageIdentifier}");

@@ -156,6 +156,13 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         else return false;
     }
 
+    public async Task<bool> DeleteAlbum(string username, string albumName)
+    {
+        HttpResponseMessage response = await _client.DeleteAsync($"users/{username}/albums/{albumName}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return true;
+        else return false;
+    }
+
     public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch)
     {
         string uri = $"users/{username}/search";

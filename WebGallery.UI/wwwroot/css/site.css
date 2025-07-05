@@ -525,3 +525,15 @@ th, td {
     height: 300px;
     object-fit: cover;
 }
+
+/* Admin album management table styles */
+.admin-album-table th,
+.admin-album-table td {
+    vertical-align: middle;
+    padding: 15px;
+}
+
+.admin-album-table .btn-danger.btn-sm {
+    padding: 2px 10px;
+    font-size: 0.95rem;
+}

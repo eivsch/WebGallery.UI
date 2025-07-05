@@ -1,0 +1,52 @@
+@using Infrastructure.MinimalApi
+@model List<AlbumMetaDTO>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<div class="container mt-5">
+    <h2 class="mb-4">Admin: Album Management</h2>
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">No albums found.</div>
+    }
+    else
+    {
+        <table class="table table-dark table-striped admin-album-table">
+            <thead>
+                <tr>
+                    <th>Album Name</th>
+                    <th>Created</th>
+                    <th>Total Items</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var album in Model)
+            {
+                <tr class="album-row" data-href="/admin/albums/@album.AlbumName" style="cursor:pointer;">
+                    <td>@album.AlbumName</td>
+                    <td>@album.Created.ToString("yyyy-MM-dd")</td>
+                    <td>@album.TotalCount</td>
+                    <td>
+                        <form asp-action="Delete" asp-controller="Admin" method="post" class="d-inline-block" onsubmit="event.stopPropagation(); return confirm('Are you sure you want to delete this album?');">
+                            <input type="hidden" name="albumName" value="@album.AlbumName" />
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            @Html.AntiForgeryToken()
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.album-row').forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('form')) return;
+                window.location = row.getAttribute('data-href');
+            });
+        });
+    </script>
+}
