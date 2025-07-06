@@ -7,6 +7,7 @@ using Application.Tags;
 using AutoMapper;
 using Infrastructure.Common;
 using Infrastructure.MinimalApi;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Models;
@@ -22,14 +23,22 @@ namespace WebGallery.UI.Controllers
         private readonly ITagService _tagService;
         private readonly IMapper _mapper;
         private readonly MinimalApiProxy _minimalApiProxy;
+        private readonly IFileSystemService _fileSystemService;
         private readonly string _username;
 
-        public BioController(IPictureService pictureService, ITagService tagService, IMapper mapper, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver)
+        public BioController(
+            IPictureService pictureService,
+            ITagService tagService,
+            IMapper mapper,
+            MinimalApiProxy minimalApiProxy,
+            IFileSystemService fileSystemService,
+            UsernameResolver usernameResolver)
         {
             _pictureService = pictureService;
             _tagService = tagService;
             _mapper = mapper;
             _minimalApiProxy = minimalApiProxy;
+            _fileSystemService = fileSystemService;
             _username = usernameResolver.Username;
         }
 
@@ -149,6 +158,19 @@ namespace WebGallery.UI.Controllers
             await _minimalApiProxy.DeleteMedia(_username, album, media);
 
             return View("Deleted", new BioPictureViewModel { AlbumMediaIndex = 0});
+        }
+
+        [HttpPost("SetVideoThumbnail")]
+        public async Task<IActionResult> SetVideoThumbnail([FromBody] SetVideoThumbnailRequest request)
+        {
+            await _fileSystemService.GenerateVideoThumbnailAsync(request.AppPathB64, request.CurrentTime ?? "00:00:01");
+            return Ok();
+        }
+
+        public class SetVideoThumbnailRequest
+        {
+            public string AppPathB64 { get; set; }
+            public string CurrentTime { get; set; }
         }
     }
 }

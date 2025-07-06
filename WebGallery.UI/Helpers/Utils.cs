@@ -1,5 +1,6 @@
 ﻿using Application.Enums;
 using System.IO;
+using System.Text;
 
 namespace WebGallery.UI.Helpers
 {
@@ -20,5 +21,17 @@ namespace WebGallery.UI.Helpers
         }
 
         public const string ThumbnailFolder = "thumbs";
+
+        /// <summary>
+        /// Returns the base64-encoded thumbnail path for a given media file path.
+        /// </summary>
+        public static string GetThumbsBase64(string appPath)
+        {
+            string thumbsName = Path.GetFileNameWithoutExtension(appPath) + ".jpg";
+            string thumbsDir = Path.GetDirectoryName(appPath);
+            string thumbsPath = Path.Combine(thumbsDir, ThumbnailFolder, thumbsName);
+            byte[] thumbsPathBytes = Encoding.UTF8.GetBytes(thumbsPath);
+            return System.Convert.ToBase64String(thumbsPathBytes);
+        }
     }
 }

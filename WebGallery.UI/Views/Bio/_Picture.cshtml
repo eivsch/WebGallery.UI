@@ -6,16 +6,31 @@
 @{
     var appPathBytes = System.Text.Encoding.UTF8.GetBytes(Model.AppPath);
     string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
-    string imageUri = $"/files/image/{appPathBase64}";
+    var mediaType = WebGallery.UI.Helpers.Utils.DetermineMediaType(Model.Name);
 }
 
 <div id="image-id-placeholder" style="display:none">@Model.Id</div>
 <div id="album-id-placeholder" style="display:none">@Model.Album</div>
 
 <figure class="bio-figure" data-aos="fade-in">
+@if (mediaType == Application.Enums.MediaType.Video)
+{
+    string videoUri = $"/files/video/{appPathBase64}";
+    string thumbsUri = $"/files/image/{WebGallery.UI.Helpers.Utils.GetThumbsBase64(Model.AppPath)}";
+    <div style="position:relative;">
+        <video class="bio-img" controls poster="@thumbsUri" style="width:100%;height:auto;">
+            <source src="@videoUri" type="video/mp4" />
+            Your browser does not support the video tag.
+        </video>
+    </div>
+}
+else 
+{
+    string imageUri = $"/files/image/{appPathBase64}";
     <a href="@imageUri" data-fancybox data-type="image">
         <img src="@imageUri" alt="Image" class="bio-img">
     </a>
+}
 </figure>
 
 <div data-aos="fade-left" data-aos-duration="1000">
@@ -29,7 +44,8 @@
             <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id', '@Model.Album')" class="far fa-minus-square"></i></li>
         }
     </ul>
-</div>
+</diusing WebGallery.UI.Helpers;
+#line default
 
 <div class="bio-nav-container">
     <div class="bio-nav-item">
@@ -39,4 +55,63 @@
     <div class="bio-nav-item">
         <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">  >>></a>
     </div>
+    @if (mediaType == Application.Enums.MediaType.Video)
+    {
+        <div class="row">
+            <div class="bio-nav-item">
+                <button id="setVideoThumbnail" type="button">
+                    Set as thumbnail
+                </button>
+            </div>
+        </div>
+    }
 </div>
+
+<script>
+    const video = document.querySelector('video');
+    const setThumbBtn = document.getElementById('setVideoThumbnail');
+    if (video && setThumbBtn) {
+        setThumbBtn.addEventListener('click', function () {
+            // Format as hh:mm:ss, rounding up
+            function formatTime(seconds) {
+                const total = Math.ceil(seconds);
+                const h = Math.floor(total / 3600).toString().padStart(2, '0');
+                const m = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
+                const s = (total % 60).toString().padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            }
+            const currentTime = formatTime(video.currentTime);
+            const appPathB64 = "@appPathBase64";
+
+            setThumbBtn.disabled = true;
+            setThumbBtn.textContent = "Setting...";
+
+            fetch('/Bio/SetVideoThumbnail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appPathB64: appPathB64,
+                    currentTime: currentTime
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    setThumbBtn.textContent = "Thumbnail set!";
+                    setTimeout(() => {
+                        setThumbBtn.textContent = "Set as thumbnail";
+                        setThumbBtn.disabled = false;
+                    }, 1500);
+                } else {
+                    setThumbBtn.textContent = "Failed!";
+                    setThumbBtn.disabled = false;
+                }
+            })
+            .catch(() => {
+                setThumbBtn.textContent = "Failed!";
+                setThumbBtn.disabled = false;
+            });
+        });
+    }
+</script>

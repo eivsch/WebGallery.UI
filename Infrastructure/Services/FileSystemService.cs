@@ -76,5 +76,23 @@ namespace Infrastructure.Services
                 throw new Exception($"The API returned a {response.StatusCode} status code.");
             }
         }
+
+        public async Task GenerateVideoThumbnailAsync(string appPathBase64, string seekTime = "00:00:01")
+        {
+            var request = new
+            {
+                File = appPathBase64,
+                SeekTime = seekTime
+            };
+
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync($"{_fileServerUrl}/files/generate-thumbnail", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to generate thumbnail. The API returned a {response.StatusCode} status code.");
+            }
+        }
     }
 }

@@ -40,17 +40,13 @@
                         </a>
                     </div> *@
 
-                    string thumbsName = System.IO.Path.GetFileNameWithoutExtension(item.AppPath) + ".jpg";
-                    string thumbsDir = System.IO.Path.GetDirectoryName(item.AppPath);
-                    string thumbsPath = System.IO.Path.Combine(thumbsDir, WebGallery.UI.Helpers.Utils.ThumbnailFolder, thumbsName);
-                    byte[] thumbsPathBytes = System.Text.Encoding.UTF8.GetBytes(thumbsPath);
-                    string thumbsBase64 = System.Convert.ToBase64String(thumbsPathBytes);
+                    string thumbsBase64 = WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.AppPath);
                     string thumbsUri = $"/files/image/{thumbsBase64}";
                     string videoUri = $"/files/video/{appPathBase64}";
 
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
                         <a href="@videoUri"
-                           class="d-block photo-item"fg
+                           class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="video"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
