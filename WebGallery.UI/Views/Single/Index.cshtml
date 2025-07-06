@@ -27,17 +27,25 @@
 
                 if (item.MediaType == MediaType.Video)
                 {
+                    string thumbsBase64 = WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.AppPath);
+                    string thumbsUri = $"/files/image/{thumbsBase64}";
                     string videoUri = $"/files/video/{appPathBase64}";
+
                     <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
                         <a href="@videoUri"
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="video"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
-                            <video class="img-fluid" muted>
-                                <source src="@videoUri" type="video/mp4" />
-                            </video>
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>"
+                           data-video-autoplay="false">
+                            <img src="@thumbsUri" alt="Video thumbnail" class="img-fluid">
                         </a>
+                        <div class="play-icon-overlay">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="white" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.4)"/>
+                                <polygon points="12,9 24,16 12,23" fill="white"/>
+                            </svg>
+                        </div>
                     </div>
                 }
                 else

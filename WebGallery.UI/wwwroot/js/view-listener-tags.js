@@ -38,12 +38,13 @@ function createThumbnailElem(mediaWithTag, album, tag) {
         const uriPrefix = "/files/video/";
         const mediaUri = album.albumName + "/" + mediaWithTag.name;
         const mediaUrib64 = window.btoa(mediaUri);
+        const thumbnailUrib64 = getThumbsBase64(album.albumName, mediaWithTag.name);
 
         const vid = document.createElement("video");
         vid.classList.add("img-fluid");
-        vid.setAttribute("autoplay");
-        vid.setAttribute("loop");
-        vid.setAttribute("muted");
+        vid.setAttribute("muted", true);
+        vid.setAttribute("preload", "none");
+        vid.setAttribute("poster", "/files/image/" + thumbnailUrib64);
 
         const srcEl = document.createElement("source");
         srcEl.src = uriPrefix + mediaUrib64;
@@ -81,6 +82,13 @@ function createThumbnailElem(mediaWithTag, album, tag) {
     col.appendChild(a);
 
     return col;
+}
+
+function getThumbsBase64(albumName, fileName) {
+    const fileNameNoExt = fileName.replace(/\.[^/.]+$/, "");
+    const thumbsName = fileNameNoExt + ".jpg";
+    const thumbsPath = albumName + "/thumbs/" + thumbsName;
+    return btoa(thumbsPath);
 }
 
 async function getAlbums() {
