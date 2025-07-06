@@ -18,7 +18,7 @@
     string videoUri = $"/files/video/{appPathBase64}";
     string thumbsUri = $"/files/image/{WebGallery.UI.Helpers.Utils.GetThumbsBase64(Model.AppPath)}";
     <div style="position:relative;">
-        <video class="bio-img" controls poster="@thumbsUri" style="width:100%;height:auto;">
+        <video class="bio-img" controls preload="none" poster="@thumbsUri" style="width:100%;height:auto;">
             <source src="@videoUri" type="video/mp4" />
             Your browser does not support the video tag.
         </video>
@@ -59,59 +59,10 @@ else
     {
         <div class="row">
             <div class="bio-nav-item">
-                <button id="setVideoThumbnail" type="button">
+                <button id="setVideoThumbnail" type="button" data-app-path-b64="@appPathBase64">
                     Set as thumbnail
                 </button>
             </div>
         </div>
     }
 </div>
-
-<script>
-    const video = document.querySelector('video');
-    const setThumbBtn = document.getElementById('setVideoThumbnail');
-    if (video && setThumbBtn) {
-        setThumbBtn.addEventListener('click', function () {
-            // Format as hh:mm:ss, rounding up
-            function formatTime(seconds) {
-                const total = Math.ceil(seconds);
-                const h = Math.floor(total / 3600).toString().padStart(2, '0');
-                const m = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
-                const s = (total % 60).toString().padStart(2, '0');
-                return `${h}:${m}:${s}`;
-            }
-            const currentTime = formatTime(video.currentTime);
-            const appPathB64 = "@appPathBase64";
-
-            setThumbBtn.disabled = true;
-            setThumbBtn.textContent = "Setting...";
-
-            fetch('/Bio/SetVideoThumbnail', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    appPathB64: appPathB64,
-                    currentTime: currentTime
-                })
-            })
-            .then(response => {
-                if (response.ok) {
-                    setThumbBtn.textContent = "Thumbnail set!";
-                    setTimeout(() => {
-                        setThumbBtn.textContent = "Set as thumbnail";
-                        setThumbBtn.disabled = false;
-                    }, 1500);
-                } else {
-                    setThumbBtn.textContent = "Failed!";
-                    setThumbBtn.disabled = false;
-                }
-            })
-            .catch(() => {
-                setThumbBtn.textContent = "Failed!";
-                setThumbBtn.disabled = false;
-            });
-        });
-    }
-</script>

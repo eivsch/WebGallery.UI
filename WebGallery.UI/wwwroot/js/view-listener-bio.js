@@ -126,4 +126,59 @@ function focusInput() {
 
 function bioSwitch(album, sortOrder) {
     window.history.pushState("", "", '/Bio/' + album + '/' + sortOrder);
+    setupVideoThumbnailButton();
 }
+
+function setupVideoThumbnailButton() {
+    var video = document.querySelector('video');
+    var setThumbBtn = document.getElementById('setVideoThumbnail');
+    if (video && setThumbBtn) {
+        setThumbBtn.onclick = function () {
+            console.log("clicked");
+            function formatTime(seconds) {
+                var total = Math.ceil(seconds);
+                var h = Math.floor(total / 3600).toString().padStart(2, '0');
+                var m = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
+                var s = (total % 60).toString().padStart(2, '0');
+                return h + ":" + m + ":" + s;
+            }
+            var currentTime = formatTime(video.currentTime);
+            var appPathB64 = setThumbBtn.getAttribute('data-app-path-b64') || window.appPathBase64 || "";
+
+            setThumbBtn.disabled = true;
+            setThumbBtn.textContent = "Setting...";
+
+            fetch('/Bio/SetVideoThumbnail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appPathB64: appPathB64,
+                    currentTime: currentTime
+                })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    setThumbBtn.textContent = "Thumbnail set!";
+                    setTimeout(function () {
+                        setThumbBtn.textContent = "Set as thumbnail";
+                        setThumbBtn.disabled = false;
+                    }, 1500);
+                } else {
+                    setThumbBtn.textContent = "Failed!";
+                    setThumbBtn.disabled = false;
+                }
+            })
+            .catch(function () {
+                setThumbBtn.textContent = "Failed!";
+                setThumbBtn.disabled = false;
+            });
+        };
+    }
+}
+
+// Initialize the video thumbnail button on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupVideoThumbnailButton();
+});

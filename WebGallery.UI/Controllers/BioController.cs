@@ -156,8 +156,9 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> DeletePicture(string album, string media)
         {
             await _minimalApiProxy.DeleteMedia(_username, album, media);
+            await _fileSystemService.DeleteFileFromFileServer(album, media); // Ensure the file is deleted from the file system as well
 
-            return View("Deleted", new BioPictureViewModel { AlbumMediaIndex = 0});
+            return View("Deleted", new BioPictureViewModel { AlbumMediaIndex = 0 });
         }
 
         [HttpPost("SetVideoThumbnail")]
