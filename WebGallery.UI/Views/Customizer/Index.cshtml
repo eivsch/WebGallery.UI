@@ -1,98 +1,64 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-@model WebGallery.UI.ViewModels.Customizer.CustomizerViewModel;
+@model WebGallery.UI.ViewModels.Customizer.SearchesViewModel
 
-<div class="customizer-form">
-    <h2>Gallery Customizer</h2>
-    <form asp-controller="Customizer" asp-action="Generate">
-        <div class="row">
-            <div class="form-element col-md-8">
-                <div class="row">
-                    <div class="col-md-12">
-                        <label>Set number of pics:</label>
-                    </div>
-                    <div class="col-md-10">
-                        <div my-slider></div>
-                    </div>
-                    <div class="col-md-2">
-                        <input asp-for="NumberOfPictures" class="form-control" type="number" value="12" data-number-pics />
-                    </div>
-                </div>
+<!-- Search Section -->
+<div class="row pt-4 mb-5 text-center">
+    <div class="col-12">
+        <!-- Collapsible Header -->
+        <h3 class="text-white mb-4" data-bs-toggle="collapse" data-bs-target="#searchFormContainer" aria-expanded="true" aria-controls="searchFormContainer" style="cursor: pointer;">
+            Search
+        </h3>
+
+        <!-- Saved Searches Dropdown -->
+        <div class="mb-3" style="max-width:600px;margin:0 auto;">
+            <div class="input-group">
+                <select id="savedSearchesDropdown" class="form-select">
+                    <option value="">-- Select a saved search --</option>
+                    @foreach (var search in Model.SavedSearches)
+                    {
+                        <option value="@search.SearchName"
+                                data-albums="@search.Albums"
+                                data-tags="@search.Tags"
+                                data-fileextensions="@search.FileExtensions"
+                                data-medianamecontains="@search.MediaNameContains"
+                                data-alltagsmustmatch="@search.AllTagsMustMatch"
+                                data-maxsize="@search.MaxSize">
+                            @search.SearchName
+                        </option>
+                    }
+                </select>
+                <button type="button" class="btn btn-danger" id="deleteSavedSearchBtn" title="Delete selected search" style="margin-left:10px;">Delete</button>
             </div>
         </div>
 
-        <div class="row">
-            <div class="form-element col-md-8">
-                <label>Tag mode:</label>
-                <br />
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioTagmodeOption" id="inlineRadioDefault" value="default" checked="checked">
-                    <label class="form-check-label" for="inlineRadioDefault">Default</label>
+        <!-- Collapsible Form -->
+        <div class="collapse show" id="searchFormContainer">
+            <form method="get" action="/single/search" class="search-form" id="searchForm">
+                <div class="form-group">
+                    <input type="text" name="albums" class="form-control" placeholder="Albums (comma-separated)" id="albumsInput">
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioTagmodeOption" id="inlineRadioOnlyTagged" value="onlytagged">
-                    <label class="form-check-label" for="inlineRadioOnlyTagged">Only tagged</label>
+                <div class="form-group">
+                    <input type="text" name="tags" class="form-control" placeholder="Tags (comma-separated)" id="tagsInput">
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioTagmodeOption" id="inlineRadioUntagged" value="untagged">
-                    <label class="form-check-label" for="inlineRadioUntagged">Untagged</label>
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="allTagsMustMatch" class="form-check-input" id="allTagsMustMatch" value="true">
+                    <label class="form-check-label text-white" for="allTagsMustMatch">All tags must match</label>
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioTagmodeOption" id="inlineRadioCustom" value="custom">
-                    <label class="form-check-label" for="inlineRadioCustom">Custom</label>
+                <div class="form-group">
+                    <input type="text" name="fileExtensions" class="form-control" placeholder="File Extensions (e.g., jpg, png)" id="fileExtensionsInput">
                 </div>
-            </div>
+                <div class="form-group">
+                    <input type="text" name="mediaNameContains" class="form-control" placeholder="Filename (partial match)" id="mediaNameContainsInput">
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <button type="button" class="btn btn-secondary" id="saveSearchBtn">Save Search</button>
+                </div>
+                <span id="saveSearchStatus" style="margin-left:10px;color:#ef6c57;display:none;"></span>
+            </form>
         </div>
-
-        <div data-tag-manager style="display: none;">
-            <div class="row">
-                <div class="form-group col-md-8">
-
-                    <select data-select-tags asp-for="SelectedTags" asp-items="@(new SelectList(Model.Tags, "Name", "Name"))" multiple="multiple" style="width: 100%"></select>
-
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="RadioTagFilterOption" id="inlineRadioInclusive" value="inclusive" checked="checked">
-                        <label class="form-check-label" for="inlineRadioInclusive">Inclusive filter</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="RadioTagFilterOption" id="inlineRadioExclusive" value="exclusive">
-                        <label class="form-check-label" for="inlineRadioExclusive">Exclusive filter</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="form-element col-md-8">
-                <label>Media mode:</label>
-                <br />
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioMediaFilterModeOption" id="inlineRadioGifInclude" value="include" checked="checked">
-                    <label class="form-check-label" for="inlineRadioGifInclude">Include All</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioMediaFilterModeOption" id="inlineRadioGifExclude" value="exclude">
-                    <label class="form-check-label" for="inlineRadioGifExclude">Exclude Gifs</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioMediaFilterModeOption" id="inlineRadioGifOnly" value="onlygifs">
-                    <label class="form-check-label" for="inlineRadioGifOnly">Gifs Only</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioMediaFilterModeOption" id="inlineRadioVideoExclude" value="excludevideos">
-                    <label class="form-check-label" for="inlineRadioVideoExclude">Exclude Videos</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="RadioMediaFilterModeOption" id="inlineRadioVideoOnly" value="onlyvideos">
-                    <label class="form-check-label" for="inlineRadioVideoOnly">Videos Only</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-element__submit">
-            <button class="btn btn-light" type="submit">Generate</button>
-        </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {

@@ -15,7 +15,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
 
     public async Task<CredentialsDTO> GetCredentials(string username)
     {
-        HttpResponseMessage response =  await _client.GetAsync($"/users/{username}");
+        HttpResponseMessage response = await _client.GetAsync($"/users/{username}");
         if (response.IsSuccessStatusCode)
         {
             if (response.Content == null || response.Content.Headers.ContentLength == 0)
@@ -57,7 +57,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
 
     public async Task<List<AlbumMetaDTO>> GetAlbums(string username)
     {
-        HttpResponseMessage response =  await _client.GetAsync($"/users/{username}/albums");
+        HttpResponseMessage response = await _client.GetAsync($"/users/{username}/albums");
         if (response.IsSuccessStatusCode)
         {
             string responseStr = await response.Content.ReadAsStringAsync();
@@ -83,7 +83,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         if (!response.IsSuccessStatusCode)
         {
             throw new Exception($"The API returned a {response.StatusCode} status code.");
-        }        
+        }
     }
 
     public async Task PostMediaItem(string username, string albumName, SavedFileInfo savedFileInfo)
@@ -104,7 +104,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
 
     public async Task<AlbumContentsDTO> GetAlbumContents(string username, string albumName, int from, int numberOfItems)
     {
-        HttpResponseMessage response =  await _client.GetAsync($"/users/{username}/albums/{albumName}?from={from}&size={numberOfItems}");
+        HttpResponseMessage response = await _client.GetAsync($"/users/{username}/albums/{albumName}?from={from}&size={numberOfItems}");
         if (response.IsSuccessStatusCode)
         {
             string responseStr = await response.Content.ReadAsStringAsync();
@@ -202,6 +202,40 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
     }
+
+    public async Task SaveSearch(string username, SavedSearchDTO search)
+    {
+        var jsonContent = new JsonContent(search);
+        var response = await _client.PostAsync($"/users/{username}/saved-searches", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task<List<SavedSearchDTO>> GetSavedSearches(string username)
+    {
+        var response = await _client.GetAsync($"/users/{username}/saved-searches");
+        if (response.IsSuccessStatusCode)
+        {
+            string responseStr = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<List<SavedSearchDTO>>(responseStr, _jsonOpts);
+            return data;
+        }
+        else
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task DeleteSavedSearch(string username, string searchName)
+    {
+        var response = await _client.DeleteAsync($"/users/{username}/saved-searches/{searchName}");
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
 public record CredentialsDTO
@@ -254,4 +288,15 @@ public record SearchHitDTO
     public int MediaAlbumIndex { get; set; }
     public required string AlbumName { get; set; }
     public required MediaDTO MediaItem { get; set; }
+}
+
+public record SavedSearchDTO
+{
+    public string SearchName { get; set; }
+    public string Albums { get; set; }
+    public string Tags { get; set; }
+    public string FileExtensions { get; set; }
+    public string MediaNameContains { get; set; }
+    public int? MaxSize { get; set; }
+    public bool? AllTagsMustMatch { get; set; }
 }

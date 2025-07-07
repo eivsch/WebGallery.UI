@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
+using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.ViewModels.Customizer;
+using WebGallery.UI.ViewModels.Single;
 
 namespace WebGallery.UI.Controllers
 {
@@ -13,10 +18,15 @@ namespace WebGallery.UI.Controllers
     public class CustomizerController : Controller
     {
         private readonly ITagService _tagService;
+        readonly MinimalApiProxy _minimalApiProxy;
+        readonly string _username;
 
-        public CustomizerController(ITagService tagService)
+        public CustomizerController(ITagService tagService, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
             _tagService = tagService;
+            _minimalApiProxy = minimalApiProxy;
+            Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
+            _username = claim.Value;
         }
         
         [HttpGet]
@@ -24,14 +34,34 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Customizer";
 
-            var tags = await _tagService.GetAll();
-
-            var vm = new CustomizerViewModel
+            List<SavedSearchDTO> searches = await _minimalApiProxy.GetSavedSearches(_username);
+            SearchesViewModel vm = new ()
             {
-                Tags = tags.Select(t => new Models.Tag { Name = t.TagName }).ToList()
+                SavedSearches = searches
             };
 
             return View(vm);
+        }
+
+        [HttpPost("save-search")]
+        public async Task<IActionResult> SaveSearch([FromBody] SaveSearchRequest searchDetails)
+        {
+            if (string.IsNullOrWhiteSpace(searchDetails.SearchName))
+                return BadRequest("Search name cannot be empty.");
+
+            var searchDto = new SavedSearchDTO
+            {
+                SearchName = searchDetails.SearchName,
+                Albums = searchDetails.Albums,
+                Tags = searchDetails.Tags,
+                FileExtensions = searchDetails.FileExtensions,
+                MediaNameContains = searchDetails.MediaNameContains,
+                MaxSize = searchDetails.MaxSize,
+                AllTagsMustMatch = searchDetails.AllTagsMustMatch
+            };
+
+            await _minimalApiProxy.SaveSearch(_username, searchDto);
+            return Ok();
         }
 
         [HttpPost]
@@ -66,6 +96,15 @@ namespace WebGallery.UI.Controllers
                 default:
                     return "undefined";
             }
+        }
+
+        [HttpDelete("delete-saved-search")]
+        public async Task<IActionResult> DeleteSavedSearch(string searchName)
+        {
+            if (string.IsNullOrWhiteSpace(searchName))
+                return BadRequest("Search name required.");
+            await _minimalApiProxy.DeleteSavedSearch(_username, searchName);
+            return Ok();
         }
     }
 }

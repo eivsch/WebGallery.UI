@@ -543,3 +543,75 @@ a.regular-text-link {
     color: inherit !important;
     text-decoration: none !important;
 }
+
+#saveSearchStatus {
+    font-weight: bold;
+}
+
+/* Button container for search form buttons */
+.search-form .button-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+    margin-top: 30px;
+    margin-bottom: 0;
+    min-height: 60px;
+}
+
+/* Center the main Search button */
+.search-form .btn-primary {
+    margin: 0 auto;
+    display: block;
+}
+
+/* Align Save Search button to bottom right */
+#saveSearchBtn {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background-color: #444;
+    color: #ef6c57;
+    border: 2px solid #ef6c57;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+#saveSearchBtn:hover {
+    background-color: #ef6c57;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+#saveSearchBtn:active {
+    background-color: #c74332;
+    color: #fff;
+    transform: scale(0.95);
+}
+
+#savedSearchesDropdown {
+    max-width: 300px;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#deleteSavedSearchBtn {
+    background-color: #c74332;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#deleteSavedSearchBtn:hover {
+    background-color: #ef6c57;
+}
