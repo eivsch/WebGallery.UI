@@ -15,7 +15,8 @@
             <thead>
                 <tr>
                     <th>Filename</th>
-                    <th>Size (bytes)</th>
+                    <th>Size (KB)</th>
+                    <th>Created</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -23,8 +24,16 @@
             @foreach (var file in Model.Items)
             {
                 <tr>
-                    <td>@file.Name</td>
-                    <td>@file.AlbumName</td>
+                    <td><a class="regular-text-link" href="/Bio/id/@file.Id">@file.Name</a></td>
+                    @if (file.Size.HasValue)
+                    {
+                        <td>@Math.Round((file.Size.Value / 1024.0M), 1)</td>
+                    }
+                    else
+                    {
+                        <td>N/A</td>
+                    }
+                    <td>@file.Created.ToString("yyyy-MM-dd HH:mm:ss")</td>
                     <td>
                         <form asp-action="DeleteFile" asp-controller="Admin" asp-route-albumName="@albumName" method="post" class="d-inline-block" onsubmit="return confirm('Delete this file?');">
                             <input type="hidden" name="fileName" value="@file.Name" />

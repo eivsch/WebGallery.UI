@@ -27,7 +27,7 @@
 else 
 {
     string imageUri = $"/files/image/{appPathBase64}";
-    <a href="@imageUri" data-fancybox data-type="image">
+    <a href="@imageUri" data-fancybox data-type="image" data-caption="@Model.Name">
         <img src="@imageUri" alt="Image" class="bio-img">
     </a>
 }
@@ -44,14 +44,13 @@ else
             <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id', '@Model.Album')" class="far fa-minus-square"></i></li>
         }
     </ul>
-</diusing WebGallery.UI.Helpers;
-#line default
+</div>
 
 <div class="bio-nav-container">
     <div class="bio-nav-item">
         <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))"><<<  </a>
     </div>
-    <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - @Model.Album</div>
+    <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - <a class="regular-text-link" href="/admin/albums/@Model.Album">@Model.Album</a></div>
     <div class="bio-nav-item">
         <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">  >>></a>
     </div>

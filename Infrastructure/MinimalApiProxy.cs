@@ -234,11 +234,13 @@ public record AlbumContentsDTO
 
 public record MediaDTO
 {
-    public string Id {get;set;}
-    public string Name {get;set;}
-    public List<TagDTO> Tags {get;set;}
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public List<TagDTO> Tags { get; set; }
     public string AlbumName { get; set; }
-    public int? Index {get;set;}
+    public int? Index { get; set; }
+    public int? Size { get; set; }
+    public DateTimeOffset Created {get;set;}
 }
 
 public record TagDTO

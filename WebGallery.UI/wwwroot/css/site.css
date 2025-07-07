@@ -537,3 +537,9 @@ th, td {
     padding: 2px 10px;
     font-size: 0.95rem;
 }
+
+/* Remove styling from <a> tags inside the admin album table's filename column */
+a.regular-text-link {
+    color: inherit !important;
+    text-decoration: none !important;
+}
