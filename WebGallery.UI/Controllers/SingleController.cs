@@ -74,7 +74,7 @@ namespace WebGallery.UI.Controllers
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
             // TODO: decide how to scroll over many search hits
-            const int sizeLimit = 256;
+            const int sizeLimit = 128;
             //const int viewDisplayLimit = 32;
             maxSize = maxSize > sizeLimit ? sizeLimit : maxSize;
 

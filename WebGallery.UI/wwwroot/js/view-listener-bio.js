@@ -132,31 +132,25 @@ function bioSwitch(album, sortOrder) {
 function setupVideoThumbnailButton() {
     var video = document.querySelector('video');
     var setThumbBtn = document.getElementById('setVideoThumbnail');
+    var genImgBtn = document.getElementById('generateVideoImage');
+    function formatTime(seconds) {
+        var totalMs = Math.ceil(seconds * 1000);
+        var h = Math.floor(totalMs / 3600000).toString().padStart(2, '0');
+        var m = Math.floor((totalMs % 3600000) / 60000).toString().padStart(2, '0');
+        var s = Math.floor((totalMs % 60000) / 1000).toString().padStart(2, '0');
+        var ms = (totalMs % 1000).toString().padStart(3, '0');
+        return h + ":" + m + ":" + s + "." + ms;
+    }
     if (video && setThumbBtn) {
         setThumbBtn.onclick = function () {
-            console.log("clicked");
-            function formatTime(seconds) {
-                var total = Math.ceil(seconds);
-                var h = Math.floor(total / 3600).toString().padStart(2, '0');
-                var m = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
-                var s = (total % 60).toString().padStart(2, '0');
-                return h + ":" + m + ":" + s;
-            }
             var currentTime = formatTime(video.currentTime);
             var appPathB64 = setThumbBtn.getAttribute('data-app-path-b64') || window.appPathBase64 || "";
-
             setThumbBtn.disabled = true;
             setThumbBtn.textContent = "Setting...";
-
             fetch('/Bio/SetVideoThumbnail', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    appPathB64: appPathB64,
-                    currentTime: currentTime
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appPathB64: appPathB64, currentTime: currentTime })
             })
             .then(function(response) {
                 if (response.ok) {
@@ -173,6 +167,35 @@ function setupVideoThumbnailButton() {
             .catch(function () {
                 setThumbBtn.textContent = "Failed!";
                 setThumbBtn.disabled = false;
+            });
+        };
+    }
+    if (video && genImgBtn) {
+        genImgBtn.onclick = function () {
+            var currentTime = formatTime(video.currentTime);
+            var appPathB64 = genImgBtn.getAttribute('data-app-path-b64') || window.appPathBase64 || "";
+            genImgBtn.disabled = true;
+            genImgBtn.textContent = "Generating...";
+            fetch('/Bio/GenerateVideoImage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appPathB64: appPathB64, currentTime: currentTime })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    genImgBtn.textContent = "Image generated!";
+                    setTimeout(function () {
+                        genImgBtn.textContent = "Generate image";
+                        genImgBtn.disabled = false;
+                    }, 1500);
+                } else {
+                    genImgBtn.textContent = "Failed!";
+                    genImgBtn.disabled = false;
+                }
+            })
+            .catch(function () {
+                genImgBtn.textContent = "Failed!";
+                genImgBtn.disabled = false;
             });
         };
     }

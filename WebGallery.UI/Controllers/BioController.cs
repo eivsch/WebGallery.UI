@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Services.Interfaces;
@@ -26,6 +27,8 @@ namespace WebGallery.UI.Controllers
         private readonly IFileSystemService _fileSystemService;
         private readonly string _username;
 
+        private List<AlbumMetaDTO> _albumsCache;
+
         public BioController(
             IPictureService pictureService,
             ITagService tagService,
@@ -42,6 +45,13 @@ namespace WebGallery.UI.Controllers
             _username = usernameResolver.Username;
         }
 
+        private async Task<List<AlbumMetaDTO>> GetAlbumsAsync()
+        {
+            if (_albumsCache == null)
+                _albumsCache = await _minimalApiProxy.GetAlbums(_username);
+            return _albumsCache;
+        }
+
         public async Task<IActionResult> Index()
         {
             ViewBag.Current = "Bio";
@@ -51,7 +61,7 @@ namespace WebGallery.UI.Controllers
             AlbumMetaDTO album;
             int albumMediaIndex;
             
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
             if (albums == null) return null;
 
             int albumIndex = rnd.Next(0, albums.Count); 
@@ -67,7 +77,7 @@ namespace WebGallery.UI.Controllers
             AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, index, 1);
             MediaDTO media = albumContents.Items[0];
 
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
             IEnumerable<TagMetaDTO> tags = albums.SelectMany(s => s.Tags);
             IEnumerable<string> allTags = tags.Select(s => s.TagName).Distinct();
 
@@ -95,7 +105,7 @@ namespace WebGallery.UI.Controllers
             if (result.Count == 0) return NoContent();
             SearchHitDTO searchHit = result[0];
 
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
             IEnumerable<TagMetaDTO> tags = albums.SelectMany(s => s.Tags);
             IEnumerable<string> allTags = tags.Select(s => s.TagName).Distinct();
 
@@ -165,6 +175,24 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> SetVideoThumbnail([FromBody] SetVideoThumbnailRequest request)
         {
             await _fileSystemService.GenerateVideoThumbnailAsync(request.AppPathB64, request.CurrentTime ?? "00:00:01");
+            return Ok();
+        }
+
+        [HttpPost("GenerateVideoImage")]
+        public async Task<IActionResult> GenerateVideoImage([FromBody] SetVideoThumbnailRequest request)
+        {
+            SavedFileInfo savedFile = await _fileSystemService.GenerateVideoImageAsync(request.AppPathB64, request.CurrentTime ?? "00:00:01.000");
+            string fullDirName = Path.GetDirectoryName(savedFile.FilePathFull);
+            string albumName = Path.GetFileName(fullDirName);
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
+            if (albums.Any(a => a.AlbumName == albumName) == false)
+            {
+                // Create the album if it doesn't exist
+                await _minimalApiProxy.CreateAlbum(_username, albumName);
+            }
+
+            await _minimalApiProxy.PostMediaItem(_username, albumName, savedFile);
+
             return Ok();
         }
 

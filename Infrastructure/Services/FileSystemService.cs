@@ -14,7 +14,7 @@ namespace Infrastructure.Services
         private readonly HttpClient _client;
         private readonly string _rootPath;
         private readonly string _fileServerUrl;
-        
+
         public FileSystemService(IConfiguration configuration, WebGalleryFileServerClient fileServerClient)
         {
             _rootPath = configuration.GetValue("ConnectionStrings:FileServerRoot", "");
@@ -42,14 +42,14 @@ namespace Infrastructure.Services
         public async Task<byte[]> DownloadImageFromFileServer(string imageIdentifier)
         {
             var response = await _client.GetAsync($"{_fileServerUrl}/files/image?file={imageIdentifier}");
-                    
+
             return await response.Content.ReadAsByteArrayAsync();
         }
 
         public async Task<byte[]> DownloadVideoFromFileServer(string videoIdentifier)
         {
             var response = await _client.GetAsync($"{_fileServerUrl}/files/video?file={videoIdentifier}");
-                    
+
             return await response.Content.ReadAsByteArrayAsync();
         }
 
@@ -77,7 +77,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task GenerateVideoThumbnailAsync(string appPathBase64, string seekTime = "00:00:01")
+        public async Task GenerateVideoThumbnailAsync(string appPathBase64, string seekTime = "00:00:01.000")
         {
             var request = new
             {
@@ -93,6 +93,27 @@ namespace Infrastructure.Services
             {
                 throw new Exception($"Failed to generate thumbnail. The API returned a {response.StatusCode} status code.");
             }
+        }
+        
+        public async Task<SavedFileInfo> GenerateVideoImageAsync(string appPathB64, string seekTime = "00:00:01.000")
+        {
+            var body = new { File = appPathB64, SeekTime = seekTime };
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync($"{_fileServerUrl}/files/generate-video-image", content);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Failed to generate video image. Status: {response.StatusCode}");
+
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            var responseData = await JsonSerializer.DeserializeAsync<SavedFileInfo>(responseStream);
+
+            return new SavedFileInfo
+            {
+                FileName = responseData.FileName,
+                FilePathFull = responseData.FilePathFull,
+                FileSize = responseData.FileSize
+            };
         }
     }
 }
