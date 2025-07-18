@@ -14,12 +14,29 @@ using WebGallery.UI.ViewModels.Single;
 
 namespace WebGallery.UI.Controllers
 {
+    class SearchDetails
+    {
+        public List<SearchHitDTO> Hits { get; set; }
+
+        public string Albums { get; set; } 
+        public string Tags { get; set; }
+        public string FileExtensions { get; set; }
+        public string MediaNameContains { get; set; }
+        public int? MaxSize { get; set; }
+        public bool? AllTagsMustMatch { get; set; }
+        public bool HasMoreResults { get; set; }
+    }
+
     [Authorize]
     [Route("[controller]")]
     public class SingleController : Controller
     {
+        private static Dictionary<string, SearchDetails> _searchCache = [];
+        
         readonly MinimalApiProxy _minimalApiProxy;
         readonly string _username;
+
+        const int DISPLAY_COUNT_MAX = 32;
 
         public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
@@ -31,14 +48,14 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.Current = "Random";
-            int totalCount = 32, currentCount = 0;
+            int currentCount = 0;
             Random rnd = new();
 
             List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
             if (albums == null) return null;
 
             List<SingleGalleryImageViewModel> items = new();
-            while (currentCount < totalCount)
+            while (currentCount < DISPLAY_COUNT_MAX)
             {
                 int randomAlbumIndex = rnd.Next(0, albums.Count);
                 AlbumMetaDTO album = albums[randomAlbumIndex];
@@ -61,27 +78,84 @@ namespace WebGallery.UI.Controllers
 
             var vm = SinglePageGenerator.SetDisplayProperties(items);
             vm.GalleryTitle = "Randomized album";
-            vm.TotalImageCount = totalCount;
+            vm.TotalImageCount = DISPLAY_COUNT_MAX;
             vm.CurrentOffset = 0;
-            vm.CurrentDisplayCount = 12;
+            vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.IsRandomized = true;
 
             return View("Index", vm);
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = null, bool? allTagsMustMatch = false)
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, bool? allTagsMustMatch = false, int? hitsToSkip = null)
         {
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
-            // TODO: decide how to scroll over many search hits
-            const int sizeLimit = 128;
-            //const int viewDisplayLimit = 32;
-            maxSize = maxSize > sizeLimit ? sizeLimit : maxSize;
 
-            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true);
-            List<SingleGalleryImageViewModel> items = [];
-            foreach (SearchHitDTO hit in hits)
+            List<SearchHitDTO> searchHits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true, hitsToSkip);
+            SearchDetails searchDetails = new()
             {
+                Hits = searchHits,
+                Albums = albums,
+                Tags = tags,
+                FileExtensions = fileExtensions,
+                MediaNameContains = mediaNameContains,
+                MaxSize = maxSize,
+                AllTagsMustMatch = allTagsMustMatch,
+                HasMoreResults = maxSize == searchHits.Count,
+            };
+
+            _searchCache.Remove(_username);
+            _searchCache.Add(_username, searchDetails);
+
+            List<SingleGalleryImageViewModel> items = PopulateItemList(0, searchHits);
+
+            SingleGalleryViewModel vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.GalleryTitle = "Search results";
+            vm.TotalImageCount = searchDetails.HasMoreResults ? searchHits.Count + 1 : searchHits.Count;
+            vm.CurrentOffset = hitsToSkip ?? 0;
+            vm.DisplayCount = DISPLAY_COUNT_MAX;
+
+            return View("Index", vm);
+        }
+
+        [HttpGet("search/scroll")]
+        public async Task <IActionResult> ScrollSearch(int from)
+        {
+            if (_searchCache.ContainsKey(_username) == false) RedirectToAction("Index", "Customizer");
+            
+            SearchDetails cachedResults = _searchCache[_username];
+            if (from >= cachedResults.Hits.Count && cachedResults.HasMoreResults)
+            {
+                return await Search(cachedResults.Albums, cachedResults.Tags, cachedResults.FileExtensions, cachedResults.MediaNameContains, cachedResults.MaxSize, cachedResults.AllTagsMustMatch, hitsToSkip: from);
+            }
+
+            List<SingleGalleryImageViewModel> items = PopulateItemList(from, cachedResults.Hits);
+            
+            SingleGalleryViewModel vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.GalleryTitle = "Search results";
+            vm.TotalImageCount = cachedResults.Hits.Count;
+            vm.CurrentOffset = from;
+            vm.DisplayCount = DISPLAY_COUNT_MAX;
+
+            return View("Index", vm);
+        }
+
+        [HttpGet("custom-js")]
+        public async Task<IActionResult> CustomJs(int mediaCount, string tags, string tagFilterMode, string mediaFilterMode)
+        {
+            return View("CustomJs");
+        }
+
+        private static List<SingleGalleryImageViewModel> PopulateItemList(int from, List<SearchHitDTO> searchHits)
+        {
+            List<SingleGalleryImageViewModel> items = [];
+            int i = 0;
+            foreach (SearchHitDTO hit in searchHits.Skip(from))
+            {
+                if (i >= DISPLAY_COUNT_MAX) break;
+                else i++;
+
                 SingleGalleryImageViewModel imageVm = new()
                 {
                     Id = hit.MediaItem.Id,
@@ -92,19 +166,7 @@ namespace WebGallery.UI.Controllers
                 items.Add(imageVm);
             }
 
-            SingleGalleryViewModel vm = SinglePageGenerator.SetDisplayProperties(items);
-            vm.GalleryTitle = "Search results";
-            vm.TotalImageCount = hits.Count;
-            vm.CurrentOffset = 0;
-            vm.CurrentDisplayCount = hits.Count;
-
-            return View("Index", vm);
-        }
-
-        [HttpGet("custom-js")]
-        public async Task<IActionResult> CustomJs(int mediaCount, string tags, string tagFilterMode, string mediaFilterMode)
-        {
-            return View("CustomJs");
+            return items;
         }
     }
 }

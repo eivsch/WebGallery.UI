@@ -4,7 +4,7 @@
 
 @{
     bool hasPreviousPage = Model.CurrentOffset != 0;
-    bool hasNextPage = Model.CurrentOffset + Model.CurrentDisplayCount < Model.TotalImageCount;
+    bool hasNextPage = Model.CurrentOffset + Model.DisplayCount < Model.TotalImageCount;
 }
 
 <main class="main-content">
@@ -12,7 +12,7 @@
 
         <div class="row pt-4 mb-5 text-center">
             <div class="col-12">
-                <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @Model.Images.Count of @Model.TotalImageCount Photos</h2>
+                <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @(Model.CurrentOffset + 1)-@(Model.CurrentOffset + Model.Images.Count) of @Model.TotalImageCount Photos</h2>
             </div>
         </div>
 
@@ -84,15 +84,15 @@
 
         @if (hasPreviousPage)
         {
-            int nextOffset = Model.CurrentOffset - Model.CurrentDisplayCount;
+            int nextOffset = Model.CurrentOffset - Model.DisplayCount;
             if (nextOffset < 0) nextOffset = 0;
-            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
+            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.DisplayCount}";
             <a href="@uri">Previous</a>
         }
         @if (hasNextPage)
         {
-            int nextOffset = Model.CurrentOffset + Model.CurrentDisplayCount;
-            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.CurrentDisplayCount}";
+            int nextOffset = Model.CurrentOffset + Model.DisplayCount;
+            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.DisplayCount}";
             <a href="@uri">Next</a>
         }
 

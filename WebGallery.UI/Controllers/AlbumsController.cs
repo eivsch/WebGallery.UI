@@ -80,6 +80,8 @@ namespace WebGallery.UI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAlbum(string id, int offset = 0, int displayCount = 32)
         {
+            ViewBag.Current = "Albums";
+
             AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: displayCount);
 
             List<SingleGalleryImageViewModel> items = new();
@@ -102,7 +104,7 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = id;
             vm.TotalImageCount = data.TotalCount;
             vm.CurrentOffset = offset;
-            vm.CurrentDisplayCount = displayCount;
+            vm.DisplayCount = items.Count;
 
             return View("Album", vm);
         }

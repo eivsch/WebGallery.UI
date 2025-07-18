@@ -10,6 +10,7 @@ namespace WebGallery.UI.ViewModels.Single
         public List<SingleGalleryImageViewModel> Images { get; set; } = new List<SingleGalleryImageViewModel>();
         public int TotalImageCount { get; set; }
         public int CurrentOffset { get; set; }
-        public int CurrentDisplayCount { get; set; }
+        public int DisplayCount { get; set; }
+        public bool IsRandomized { get; set; }
     }
 }

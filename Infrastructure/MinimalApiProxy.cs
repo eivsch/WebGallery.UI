@@ -163,7 +163,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         else return false;
     }
 
-    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch)
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch, int? hitsToSkip = null)
     {
         string uri = $"users/{username}/search";
         Dictionary<string, string> paramss = [];
@@ -175,8 +175,10 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             paramss.Add("fileExtensions", fileExtension);
         if (mediaNameContains is not null)
             paramss.Add("mediaNameContains", mediaNameContains);
-        if (maxSize is not null)
+        if (maxSize.HasValue)
             paramss.Add("maxSize", maxSize.ToString());
+        if (hitsToSkip.HasValue)
+            paramss.Add("hitsToSkip", hitsToSkip.Value.ToString());
 
         paramss.Add("allTagsMustMatch", allTagsMustMatch.ToString().ToLowerInvariant());
 
