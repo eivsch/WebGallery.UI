@@ -5,6 +5,12 @@
 <div class="container mt-5">
     <h2 class="mb-4">Admin: '@albumName' Contents</h2>
     <a href="/admin" class="btn btn-secondary mb-3">Back to Albums</a>
+    <div class="row">
+        <div class="col-6">
+            <a href="/" class="btn btn-info mb-3">Rebuild on name</a>
+            <a href="/" class="btn btn-info mb-3">Rebuild on date</a>
+        </div>
+    </div>
     @if (Model.Items == null || !Model.Items.Any())
     {
         <div class="alert alert-info">No files in this album.</div>
