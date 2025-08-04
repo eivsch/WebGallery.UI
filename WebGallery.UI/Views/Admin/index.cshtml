@@ -22,8 +22,8 @@
             <tbody>
             @foreach (var album in Model)
             {
-                <tr class="album-row" data-href="/admin/albums/@album.AlbumName" style="cursor:pointer;">
-                    <td>@album.AlbumName</td>
+                <tr class="album-row">
+                    <td><a href="/admin/albums/@album.AlbumName">@album.AlbumName</a></td>
                     <td>@album.Created.ToString("yyyy-MM-dd")</td>
                     <td>@album.TotalCount</td>
                     <td>
@@ -42,12 +42,4 @@
 </div>
 
 @section Scripts {
-    <script>
-        document.querySelectorAll('.album-row').forEach(function(row) {
-            row.addEventListener('click', function(e) {
-                if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('form')) return;
-                window.location = row.getAttribute('data-href');
-            });
-        });
-    </script>
 }
