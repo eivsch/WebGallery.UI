@@ -11,7 +11,6 @@ using Application.Uploads;
 using AutoMapper;
 using System.Linq;
 using DomainModel.Aggregates.Metadata.Interfaces;
-using Application.Enums;
 
 namespace Application.Services
 {
@@ -46,18 +45,18 @@ namespace Application.Services
             _uploadedPictures.Add(picture);
         }
 
-        public async Task<byte[]> DownloadFile(string identifier, MediaType mediaType)
-        {
-            switch (mediaType){
-                case MediaType.Gif:
-                case MediaType.Image:
-                    return await _fileSystemService.DownloadImageFromFileServer(identifier);
-                case MediaType.Video:
-                    return await _fileSystemService.DownloadVideoFromFileServer(identifier);
-                default:
-                    return await _fileSystemService.DownloadImageFromFileServer(identifier);
-            }
-        }
+        //public async Task<byte[]> DownloadFile(string identifier, MediaType mediaType)
+        //{
+        //    switch (mediaType){
+        //        case MediaType.Gif:
+        //        case MediaType.Image:
+        //            return await _fileSystemService.DownloadImageFromFileServer(identifier);
+        //        case MediaType.Video:
+        //            return await _fileSystemService.DownloadVideoFromFileServer(identifier);
+        //        default:
+        //            return await _fileSystemService.DownloadImageFromFileServer(identifier);
+        //    }
+        //}
 
         public UploadResponse GetUploadRequestResult()
         {

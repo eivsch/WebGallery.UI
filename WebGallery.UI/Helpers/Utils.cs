@@ -1,6 +1,6 @@
-﻿using Application.Enums;
-using System.IO;
+﻿using System.IO;
 using System.Text;
+using WebGallery.UI.Models;
 
 namespace WebGallery.UI.Helpers
 {

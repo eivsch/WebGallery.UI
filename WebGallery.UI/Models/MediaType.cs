@@ -1,4 +1,4 @@
-﻿namespace Application.Enums
+﻿namespace WebGallery.UI.Models
 {
     public enum MediaType
     {

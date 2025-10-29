@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Application.Enums;
 using Application.Uploads;
 
 namespace Application.Services.Interfaces
@@ -11,6 +10,6 @@ namespace Application.Services.Interfaces
         Task UploadFile(string folderName, string fileName, Stream file);
         UploadResponse GetUploadRequestResult();
         
-        Task<byte[]> DownloadFile(string identifier, MediaType mediaType);  
+        //Task<byte[]> DownloadFile(string identifier, MediaType mediaType);  
     }
 }
