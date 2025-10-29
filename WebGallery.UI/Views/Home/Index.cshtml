@@ -33,11 +33,11 @@
                 <div class="landing-section--stats text-white">
                     <div class="row">
                         <div class="col-md-4">
-                            <div data-url="/home/stats?itemType=picture" data-async-view>
+                            <div data-url="/home/stats?itemType=media" data-async-view>
                                 *loading*...
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        @* <div class="col-md-4">
                             <div data-url="/home/stats?itemType=gif" data-async-view>
                                 *loading*...
                             </div>
@@ -46,7 +46,7 @@
                             <div data-url="/home/stats?itemType=video" data-async-view>
                                 *loading*...
                             </div>
-                        </div>
+                        </div> *@
                         <div class="col-md-4">
                             <div data-url="/home/stats?itemType=album" data-async-view>
                                 *loading*...
@@ -71,7 +71,13 @@
 
     <div class="row pt-4 mb-5 text-center">
         <div class="col-12">
-                <a href="/uploads"><h3 class="text-white mb-4">Upload</h3></a>
+                <h3 class="text-white mb-4"><a href="/uploads" style="color: white;">Upload</a></h3>
+        </div>
+    </div>
+
+    <div class="row pt-4 mb-5 text-center">
+        <div class="col-12">
+                <h3 class="text-white mb-4"><a href="/admin" style="color: white;">Admin</a></h3>
         </div>
     </div>
 </main>

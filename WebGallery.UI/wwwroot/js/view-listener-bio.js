@@ -12,19 +12,11 @@
     return exists;
 }
 
-function formatTag(tag) {
-    if (!tag.startsWith('#')) {
-        tag = '#' + tag;
-    }
-
-    return tag;
-}
-
 function addTag(tag) {
     $('#myInput').val('');
-    tag = formatTag(tag);
     var exists = tagExists(tag);
     var picId = $('#image-id-placeholder').text();
+    var album = $('#album-id-placeholder').text();
 
     // Add
     if (!exists) {
@@ -34,7 +26,8 @@ function addTag(tag) {
             // Data
             {
                 tag: tag,
-                pictureId: picId
+                pictureId: picId,
+                album: album,
             }
             // OnSuccess
             , function () {
@@ -47,14 +40,16 @@ function addTag(tag) {
     return false;
 }
 
-function deleteTag(tag, picId) {
+function deleteTag(tag, picId, album) {
+    tag = tag.replace("#", "");
     $.post(
         // Url
         "/bio/tag/delete",
         // Data
         {
             tag: tag,
-            pictureId: picId
+            pictureId: picId,
+            album: album,
         }
         // OnSuccess
         , function () {
@@ -115,10 +110,98 @@ function hideAll() {
 }
 
 function focusInput() {
-    $('#myInput').toggle();
-    $('#myInput').focus();
+    const input = document.getElementById("myInput");
+    const dropdown = document.getElementById("myDropdown");
+
+    // Toggle visibility of the input and dropdown
+    if (input.style.display === "none") {
+        input.style.display = "block";
+        dropdown.style.display = "block";
+        input.focus(); // Focus on the input field
+    } else {
+        input.style.display = "none";
+        dropdown.style.display = "none";
+    }
 }
 
-function bioSwitch(globalSortOrder) {
-    window.history.pushState("", "", '/Bio/' + globalSortOrder);
+function bioSwitch(album, sortOrder) {
+    window.history.pushState("", "", '/Bio/' + album + '/' + sortOrder);
+    setupVideoThumbnailButton();
 }
+
+function setupVideoThumbnailButton() {
+    var video = document.querySelector('video');
+    var setThumbBtn = document.getElementById('setVideoThumbnail');
+    var genImgBtn = document.getElementById('generateVideoImage');
+    function formatTime(seconds) {
+        var totalMs = Math.ceil(seconds * 1000);
+        var h = Math.floor(totalMs / 3600000).toString().padStart(2, '0');
+        var m = Math.floor((totalMs % 3600000) / 60000).toString().padStart(2, '0');
+        var s = Math.floor((totalMs % 60000) / 1000).toString().padStart(2, '0');
+        var ms = (totalMs % 1000).toString().padStart(3, '0');
+        return h + ":" + m + ":" + s + "." + ms;
+    }
+    if (video && setThumbBtn) {
+        setThumbBtn.onclick = function () {
+            var currentTime = formatTime(video.currentTime);
+            var appPathB64 = setThumbBtn.getAttribute('data-app-path-b64') || window.appPathBase64 || "";
+            setThumbBtn.disabled = true;
+            setThumbBtn.textContent = "Setting...";
+            fetch('/Bio/SetVideoThumbnail', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appPathB64: appPathB64, currentTime: currentTime })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    setThumbBtn.textContent = "Thumbnail set!";
+                    setTimeout(function () {
+                        setThumbBtn.textContent = "Set as thumbnail";
+                        setThumbBtn.disabled = false;
+                    }, 1500);
+                } else {
+                    setThumbBtn.textContent = "Failed!";
+                    setThumbBtn.disabled = false;
+                }
+            })
+            .catch(function () {
+                setThumbBtn.textContent = "Failed!";
+                setThumbBtn.disabled = false;
+            });
+        };
+    }
+    if (video && genImgBtn) {
+        genImgBtn.onclick = function () {
+            var currentTime = formatTime(video.currentTime);
+            var appPathB64 = genImgBtn.getAttribute('data-app-path-b64') || window.appPathBase64 || "";
+            genImgBtn.disabled = true;
+            genImgBtn.textContent = "Generating...";
+            fetch('/Bio/GenerateVideoImage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appPathB64: appPathB64, currentTime: currentTime })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    genImgBtn.textContent = "Image generated!";
+                    setTimeout(function () {
+                        genImgBtn.textContent = "Generate image";
+                        genImgBtn.disabled = false;
+                    }, 1500);
+                } else {
+                    genImgBtn.textContent = "Failed!";
+                    genImgBtn.disabled = false;
+                }
+            })
+            .catch(function () {
+                genImgBtn.textContent = "Failed!";
+                genImgBtn.disabled = false;
+            });
+        };
+    }
+}
+
+// Initialize the video thumbnail button on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupVideoThumbnailButton();
+});

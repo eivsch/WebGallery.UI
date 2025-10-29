@@ -1,17 +1,17 @@
 ﻿@using Microsoft.Extensions.Configuration
 
-@model List<WebGallery.UI.ViewModels.Tags.TagsViewModel>
+@* @model List<WebGallery.UI.ViewModels.Tags.TagsViewModel> *@
 
 <main class="main-content">
     <div class="container-fluid photos">
         <div class="row pt-4 mb-5 text-center">
             <div class="col-12">
-                <h2 class="text-white mb-4">Categories (@Model.Count total)</h2>
+                <h2 class="text-white mb-4">Placeholdet text</h2>
             </div>
         </div>
         <div class="row align-items-stretch">
-
-            @foreach (var category in Model)
+@*
+          @foreach (var category in Model)
             {
                 var appPathBytes = System.Text.Encoding.UTF8.GetBytes(category.CoverImageAppPath);
                 string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
@@ -39,6 +39,7 @@
                     </a>
                 </div>
             }
+*@
         </div>
 
         <div class="row justify-content-center">
@@ -53,3 +54,8 @@
         </div>
     </div>
 </main>
+
+@section Scripts {
+    <script type="module" src="~/js/view-listener-tags.js"></script>
+    @* <script type="text/javascript">const username = "eivsch";</script> *@
+}

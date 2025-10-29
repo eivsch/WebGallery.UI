@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Application.Services.Interfaces;
-using AutoMapper;
+using Infrastructure.Common;
+using Infrastructure.MinimalApi;
+using Infrastructure.FileServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -29,13 +31,15 @@ namespace WebGallery.UI.Controllers
                 MultipartBodyLengthLimit = MaxFileSize,
             };
         
-        private readonly IFileService _fileService;
-        private readonly IMapper _mapper;
+        private readonly IFileServerProxy _fileSystemService;
+        private readonly MinimalApiProxy _minimalApiProxy;
+        private readonly string _username;
 
-        public UploadsController(IFileService uploadService, IMapper mapper)
+        public UploadsController(IFileServerProxy fileSystemService, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver)
         {
-            _fileService = uploadService;
-            _mapper = mapper;
+            _fileSystemService = fileSystemService;
+            _minimalApiProxy = minimalApiProxy;
+            _username = usernameResolver.Username;
         }
 
         public async Task<IActionResult> Index()
@@ -59,7 +63,9 @@ namespace WebGallery.UI.Controllers
                 _defaultFormOptions.MultipartBoundaryLengthLimit
             );
 
+            List<SavedFileInfo> uploadedFiles = [];
             string albumName = "";
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
 
             var reader = new MultipartReader(boundary, Request.Body);
             var section = await reader.ReadNextSectionAsync();
@@ -72,7 +78,7 @@ namespace WebGallery.UI.Controllers
 
                 if (hasContentDispositionHeader)
                 {
-                    if (MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
+                    if (string.IsNullOrWhiteSpace(albumName) && MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
                     {
                         using (var streamReader = new StreamReader(
                             section.Body,
@@ -83,6 +89,7 @@ namespace WebGallery.UI.Controllers
                         {
                             var value = await streamReader.ReadToEndAsync();
                             albumName = value;
+                            if (!albums.Any(a => a.AlbumName == albumName)) await _minimalApiProxy.CreateAlbum(_username, albumName);
                         }
                     }
                     else if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
@@ -98,7 +105,9 @@ namespace WebGallery.UI.Controllers
 
                         using (var fileStream = section.Body)
                         {
-                            await _fileService.UploadFile(albumName, fileName, fileStream);
+                            SavedFileInfo savedFileInfo = await _fileSystemService.UploadFileToFileServer(albumName, fileName, fileStream);
+                            uploadedFiles.Add(savedFileInfo);
+                            await _minimalApiProxy.PostMediaItem(_username, albumName, savedFileInfo);
                         }
                     }
                 }
@@ -106,10 +115,19 @@ namespace WebGallery.UI.Controllers
                 section = await reader.ReadNextSectionAsync();
             }
 
-            var uploadResult = _fileService.GetUploadRequestResult();
-            var vm = _mapper.Map<UploadResultViewModel>(uploadResult);
+            var vm = CreateUploadResult(uploadedFiles, albumName);
 
             return View("success", vm);
+        }
+
+        private UploadResultViewModel CreateUploadResult(List<SavedFileInfo> savedFiles, string albumName)
+        {
+            return new()
+            {
+                UploadAlbumName = albumName,
+                UploadedFiles = savedFiles,
+                UploadFileCount = savedFiles.Count
+            };
         }
     }
 }

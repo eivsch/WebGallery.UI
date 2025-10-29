@@ -7,14 +7,14 @@
         </div>
         <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
         <div id="myDropdown">
-            <input type="text" placeholder="Search.." id="myInput" style="display:none" />
+            <input type="text" placeholder="Search or add a tag..." id="myInput" style="display:none" />
             @foreach (var tag in Model.AllTags)
             {
                 <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>
             }
         </div>
         <div class="bio-content__deletebtn">
-            <a href="/Bio/picture/delete/@Model.BioPictureViewModel.Id">Delete pic</a>
+            <a href="/Bio/picture/delete/@Model.BioPictureViewModel.Album/@Model.BioPictureViewModel.Name">Delete pic</a>
         </div>
     </div>
 

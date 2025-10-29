@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <UserSecretsId>00b3ad43-4b14-4b97-90c5-894889a15c33</UserSecretsId>
     <ApplicationInsightsResourceId>/subscriptions/8b189fd0-5a0d-46bc-a534-4f773d3ac095/resourcegroups/web-gallery-rg/providers/Microsoft.Insights/components/WebGalleryInsights</ApplicationInsightsResourceId>
   </PropertyGroup>
@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
-    <ProjectReference Include="..\DomainModel\DomainModel.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 

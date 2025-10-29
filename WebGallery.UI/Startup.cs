@@ -1,23 +1,11 @@
 using System;
 using System.Net.Http;
-using Application.Services;
-using Application.Services.Interfaces;
-using AutoMapper;
-using DomainModel.Aggregates.Gallery.Interfaces;
-using DomainModel.Aggregates.Metadata.Interfaces;
-using DomainModel.Aggregates.Picture.Interfaces;
-using DomainModel.Aggregates.Tags.Interfaces;
 using Infrastructure.Common;
-using Infrastructure.Galleries;
-using Infrastructure.Metadata;
-using Infrastructure.Pictures;
-using Infrastructure.Tags;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace WebGallery.UI
@@ -61,27 +49,10 @@ namespace WebGallery.UI
             {   
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
             });
-            
-            services.AddTransient<IGalleryService, GalleryService>();
-            services.AddTransient<IPictureService, PictureService>();
-            services.AddTransient<ITagService, TagService>();
-            services.AddTransient<IMetadataService, MetadataService>();
-            services.AddScoped<IFileService, FileService>();
 
-            services.AddTransient<IGalleryRepository, GalleryRepository>();
-            services.AddTransient<IPictureRepository, PictureRepository>();
-            services.AddTransient<ITagRepository, TagRepository>();
-            services.AddTransient<IMetadataRepository, MetadataRepository>();
-            services.AddTransient<Infrastructure.Services.IFileSystemService, Infrastructure.Services.FileSystemService>();
-
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new Mappings.AutoMapperGalleryProfile());
-                mc.AddProfile(new Mappings.AutoMapperPictureProfile());
-                mc.AddProfile(new Mappings.AutoMapperTagProfile());
-                mc.AddProfile(new Mappings.AutoMapperUploadProfile());
-            });
-            services.AddSingleton(mapperConfig.CreateMapper());
+            services.AddTransient<Infrastructure.FileServer.IFileServerProxy, Infrastructure.FileServer.FileServerProxy>();
+            services.AddTransient<Infrastructure.MinimalApi.MinimalApiProxy>();
+            services.AddTransient<Infrastructure.Common.UsernameResolver>();
 
             if (!IsDevelopmentEnv)
                 services.AddApplicationInsightsTelemetry();     // Should automatically get the key from configuration

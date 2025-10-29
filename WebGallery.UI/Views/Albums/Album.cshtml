@@ -1,5 +1,4 @@
-﻿@using Microsoft.Extensions.Configuration
-@using WebGallery.UI.Models
+﻿@using WebGallery.UI.Models
 
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
@@ -13,14 +12,7 @@
 
         <div class="row pt-4 mb-5 text-center">
             <div class="col-12">
-                @if (Model.IsRandomized)
-                {
-                    <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @Model.TotalImageCount photos in random order</h2>
-                }
-                else
-                {
-                    <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @(Model.CurrentOffset + 1)-@(Model.CurrentOffset + Model.Images.Count) of @Model.TotalImageCount Photos</h2>
-                }
+                <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @(Model.CurrentOffset + 1)-@(Model.CurrentOffset + Model.Images.Count) of @Model.TotalImageCount Photos</h2>
             </div>
         </div>
 
@@ -34,6 +26,20 @@
 
                 if (item.MediaType == MediaType.Video)
                 {
+                    @* OLD STYLE w/o thumbnail 
+                    string videoUri = $"/files/video/{appPathBase64}";
+                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                        <a href="@videoUri"
+                           class="d-block photo-item"
+                           data-fancybox="gallery"
+                           data-type="video"
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
+                            <video class="img-fluid" loop muted preload="metadata" controls>
+                                <source src="@videoUri" type="video/mp4" />
+                            </video>
+                        </a>
+                    </div> *@
+
                     string thumbsBase64 = WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.AppPath);
                     string thumbsUri = $"/files/image/{thumbsBase64}";
                     string videoUri = $"/files/video/{appPathBase64}";
@@ -43,17 +49,18 @@
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="video"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>"
-                           data-video-autoplay="false">
-                            <img src="@thumbsUri" alt="Video thumbnail" class="img-fluid">
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
+
+                            <img src="@thumbsUri" alt="Image" class="img-fluid">
                         </a>
-                        <div class="play-icon-overlay">
+                         <div class="play-icon-overlay">
                             <svg width="32" height="32" viewBox="0 0 32 32" fill="white" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.4)"/>
                                 <polygon points="12,9 24,16 12,23" fill="white"/>
                             </svg>
                         </div>
                     </div>
+
                 }
                 else
                 {
@@ -79,13 +86,13 @@
         {
             int nextOffset = Model.CurrentOffset - Model.DisplayCount;
             if (nextOffset < 0) nextOffset = 0;
-            string uri = $"/single/search/scroll?from={nextOffset}";
+            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.DisplayCount}";
             <a href="@uri">Previous</a>
         }
         @if (hasNextPage)
         {
             int nextOffset = Model.CurrentOffset + Model.DisplayCount;
-            string uri = $"/single/search/scroll?from={nextOffset}";
+            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.DisplayCount}";
             <a href="@uri">Next</a>
         }
 
@@ -103,6 +110,6 @@
 </main>
 
 @section Scripts {
-    <script type="text/javascript" src="~/js/view-listener-single.js"></script>
+    <script type="text/javascript" src="~/js/view-listener-album-single.js"></script>
     <script type="text/javascript">album = "@Model.Id";</script>
 }

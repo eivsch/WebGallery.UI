@@ -1,11 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Services.Interfaces;
+
+using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
 using WebGallery.UI.Generators;
+using WebGallery.UI.Generators.Helpers;
+using WebGallery.UI.Helpers;
+using WebGallery.UI.ViewModels.Albums;
+using WebGallery.UI.ViewModels.Single;
 
 namespace WebGallery.UI.Controllers
 {
@@ -14,33 +24,92 @@ namespace WebGallery.UI.Controllers
     public class AlbumsController : Controller
     {
         private readonly ILogger<AlbumsController> _logger;
-        private readonly IGalleryService _galleryService;
-        private readonly IPictureService _pictureService;
+        private readonly MinimalApiProxy _minimalApiProxy;
+        readonly string _username;
 
-        public AlbumsController(ILogger<AlbumsController> logger, IGalleryService galleryService, IPictureService pictureService)
+        public AlbumsController(ILogger<AlbumsController> logger, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
             _logger = logger;
-            _galleryService = galleryService;
-            _pictureService = pictureService;
+            _minimalApiProxy = minimalApiProxy;
+            Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
+            _username = claim.Value;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool randomAlbumOrder = false, bool randomCoverImage = false)
+        {
+            ViewBag.Current = "Albums";
+            Random rnd = new();
+            
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            if (albums == null) return null;
+
+            List<AlbumViewModel> albumVms = new();
+            foreach (AlbumMetaDTO album in albums)
+            {
+                int i = randomCoverImage ? rnd.Next(0, album.TotalCount) : 0;
+                AlbumContentsDTO c = await _minimalApiProxy.GetAlbumContents(_username, album.AlbumName, from: i, numberOfItems: 1);
+                if (c.Items.Count == 0) continue;
+                MediaDTO coverImg = c.Items[0];
+
+                AlbumViewModel albumVm = new()
+                {
+                    GalleryId = album.AlbumName,
+                    Title = album.AlbumName,
+                    ItemCount = album.TotalCount,
+                    CoverImageMediaType = Utils.DetermineMediaType(coverImg.Name),
+                    CoverImageId = coverImg.Id,
+                    CoverImageAppPath = Path.Combine(album.AlbumName, coverImg.Name),
+                    CoverImageIndex = i,
+                };
+                
+                albumVms.Add(albumVm);
+            }
+
+            var vm = AlbumsPageGenerator.SetDisplayProperties(albumVms);
+            if (randomAlbumOrder)
+                albumVms.ShuffleList();
+
+            return View(vm);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAlbum(string id, int offset = 0, int displayCount = 32)
         {
             ViewBag.Current = "Albums";
 
-            var allAlbums = await _galleryService.GetAllGalleriesWithoutItems();
-            var allAlbumsVm = AlbumsPageGenerator.GenerateAllRandom(allAlbums.ToList());
-            
-            foreach (var albumVm in allAlbumsVm.Albums)
+            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: displayCount);
+
+            List<SingleGalleryImageViewModel> items = new();
+            int indexCounter = offset;
+            foreach (var media in data.Items)
             {
-                var picture = await _pictureService.GetRandom(albumVm.GalleryId);
-                albumVm.CoverImageMediaType = picture.MediaType;
-                albumVm.CoverImageId = picture.Id;
-                albumVm.CoverImageAppPath = picture.AppPath;
-                albumVm.CoverImageIndex = picture.FolderSortOrder;
+                SingleGalleryImageViewModel imageVm = new()
+                {
+                    Id = media.Id,
+                    AppPath = Path.Combine(id, media.Name),
+                    GalleryIndex = indexCounter++,
+                    IndexGlobal = -1,
+                    MediaType = Utils.DetermineMediaType(media.Name),
+                };
+                items.Add(imageVm);
             }
 
-            return View(allAlbumsVm);
+            var vm = SinglePageGenerator.SetDisplayProperties(items);
+            vm.Id = id;
+            vm.GalleryTitle = id;
+            vm.TotalImageCount = data.TotalCount;
+            vm.CurrentOffset = offset;
+            vm.DisplayCount = items.Count;
+
+            return View("Album", vm);
+        }
+
+        [HttpPost("{album}/{media}/add-like")]
+        public async Task<IActionResult> AddLike(string album, string media)
+        {
+            await _minimalApiProxy.PatchAddLike(_username, album, media);
+
+            return Ok();
         }
     }
 }

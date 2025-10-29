@@ -1,5 +1,4 @@
-﻿using Application.Galleries;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using WebGallery.UI.Generators.Helpers;
 using WebGallery.UI.ViewModels.Albums;
 
@@ -7,11 +6,8 @@ namespace WebGallery.UI.Generators
 {
     public static class AlbumsPageGenerator
     {
-        public static AlbumsViewModel GenerateAllRandom(IList<GalleryResponse> input)
+        public static AlbumsViewModel SetDisplayProperties(List<AlbumViewModel> input)
         {
-            input.ShuffleList();
-            var outList = new List<AlbumViewModel>();
-
             int totalSizeOfRow = 0, indexer = 0;
             var rowFormat = RandomHelpers.GetRandomRowFormat;
             foreach (var gallery in input)
@@ -24,16 +20,8 @@ namespace WebGallery.UI.Generators
                 }
 
                 var size = rowFormat[indexer];
-                var vm = new AlbumViewModel
-                {
-                    GalleryId = gallery.Id,
-                    ItemCount = gallery.ImageCount,
-                    LargeScreenSize = size,
-                    PopUpDelay = 100 * indexer,
-                    Title = gallery.GalleryName
-                };
-
-                outList.Add(vm);
+                gallery.LargeScreenSize = size;
+                gallery.PopUpDelay = 100 * indexer;
                 
                 totalSizeOfRow += size;
                 indexer++;
@@ -41,9 +29,8 @@ namespace WebGallery.UI.Generators
 
             return new AlbumsViewModel
             {
-                Albums = outList
+                Albums = input
             };
         }
-
     }
 }

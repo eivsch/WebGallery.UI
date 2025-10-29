@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Extensions.Configuration
+@using WebGallery.UI.Models
 
 @model WebGallery.UI.ViewModels.Bio.BioPictureViewModel
 
@@ -6,15 +7,31 @@
 @{
     var appPathBytes = System.Text.Encoding.UTF8.GetBytes(Model.AppPath);
     string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
-    string imageUri = $"/files/image/{appPathBase64}";
+    var mediaType = WebGallery.UI.Helpers.Utils.DetermineMediaType(Model.Name);
 }
 
 <div id="image-id-placeholder" style="display:none">@Model.Id</div>
+<div id="album-id-placeholder" style="display:none">@Model.Album</div>
 
 <figure class="bio-figure" data-aos="fade-in">
-    <a href="@imageUri" data-fancybox data-type="image">
+@if (mediaType == MediaType.Video)
+{
+    string videoUri = $"/files/video/{appPathBase64}";
+    string thumbsUri = $"/files/image/{WebGallery.UI.Helpers.Utils.GetThumbsBase64(Model.AppPath)}";
+    <div style="position:relative;">
+        <video class="bio-img" controls preload="none" poster="@thumbsUri" style="width:100%;height:auto;">
+            <source src="@videoUri" type="video/mp4" />
+            Your browser does not support the video tag.
+        </video>
+    </div>
+}
+else 
+{
+    string imageUri = $"/files/image/{appPathBase64}";
+    <a href="@imageUri" data-fancybox data-type="image" data-caption="@Model.Name">
         <img src="@imageUri" alt="Image" class="bio-img">
     </a>
+}
 </figure>
 
 <div data-aos="fade-left" data-aos-duration="1000">
@@ -25,17 +42,30 @@
             if (!tag.StartsWith('#'))
                 tagStr = "#" + tag;
 
-            <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id')" class="far fa-minus-square"></i></li>
+            <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id', '@Model.Album')" class="far fa-minus-square"></i></li>
         }
     </ul>
 </div>
 
 <div class="bio-nav-container">
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch(@(Model.GlobalSortOrder - 1))"><<<  </a>
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))"><<<  </a>
     </div>
-    <div class="bio-nav-item" id="bioImgCounter">#@Model.GlobalSortOrder</div>
+    <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - <a class="regular-text-link" href="/admin/albums/@Model.Album">@Model.Album</a></div>
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@(Model.GlobalSortOrder + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch(@(Model.GlobalSortOrder + 1))">  >>></a>
+        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">  >>></a>
     </div>
+    @if (mediaType == MediaType.Video)
+    {
+        <div class="row">
+            <div class="bio-nav-item">
+                <button id="setVideoThumbnail" type="button" data-app-path-b64="@appPathBase64">
+                    Set as thumbnail
+                </button>
+                <button id="generateVideoImage" type="button" data-app-path-b64="@appPathBase64" style="margin-left:10px;">
+                    Generate image
+                </button>
+            </div>
+        </div>
+    }
 </div>

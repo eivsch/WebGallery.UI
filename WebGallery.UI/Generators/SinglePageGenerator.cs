@@ -1,8 +1,4 @@
-﻿using Application.Galleries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using WebGallery.UI.Generators.Helpers;
 using WebGallery.UI.ViewModels.Single;
 
@@ -10,13 +6,13 @@ namespace WebGallery.UI.Generators
 {
     public static class SinglePageGenerator
     {
-        public static SingleGalleryViewModel Generate(GalleryResponse galleryResponse)
+        public static SingleGalleryViewModel SetDisplayProperties(List<SingleGalleryImageViewModel> items)
         {
             var outList = new List<SingleGalleryImageViewModel>();
 
             int totalSizeOfRow = 0, indexer = 0;
             var rowFormat = RandomHelpers.GetRandomRowFormat;
-            foreach (var galleryItem in galleryResponse.GalleryItems)
+            foreach (var item in items)
             {
                 if (totalSizeOfRow == 12)
                 {
@@ -26,18 +22,10 @@ namespace WebGallery.UI.Generators
                 }
 
                 var size = rowFormat[indexer];
-                var vm = new SingleGalleryImageViewModel
-                {
-                    Id = galleryItem.Id,
-                    AppPath = galleryItem.AppPath,
-                    GalleryIndex = galleryItem.IndexGlobal ?? -1,
-                    IndexGlobal = galleryItem.IndexGlobal ?? -1,
-                    LargeScreenSize = size,
-                    PopUpDelay = 100 * indexer,
-                    MediaType = galleryItem.MediaType
-                };
+                item.LargeScreenSize = size;
+                item.PopUpDelay = 100 * indexer;
 
-                outList.Add(vm);
+                outList.Add(item);
 
                 totalSizeOfRow += size;
                 indexer++;
@@ -45,9 +33,9 @@ namespace WebGallery.UI.Generators
 
             return new SingleGalleryViewModel
             {
-                Id = galleryResponse.Id,
+                Id = "Placeholder Id",
+                GalleryTitle = "Placeholder name",
                 Images = outList,
-                GalleryTitle = galleryResponse.GalleryName
             };
         }
     }

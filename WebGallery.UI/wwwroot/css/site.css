@@ -5,15 +5,61 @@
     margin-top: 55px;
 
     max-width: 850px;
+
+    padding: 20px;
+    background-color: #222;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
 }
 
 .bio-content__deletebtn {
-    margin-top: 25px;
+    margin-top: 20px;
+    text-align: center;
 }
 
-.bio-figure {
-    height: 600px;
+#bio-img-partial {
+    margin-bottom: 10px;
 }
+
+.bio-content__deletebtn a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #d94c3a; /* Red for delete */
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.bio-content__deletebtn a:hover {
+    background-color: #c74332;
+    transform: scale(1.05);
+}
+
+.bio-content button {
+    background-color: #000;
+    color: #fff;
+    border: 2px solid #ef6c57;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.bio-content button:hover {
+    background-color: #ef6c57;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+/* .bio-figure {
+    height: 600px;
+} */
 
 .bio-img {
     max-width: 100%;
@@ -48,7 +94,7 @@
 }
 
 .bio-nav-container {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 .bio-nav-item {
@@ -71,8 +117,76 @@
     padding-right: 10px;
 }
 
+#myDropdown {
+    position: relative;
+    display: none; /* Initially hidden */
+    background-color: #333; /* Dark background */
+    border: 1px solid #444; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+    max-height: 200px; /* Limit height */
+    overflow-y: auto; /* Add scroll for long lists */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
+#myDropdown input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+#myDropdown .dropdown-item {
+    display: block;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid #444;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+#myDropdown .dropdown-item:hover {
+    background-color: #ef6c57;
+    color: #fff;
+}
+
+#myDropdown .dropdown-item:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .bio-content {
+        padding: 15px;
+    }
+
+    #myDropdown {
+        max-height: 150px;
+    }
+
+    #myDropdown input {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+    .bio-content__deletebtn a {
+        width: 100%;
+        text-align: center;
+    }
+}
 
 .customizer-form {
     margin: auto;
@@ -127,6 +241,11 @@
     margin-right: 25px;
 }
 
+.form-control::placeholder {
+    color: #aaa;
+    opacity: 1;
+}
+
 .landing-section--stats {
     margin-top: 25px;
     margin-left: 25px;
@@ -158,14 +277,246 @@
     }
 }
 
+.search-form {
+    max-width: 600px; /* Limit the width for better readability */
+    margin: 0 auto; /* Center the form */
+    padding: 20px; /* Add padding inside the form */
+    background-color: #222; /* Dark background to match the site's theme */
+    border-radius: 10px; /* Rounded corners for a modern look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+.search-form .form-control {
+    background: none; /* Transparent background */
+    color: #fff; /* White text for contrast */
+    border: none; /* Remove default border */
+    border-bottom: 2px solid gray; /* Add a bottom border */
+    border-radius: 0; /* No rounded corners */
+    padding: 10px 5px; /* Add padding for usability */
+    width: 100%; /* Full width for alignment */
+    transition: border-color 0.3s ease; /* Smooth transition on focus */
+}
+
+.search-form .form-control:focus {
+    border-color: #ef6c57; /* Accent color on focus */
+    outline: none; /* Remove default outline */
+}
+
+.search-form .form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px; /* Add spacing between checkbox and label */
+}
+
+.search-form .form-check {
+    display: flex; /* Use flexbox for horizontal alignment */
+    align-items: center; /* Vertically align the checkbox and label */
+}
+
+.search-form .form-check-label {
+    color: #fff; /* White text for contrast */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    letter-spacing: 0.05em; /* Add slight spacing for readability */
+    margin-bottom: 0; /* Remove any default bottom margin */
+    text-align: left; /* Ensure the label text aligns properly */
+}
+
+.search-form button {
+    background-color: #ef6c57;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    text-transform: uppercase; /* Consistent with other buttons */
+    letter-spacing: 0.1em; /* Add slight spacing for readability */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
+}
+
+.search-form button:hover {
+    background-color: #d94c3a; /* Slightly darker shade on hover */
+    transform: scale(1.05); /* Subtle zoom effect */
+}
+
+.search-form button:active {
+    background-color: #c74332; /* Even darker shade when clicked */
+    transform: scale(0.95); /* Slight shrink effect */
+}
+
+.search-form .form-group,
+.search-form .form-check {
+    margin-bottom: 20px;
+}
+
+#searchForm {
+    margin-top: 20px;
+}
+
+
 th, td {
     padding: 15px;
   }
 
 .login-form {
-    width: 25%;
+    width: 30%; /* Slightly wider for better usability */
     margin: auto;
-    margin-top: 150px;
+    margin-top: 100px; /* Reduce top margin for better alignment */
+    padding: 30px; /* Add padding for spacing inside the form */
+    background-color: #333; /* Dark background to match the site's theme */
+    border-radius: 10px; /* Rounded corners for a modern look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+.login-form label {
+    color: #fff; /* White text for contrast */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    text-transform: uppercase; /* Consistent with other text styles */
+    letter-spacing: 0.05em; /* Add slight spacing for readability */
+}
+
+.login-form input {
+    background: none; /* Transparent background */
+    color: #fff; /* White text for contrast */
+    border: none; /* Remove default border */
+    border-bottom: 2px solid gray; /* Add a bottom border */
+    border-radius: 0; /* No rounded corners */
+    padding: 10px 5px; /* Add padding for better usability */
+    width: 100%; /* Full width for alignment */
+    transition: border-color 0.3s ease; /* Smooth transition on focus */
+}
+
+.login-form input:focus {
+    border-color: #ef6c57; /* Accent color on focus */
+    outline: none; /* Remove default outline */
+}
+
+.login-form .form--error {
+    color: #ef6c57; /* Accent color for errors */
+    font-size: 0.8rem; /* Smaller font size */
+    margin-top: 5px; /* Add spacing above the error message */
+}
+
+.login-form .form-messages {
+    color: #ef6c57; /* Accent color for error messages */
+    font-size: 0.9rem; /* Slightly larger font size */
+    margin-bottom: 15px; /* Add spacing below the messages */
+    text-align: center; /* Center-align the messages */
+}
+
+.login-form button {
+    background-color: #fff; /* White background */
+    color: #000; /* Black text for contrast */
+    border-radius: 10px; /* Rounded corners for a modern look */
+    padding: 10px 20px; /* Add padding for a comfortable size */
+    font-size: 1rem; /* Readable font size */
+    text-transform: uppercase; /* Consistent with other buttons */
+    letter-spacing: 0.1em; /* Add slight spacing for readability */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease; /* Smooth hover effects */
+}
+
+.login-form button:hover {
+    background-color: #21201f; /* Accent color on hover */
+    color: #fff; /* White text on hover */
+    transform: scale(1.05); /* Subtle zoom effect */
+}
+
+.login-form button:active {
+    background-color: #d94c3a; /* Slightly darker shade when clicked */
+    transform: scale(0.95); /* Slight shrink effect */
+}
+
+.login-form a {
+    display: block; /* Make it a block element */
+    margin-top: 20px; /* Add spacing above the link */
+    color: #fff; /* White text by default */
+    text-align: center; /* Center-align the link */
+    text-transform: uppercase; /* Consistent with other text styles */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    transition: color 0.3s ease; /* Smooth transition on hover */
+}
+
+.login-form a:hover {
+    color: #ef6c57; /* Accent color on hover */
+}
+
+.upload-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #222;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+    color: #fff; /* White text for contrast */
+}
+
+.upload-form .form-label {
+    font-weight: bold;
+    color: #fff; /* White text for labels */
+}
+
+.upload-form .form-control {
+    background-color: #333; /* Darker background for input fields */
+    color: #fff; /* White text for input fields */
+    border: 1px solid #444; /* Subtle border for input fields */
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.upload-form .form-control::placeholder {
+    color: #aaa; /* Light gray placeholder text */
+}
+
+.upload-form .btn-primary {
+    background-color: #ef6c57; /* Accent color for the button */
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.upload-form .btn-primary:hover {
+    background-color: #d94c3a; /* Slightly darker shade on hover */
+    transform: scale(1.05); /* Subtle zoom effect */
+}
+
+.upload-form .btn-primary:active {
+    background-color: #c74332; /* Even darker shade when clicked */
+    transform: scale(0.95); /* Slight shrink effect */
+}
+
+@media (max-width: 768px) {
+    .upload-form {
+        padding: 15px;
+    }
+
+    .upload-form .btn-primary {
+        width: 100%; /* Full-width button on smaller screens */
+    }
+}
+
+/* Overlay for play icon on video thumbnails */
+.photo-item {
+    position: relative;
+}
+ 
+.play-icon-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    pointer-events: none;
+    /* border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center; */
 }
 
 /* Shutter overrides */
@@ -173,4 +524,94 @@ th, td {
     width: 100%;
     height: 300px;
     object-fit: cover;
+}
+
+/* Admin album management table styles */
+.admin-album-table th,
+.admin-album-table td {
+    vertical-align: middle;
+    padding: 15px;
+}
+
+.admin-album-table .btn-danger.btn-sm {
+    padding: 2px 10px;
+    font-size: 0.95rem;
+}
+
+/* Remove styling from <a> tags inside the admin album table's filename column */
+a.regular-text-link {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+#saveSearchStatus {
+    font-weight: bold;
+}
+
+/* Button container for search form buttons */
+.search-form .button-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+    margin-top: 30px;
+    margin-bottom: 0;
+    min-height: 60px;
+}
+
+/* Center the main Search button */
+.search-form .btn-primary {
+    margin: 0 auto;
+    display: block;
+}
+
+/* Align Save Search button to bottom right */
+#saveSearchBtn {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background-color: #444;
+    color: #ef6c57;
+    border: 2px solid #ef6c57;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+#saveSearchBtn:hover {
+    background-color: #ef6c57;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+#saveSearchBtn:active {
+    background-color: #c74332;
+    color: #fff;
+    transform: scale(0.95);
+}
+
+#savedSearchesDropdown {
+    max-width: 300px;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#deleteSavedSearchBtn {
+    background-color: #c74332;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#deleteSavedSearchBtn:hover {
+    background-color: #ef6c57;
 }

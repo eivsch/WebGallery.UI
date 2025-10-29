@@ -1,7 +1,8 @@
 @model WebGallery.UI.ViewModels.Uploads.UploadResultViewModel
 
+<a href="/uploads">Return to uploads page</a>
 <h3>Success!</h3>
-<p>Uploaded album '@Model.UploadAlbumName' with @Model.UploadFileCount files</p>
+<p>Uploaded album <a href="/albums/@Model.UploadAlbumName">'@Model.UploadAlbumName'</a> with @Model.UploadFileCount files</p>
 
 <table>
     <tr>
@@ -13,7 +14,7 @@
     {
         <tr>
             <td>@file.FileName</td>
-            <td>@file.FileSizeInBytes</td>
+            <td>@file.FileSize</td>
             @* <td>@file.UploadDestinationPath</td> *@
         </tr>
     }

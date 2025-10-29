@@ -4,17 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Application.Enums;
-using Application.Services.Interfaces;
+
+using Infrastructure.FileServer;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
-using WebGallery.UI.Attributes;
-using WebGallery.UI.Helpers;
-using WebGallery.UI.ViewModels.Uploads;
 
 namespace WebGallery.UI.Controllers
 {
@@ -22,17 +20,17 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class FilesController : Controller
     {
-        private readonly IFileService _fileService;
+        private readonly IFileServerProxy _fileSystemService;
 
-        public FilesController(IFileService fileService)
+        public FilesController(IFileServerProxy fileSystemService)
         {
-            _fileService = fileService;
+            _fileSystemService = fileSystemService;
         }
 
         [HttpGet("image/{base64EncodedAppPath}")]
         public async Task<IActionResult> ShowImage(string base64EncodedAppPath)
         {
-            var file = await _fileService.DownloadFile(base64EncodedAppPath, MediaType.Image);
+            var file = await _fileSystemService.DownloadImageFromFileServer(base64EncodedAppPath);
             FileContentResult result = new FileContentResult(file, "image/jpeg"); 
 
             return result;
@@ -41,7 +39,7 @@ namespace WebGallery.UI.Controllers
         [HttpGet("video/{base64EncodedAppPath}")]
         public async Task<IActionResult> ShowVideo(string base64EncodedAppPath)
         {
-            var file = await _fileService.DownloadFile(base64EncodedAppPath, MediaType.Video);
+            var file = await _fileSystemService.DownloadVideoFromFileServer(base64EncodedAppPath);
             FileContentResult result = new FileContentResult(file, "video/mp4"); 
 
             return result;

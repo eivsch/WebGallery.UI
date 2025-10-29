@@ -1,4 +1,4 @@
-﻿using Application.Enums;
+﻿using WebGallery.UI.Models;
 
 namespace WebGallery.UI.ViewModels.Tags
 {

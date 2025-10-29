@@ -1,0 +1,55 @@
+@model Infrastructure.MinimalApi.AlbumContentsDTO;
+@{
+    var albumName = ViewBag.AlbumName as string;
+}
+<div class="container mt-5">
+    <h2 class="mb-4">Admin: '@albumName' Contents</h2>
+    <a href="/admin" class="btn btn-secondary mb-3">Back to Albums</a>
+    <div class="row">
+        <div class="col-6">
+            <a href="/" class="btn btn-info mb-3">Rebuild on name</a>
+            <a href="/" class="btn btn-info mb-3">Rebuild on date</a>
+        </div>
+    </div>
+    @if (Model.Items == null || !Model.Items.Any())
+    {
+        <div class="alert alert-info">No files in this album.</div>
+    }
+    else
+    {
+        <table class="table table-dark table-striped admin-album-table">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Size (KB)</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var file in Model.Items)
+            {
+                <tr>
+                    <td><a class="regular-text-link" href="/Bio/id/@file.Id">@file.Name</a></td>
+                    @if (file.Size.HasValue)
+                    {
+                        <td>@Math.Round((file.Size.Value / 1024.0M), 1)</td>
+                    }
+                    else
+                    {
+                        <td>N/A</td>
+                    }
+                    <td>@file.Created.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>
+                        <form asp-action="DeleteFile" asp-controller="Admin" asp-route-albumName="@albumName" method="post" class="d-inline-block" onsubmit="return confirm('Delete this file?');">
+                            <input type="hidden" name="fileName" value="@file.Name" />
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            @Html.AntiForgeryToken()
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>
