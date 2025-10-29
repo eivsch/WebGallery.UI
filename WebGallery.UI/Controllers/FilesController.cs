@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Infrastructure.Services;
+using Infrastructure.FileServer;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,9 +20,9 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class FilesController : Controller
     {
-        private readonly IFileSystemService _fileSystemService;
+        private readonly IFileServerProxy _fileSystemService;
 
-        public FilesController(IFileSystemService fileSystemService)
+        public FilesController(IFileServerProxy fileSystemService)
         {
             _fileSystemService = fileSystemService;
         }

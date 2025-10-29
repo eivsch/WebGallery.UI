@@ -1,11 +1,9 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
-namespace Infrastructure.Services
+namespace Infrastructure.FileServer
 {
-    public interface IFileSystemService
+    public interface IFileServerProxy
     {
         Task<SavedFileInfo> UploadFileToFileServer(string albumname, string filename, Stream file);
         Task<byte[]> DownloadImageFromFileServer(string imageIdentifier);

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Infrastructure.Services
+namespace Infrastructure.FileServer
 {
     public class SavedFileInfo
     {

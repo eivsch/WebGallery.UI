@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Infrastructure.MinimalApi;
-using Infrastructure.Services;
+using Infrastructure.FileServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +16,9 @@ namespace WebGallery.UI.Controllers
     {
         readonly string _username;
         readonly MinimalApiProxy _minimalApiProxy;
-        readonly IFileSystemService _fileSystemService;
+        readonly IFileServerProxy _fileSystemService;
 
-        public AdminController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IFileSystemService fileSystemService)
+        public AdminController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IFileServerProxy fileSystemService)
         {
             _minimalApiProxy = minimalApiProxy;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);

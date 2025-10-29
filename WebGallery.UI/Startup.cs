@@ -50,7 +50,7 @@ namespace WebGallery.UI
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
             });
 
-            services.AddTransient<Infrastructure.Services.IFileSystemService, Infrastructure.Services.FileSystemService>();
+            services.AddTransient<Infrastructure.FileServer.IFileServerProxy, Infrastructure.FileServer.FileServerProxy>();
             services.AddTransient<Infrastructure.MinimalApi.MinimalApiProxy>();
             services.AddTransient<Infrastructure.Common.UsernameResolver>();
 

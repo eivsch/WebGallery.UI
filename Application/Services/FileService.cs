@@ -2,7 +2,7 @@ using Application.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Infrastructure.Services;
+using Infrastructure.FileServer;
 using DomainModel.Aggregates.Picture;
 using System.IO;
 using DomainModel.Aggregates.Picture.Interfaces;
@@ -16,12 +16,12 @@ namespace Application.Services
 {
     public class FileService : IFileService
     {
-        private readonly IFileSystemService _fileSystemService;
+        private readonly IFileServerProxy _fileSystemService;
         private readonly IPictureRepository _pictureRepository;
         private readonly IMapper _mapper;
         private readonly List<Picture> _uploadedPictures;
         
-        public FileService(IFileSystemService fileSystemService, IPictureRepository pictureRepository, IMetadataRepository metadataRepository, IMapper mapper)
+        public FileService(IFileServerProxy fileSystemService, IPictureRepository pictureRepository, IMetadataRepository metadataRepository, IMapper mapper)
         {
             _fileSystemService = fileSystemService;
             _pictureRepository = pictureRepository;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Infrastructure.Common;
 using Infrastructure.MinimalApi;
-using Infrastructure.Services;
+using Infrastructure.FileServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Models;
@@ -20,7 +20,7 @@ namespace WebGallery.UI.Controllers
     public class BioController : Controller
     {
         private readonly MinimalApiProxy _minimalApiProxy;
-        private readonly IFileSystemService _fileSystemService;
+        private readonly IFileServerProxy _fileSystemService;
         private readonly string _username;
 
         private List<AlbumMetaDTO> _albumsCache;
@@ -28,7 +28,7 @@ namespace WebGallery.UI.Controllers
         public BioController(
             IMapper mapper,
             MinimalApiProxy minimalApiProxy,
-            IFileSystemService fileSystemService,
+            IFileServerProxy fileSystemService,
             UsernameResolver usernameResolver)
         {
             _minimalApiProxy = minimalApiProxy;

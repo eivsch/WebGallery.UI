@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 using Infrastructure.Common;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Services
+namespace Infrastructure.FileServer
 {
-    public class FileSystemService : IFileSystemService
+    public class FileServerProxy : IFileServerProxy
     {
         private readonly HttpClient _client;
         private readonly string _rootPath;
         private readonly string _fileServerUrl;
 
-        public FileSystemService(IConfiguration configuration, WebGalleryFileServerClient fileServerClient)
+        public FileServerProxy(IConfiguration configuration, WebGalleryFileServerClient fileServerClient)
         {
             _rootPath = configuration.GetValue("ConnectionStrings:FileServerRoot", "");
             if (string.IsNullOrEmpty(_rootPath))

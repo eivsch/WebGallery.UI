@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Infrastructure.Common;
 using Infrastructure.MinimalApi;
-using Infrastructure.Services;
+using Infrastructure.FileServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -31,11 +31,11 @@ namespace WebGallery.UI.Controllers
                 MultipartBodyLengthLimit = MaxFileSize,
             };
         
-        private readonly IFileSystemService _fileSystemService;
+        private readonly IFileServerProxy _fileSystemService;
         private readonly MinimalApiProxy _minimalApiProxy;
         private readonly string _username;
 
-        public UploadsController(IFileSystemService fileSystemService, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver)
+        public UploadsController(IFileServerProxy fileSystemService, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver)
         {
             _fileSystemService = fileSystemService;
             _minimalApiProxy = minimalApiProxy;
