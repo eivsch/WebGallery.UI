@@ -1,20 +1,11 @@
 using System;
 using System.Net.Http;
-using DomainModel.Aggregates.Gallery.Interfaces;
-using DomainModel.Aggregates.Metadata.Interfaces;
-using DomainModel.Aggregates.Picture.Interfaces;
-using DomainModel.Aggregates.Tags.Interfaces;
 using Infrastructure.Common;
-using Infrastructure.Galleries;
-using Infrastructure.Metadata;
-using Infrastructure.Pictures;
-using Infrastructure.Tags;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
 namespace WebGallery.UI
@@ -59,10 +50,6 @@ namespace WebGallery.UI
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
             });
 
-            services.AddTransient<IGalleryRepository, GalleryRepository>();
-            services.AddTransient<IPictureRepository, PictureRepository>();
-            services.AddTransient<ITagRepository, TagRepository>();
-            services.AddTransient<IMetadataRepository, MetadataRepository>();
             services.AddTransient<Infrastructure.Services.IFileSystemService, Infrastructure.Services.FileSystemService>();
             services.AddTransient<Infrastructure.MinimalApi.MinimalApiProxy>();
             services.AddTransient<Infrastructure.Common.UsernameResolver>();
