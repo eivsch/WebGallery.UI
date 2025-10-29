@@ -5,8 +5,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Application.Services.Interfaces;
-using AutoMapper;
 using Infrastructure.Common;
 using Infrastructure.MinimalApi;
 using Infrastructure.Services;
@@ -33,16 +31,12 @@ namespace WebGallery.UI.Controllers
                 MultipartBodyLengthLimit = MaxFileSize,
             };
         
-        private readonly IFileService _fileService;
-        private readonly IMapper _mapper;
         private readonly IFileSystemService _fileSystemService;
         private readonly MinimalApiProxy _minimalApiProxy;
         private readonly string _username;
 
-        public UploadsController(IFileService uploadService, IMapper mapper, IFileSystemService fileSystemService, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver)
+        public UploadsController(IFileSystemService fileSystemService, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver)
         {
-            _fileService = uploadService;
-            _mapper = mapper;
             _fileSystemService = fileSystemService;
             _minimalApiProxy = minimalApiProxy;
             _username = usernameResolver.Username;

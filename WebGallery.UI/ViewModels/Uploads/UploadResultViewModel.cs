@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Application.Uploads;
 using Infrastructure.Services;
 
 namespace WebGallery.UI.ViewModels.Uploads

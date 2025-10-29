@@ -4,14 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Services;
-using Application.Services.Interfaces;
-using Application.Tags;
+
 using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
 using WebGallery.UI.Generators;
 using WebGallery.UI.Generators.Helpers;
 using WebGallery.UI.Helpers;
@@ -25,16 +24,12 @@ namespace WebGallery.UI.Controllers
     public class AlbumsController : Controller
     {
         private readonly ILogger<AlbumsController> _logger;
-        private readonly IGalleryService _galleryService;
-        private readonly IPictureService _pictureService;
         private readonly MinimalApiProxy _minimalApiProxy;
         readonly string _username;
 
-        public AlbumsController(ILogger<AlbumsController> logger, IGalleryService galleryService, IPictureService pictureService, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
+        public AlbumsController(ILogger<AlbumsController> logger, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
             _logger = logger;
-            _galleryService = galleryService;
-            _pictureService = pictureService;
             _minimalApiProxy = minimalApiProxy;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;

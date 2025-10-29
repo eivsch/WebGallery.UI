@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Application.Services.Interfaces;
-using Application.Tags;
+
 using AutoMapper;
 using Infrastructure.Common;
 using Infrastructure.MinimalApi;
@@ -20,9 +19,6 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class BioController : Controller
     {
-        private readonly IPictureService _pictureService;
-        private readonly ITagService _tagService;
-        private readonly IMapper _mapper;
         private readonly MinimalApiProxy _minimalApiProxy;
         private readonly IFileSystemService _fileSystemService;
         private readonly string _username;
@@ -30,16 +26,11 @@ namespace WebGallery.UI.Controllers
         private List<AlbumMetaDTO> _albumsCache;
 
         public BioController(
-            IPictureService pictureService,
-            ITagService tagService,
             IMapper mapper,
             MinimalApiProxy minimalApiProxy,
             IFileSystemService fileSystemService,
             UsernameResolver usernameResolver)
         {
-            _pictureService = pictureService;
-            _tagService = tagService;
-            _mapper = mapper;
             _minimalApiProxy = minimalApiProxy;
             _fileSystemService = fileSystemService;
             _username = usernameResolver.Username;

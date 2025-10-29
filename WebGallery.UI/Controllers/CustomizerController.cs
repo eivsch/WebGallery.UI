@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Services.Interfaces;
 using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,13 +16,11 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class CustomizerController : Controller
     {
-        private readonly ITagService _tagService;
         readonly MinimalApiProxy _minimalApiProxy;
         readonly string _username;
 
-        public CustomizerController(ITagService tagService, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
+        public CustomizerController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
-            _tagService = tagService;
             _minimalApiProxy = minimalApiProxy;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
