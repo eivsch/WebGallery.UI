@@ -115,5 +115,26 @@ namespace Infrastructure.FileServer
                 FileSize = responseData.FileSize
             };
         }
+
+        public async Task MergeFolders(string targetFolder, List<string> sourceFolders)
+        {
+            if (string.IsNullOrWhiteSpace(targetFolder)) throw new ArgumentException("targetFolder is required", nameof(targetFolder));
+            if (sourceFolders == null || sourceFolders.Count == 0) throw new ArgumentException("sourceFolders must contain at least one folder", nameof(sourceFolders));
+
+            var body = new
+            {
+                TargetFolder = targetFolder,
+                SourceFolders = sourceFolders
+            };
+
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync($"{_fileServerUrl}/files/merge-folders", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to merge folders. The file server returned a {response.StatusCode} status code.");
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Infrastructure.FileServer
 {
@@ -11,5 +12,6 @@ namespace Infrastructure.FileServer
         Task DeleteFileFromFileServer(string albumName, string fileName);
         Task GenerateVideoThumbnailAsync(string appPathBase64, string seekTime = "00:00:01.000");
         Task<SavedFileInfo> GenerateVideoImageAsync(string appPathB64, string seekTime = "00:00:01.000");
+        Task MergeFolders(string targetFolder, List<string> sourceFolders);
     }
 }

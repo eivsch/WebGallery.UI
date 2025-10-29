@@ -1,9 +1,17 @@
 @using Infrastructure.MinimalApi
+@using System.Text.Encodings.Web
 @model List<AlbumMetaDTO>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 <div class="container mt-5">
     <h2 class="mb-4">Admin: Album Management</h2>
+
+    <div id="operationMessage" class="mt-2" style="display:none"></div>
+
+    <div class="mb-3">
+        <button id="mergeSelectedBtn" type="button" class="btn btn-primary" disabled>Merge Selected</button>
+    </div>
+
     @if (Model == null || !Model.Any())
     {
         <div class="alert alert-info">No albums found.</div>
@@ -13,6 +21,7 @@
         <table class="table table-dark table-striped admin-album-table">
             <thead>
                 <tr>
+                    <th>Select</th>
                     <th>Album Name</th>
                     <th>Created</th>
                     <th>Total Items</th>
@@ -22,15 +31,17 @@
             <tbody>
             @foreach (var album in Model)
             {
-                <tr class="album-row">
-                    <td><a href="/admin/albums/@album.AlbumName">@album.AlbumName</a></td>
-                    <td>@album.Created.ToString("yyyy-MM-dd")</td>
-                    <td>@album.TotalCount</td>
-                    <td>
-                        <button type="button" class="btn btn-info">Merge</button>
-                        <form asp-action="Delete" asp-controller="Admin" method="post" class="d-inline-block" onsubmit="event.stopPropagation(); return confirm('Are you sure you want to delete this album?');">
+                <tr class="album-row" data-album-name="@album.AlbumName">
+                    <td class="align-middle">
+                        <input type="checkbox" class="album-checkbox" data-album-name="@album.AlbumName" />
+                    </td>
+                    <td class="align-middle"><a href="/admin/albums/@album.AlbumName">@album.AlbumName</a></td>
+                    <td class="align-middle">@album.Created.ToString("yyyy-MM-dd")</td>
+                    <td class="align-middle">@album.TotalCount</td>
+                    <td class="align-middle">
+                        <form asp-action="Delete" asp-controller="Admin" method="post" class="d-inline-block">
                             <input type="hidden" name="albumName" value="@album.AlbumName" />
-                            <button type="submit" class="btn btn-danger btn-sm"> X </button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Are you sure you want to delete the album @Html.Raw(JavaScriptEncoder.Default.Encode(album.AlbumName))?');"> X </button>
                             @Html.AntiForgeryToken()
                         </form>
                     </td>
@@ -41,5 +52,244 @@
     }
 </div>
 
+<!-- Merge Modal -->
+<div class="modal fade" id="mergeModal" tabindex="-1" aria-labelledby="mergeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="mergeForm" asp-action="Merge" asp-controller="Admin" method="post">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mergeModalLabel">Merge albums</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          @Html.AntiForgeryToken()
+
+          <div id="mergeSourcesContainer" class="mb-3">
+            <label class="form-label">Source album(s):</label>
+            <ul id="mergeSourcesList" class="list-group"></ul>
+          </div>
+
+          <div class="mb-3">
+            <label for="targetAlbumSelect" class="form-label">Target album (where items will be moved):</label>
+            <select id="targetAlbumSelect" name="targetAlbum" class="form-select">
+                <option value="">-- Select target album --</option>
+                @foreach (var album in Model)
+                {
+                    <option value="@album.AlbumName">@album.AlbumName</option>
+                }
+            </select>
+            <div class="form-text">Or create a new album below — if you enter a name there it will be used instead of the selected album.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="newTargetAlbumInput" class="form-label">New target album (optional)</label>
+            <input id="newTargetAlbumInput" name="newTargetAlbum" class="form-control bg-white text-dark" placeholder="Enter a new album name to create and use as target" />
+            <div id="newTargetValidation" class="form-text text-danger" style="display:none"></div>
+            <div class="form-text">Leave empty to use the selected existing album. If filled, a new album will be created and used as the merge target.</div>
+          </div>
+
+          <!-- Hidden container for source album inputs; will be filled by JS before submit -->
+          <div id="mergeHiddenInputs"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button id="confirmMergeBtn" type="submit" class="btn btn-danger">Confirm merge</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 @section Scripts {
+    <script>
+        (function () {
+            // Prepare client-side list of existing album names for validation (case-insensitive)
+            const existingAlbums = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.Select(a => a.AlbumName).ToList() ?? new List<string>()));
+            const existingAlbumSetLower = new Set(existingAlbums.map(n => n.toLowerCase()));
+
+            const mergeSelectedBtn = document.getElementById('mergeSelectedBtn');
+            const checkboxes = document.querySelectorAll('.album-checkbox');
+            const mergeModalEl = document.getElementById('mergeModal');
+            const mergeModal = new bootstrap.Modal(mergeModalEl);
+            const mergeSourcesList = document.getElementById('mergeSourcesList');
+            const mergeHiddenInputs = document.getElementById('mergeHiddenInputs');
+            const targetSelect = document.getElementById('targetAlbumSelect');
+            const newTargetInput = document.getElementById('newTargetAlbumInput');
+            const newTargetValidation = document.getElementById('newTargetValidation');
+            const mergeForm = document.getElementById('mergeForm');
+            const confirmBtn = document.getElementById('confirmMergeBtn');
+            const operationMessage = document.getElementById('operationMessage');
+
+            function showMessage(type, text, autoHideMs = 3000) {
+                operationMessage.style.display = '';
+                operationMessage.className = '';
+                operationMessage.classList.add('alert');
+                if (type === 'success') operationMessage.classList.add('alert-success');
+                else operationMessage.classList.add('alert-danger');
+                operationMessage.textContent = text;
+                operationMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (autoHideMs) {
+                    setTimeout(() => {
+                        operationMessage.style.display = 'none';
+                    }, autoHideMs);
+                }
+            }
+
+            function getSelectedAlbums() {
+                return Array.from(document.querySelectorAll('.album-checkbox:checked')).map(cb => cb.getAttribute('data-album-name'));
+            }
+
+            function updateMergeButtonState() {
+                const selected = getSelectedAlbums();
+                // enable button when at least one is selected (we'll require target different from sources when confirming)
+                mergeSelectedBtn.disabled = selected.length === 0;
+            }
+
+            checkboxes.forEach(cb => cb.addEventListener('change', updateMergeButtonState));
+
+            // When user clicks Merge Selected
+            mergeSelectedBtn.addEventListener('click', function () {
+                const selected = getSelectedAlbums();
+                if (!selected.length) {
+                    showMessage('error', 'Please select at least one album to merge.');
+                    return;
+                }
+                openMergeModal(selected);
+            });
+
+            // Per-row merge button -> treat that row as single source (if present)
+            document.querySelectorAll('.per-row-merge').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    const album = btn.getAttribute('data-album-name');
+                    openMergeModal([album]);
+                });
+            });
+
+            function openMergeModal(sources) {
+                // Populate the list of source albums in the modal
+                mergeSourcesList.innerHTML = '';
+                sources.forEach(s => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = s;
+                    mergeSourcesList.appendChild(li);
+                });
+
+                // Populate/select target options: reset and disable selecting a target that is one of the sources
+                for (const opt of targetSelect.options) {
+                    // keep the placeholder enabled
+                    if (!opt.value) continue;
+                    opt.disabled = sources.includes(opt.value);
+                }
+
+                // Clear previous hidden inputs
+                mergeHiddenInputs.innerHTML = '';
+
+                // Add hidden inputs for source albums with the name 'sourceAlbums'
+                sources.forEach(s => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'sourceAlbums';
+                    input.value = s;
+                    mergeHiddenInputs.appendChild(input);
+                });
+
+                // Reset target select to placeholder
+                targetSelect.value = '';
+                // Reset new target input and validation
+                newTargetInput.value = '';
+                newTargetValidation.style.display = 'none';
+                confirmBtn.disabled = false;
+
+                // Show modal
+                mergeModal.show();
+            }
+
+            // Validate new target input against existing album names
+            function validateNewTarget() {
+                const val = (newTargetInput.value || '').trim();
+                if (!val) {
+                    newTargetValidation.style.display = 'none';
+                    confirmBtn.disabled = false;
+                    return true;
+                }
+                if (existingAlbumSetLower.has(val.toLowerCase())) {
+                    newTargetValidation.textContent = 'An album with that name already exists. Use the existing album as the target or choose a different name.';
+                    newTargetValidation.style.display = '';
+                    confirmBtn.disabled = true;
+                    return false;
+                }
+                // additional character/length checks can be added here
+                newTargetValidation.style.display = 'none';
+                confirmBtn.disabled = false;
+                return true;
+            }
+
+            newTargetInput.addEventListener('input', validateNewTarget);
+
+            // Before submitting, validate that a target is chosen and is not one of the sources
+            mergeForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const sources = Array.from(mergeHiddenInputs.querySelectorAll('input[name="sourceAlbums"]')).map(i => i.value);
+                const selectedTarget = targetSelect.value;
+                const newTarget = (newTargetInput.value || '').trim();
+
+                // Determine actual target: prefer newTarget when provided
+                const actualTarget = newTarget !== '' ? newTarget : selectedTarget;
+
+                if (!actualTarget) {
+                    showMessage('error', 'Please choose or enter a target album.');
+                    return false;
+                }
+
+                if (sources.includes(actualTarget)) {
+                    showMessage('error', 'Target album must be different from the source album(s).');
+                    return false;
+                }
+
+                // If new target provided, re-validate against existing albums (case-insensitive)
+                if (newTarget !== '' && existingAlbumSetLower.has(newTarget.toLowerCase())) {
+                    showMessage('error', 'An album with that name already exists. Use the existing album as the target or choose a different name.');
+                    return false;
+                }
+
+                // Build FormData (includes antiforgery token)
+                const formData = new FormData(mergeForm);
+
+                // Post via fetch so controller can return JSON with result info
+                fetch(mergeForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(async response => {
+                    let payload = null;
+                    try {
+                        payload = await response.json();
+                    } catch (err) {
+                        // non-json response
+                    }
+
+                    if (response.ok && payload && payload.success) {
+                        mergeModal.hide();
+                        showMessage('success', payload.message || 'Merge completed successfully.');
+                        // refresh to reflect changes (albums list)
+                        setTimeout(() => location.reload(), 1200);
+                    } else {
+                        const msg = (payload && payload.message) ? payload.message : (response.statusText || 'Merge failed');
+                        showMessage('error', msg);
+                    }
+                })
+                .catch(err => {
+                    showMessage('error', 'Merge failed: ' + err.message);
+                });
+
+                return false;
+            });
+
+        })();
+    </script>
 }

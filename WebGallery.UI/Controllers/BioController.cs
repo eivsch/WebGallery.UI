@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-using AutoMapper;
 using Infrastructure.Common;
 using Infrastructure.MinimalApi;
 using Infrastructure.FileServer;
@@ -26,7 +25,6 @@ namespace WebGallery.UI.Controllers
         private List<AlbumMetaDTO> _albumsCache;
 
         public BioController(
-            IMapper mapper,
             MinimalApiProxy minimalApiProxy,
             IFileServerProxy fileSystemService,
             UsernameResolver usernameResolver)

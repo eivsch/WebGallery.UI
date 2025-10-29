@@ -238,6 +238,27 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
     }
+
+    // New: Merge albums on the server side. Updated to match API signature:
+    // PATCH /users/{username}/merge-albums with body { AlbumNamesSource: [], AlbumNameTarget: "" }
+    public async Task MergeAlbums(string username, string targetAlbum, List<string> sourceAlbums)
+    {
+        if (string.IsNullOrWhiteSpace(targetAlbum)) throw new ArgumentException("targetAlbum is required", nameof(targetAlbum));
+        if (sourceAlbums == null || sourceAlbums.Count == 0) throw new ArgumentException("sourceAlbums must contain at least one album", nameof(sourceAlbums));
+
+        var body = new
+        {
+            AlbumNamesSource = sourceAlbums,
+            AlbumNameTarget = targetAlbum
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PatchAsync($"/users/{username}/merge-albums", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
 public record CredentialsDTO
