@@ -30,6 +30,8 @@ namespace WebGallery.UI.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
+            ViewBag.Current = "Admin";
+
             var albums = await _minimalApiProxy.GetAlbums(_username);
             return View(albums);
         }
