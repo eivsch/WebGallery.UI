@@ -4,11 +4,15 @@
 }
 <div class="container mt-5">
     <h2 class="mb-4">Admin: '@albumName' Contents</h2>
-    <a href="/admin" class="btn btn-secondary mb-3">Back to Albums</a>
+    <a href="/admin" class="btn btn-secondary mb-3">Back to album list</a>
     <div class="row">
+        @* TODO: create a better UI for this. Use proper buttons instead of anchor tags and maybe some visual progress indicator or spinner.*@
         <div class="col-6">
-            <a href="/" class="btn btn-info mb-3">Rebuild on name</a>
-            <a href="/" class="btn btn-info mb-3">Rebuild on date</a>
+            <a href="/admin/albums/@albumName/rebuild-index?type=name" class="btn btn-link mb-3" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items in alphabetical order.');">Rebuild on name</a>
+            <a href="/admin/albums/@albumName/rebuild-index?type=date" class="btn btn-link mb-3" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items according to the date they were added.');">Rebuild on date</a>
+            <a href="/albums/@albumName" class="btn btn-link mb-3">View album</a>
+            @* TODO: Pre-populate the album name on the uploads page *@
+            <a href="/uploads" class="btn btn-info mb-3">Add items</a>
         </div>
     </div>
     @if (Model.Items == null || !Model.Items.Any())

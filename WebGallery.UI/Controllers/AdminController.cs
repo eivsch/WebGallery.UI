@@ -164,5 +164,16 @@ namespace WebGallery.UI.Controllers
 
             return RedirectToAction(nameof(Album), new { albumName });
         }
+
+        [HttpGet("albums/{albumName}/rebuild-index")]
+        public async Task<IActionResult> RebuildIndex(string albumName, [FromQuery] string type)
+        {
+            if (!string.IsNullOrWhiteSpace(albumName))
+            {
+                await _minimalApiProxy.PatchRebuildIndex(_username, albumName, type);
+            }
+
+            return RedirectToAction(nameof(Album), new { albumName });
+        }
     }
 }
