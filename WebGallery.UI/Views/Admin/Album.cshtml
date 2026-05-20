@@ -11,8 +11,7 @@
             <a href="/admin/albums/@albumName/rebuild-index?type=name" class="btn btn-link mb-3" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items in alphabetical order.');">Rebuild on name</a>
             <a href="/admin/albums/@albumName/rebuild-index?type=date" class="btn btn-link mb-3" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items according to the date they were added.');">Rebuild on date</a>
             <a href="/albums/@albumName" class="btn btn-link mb-3">View album</a>
-            @* TODO: Pre-populate the album name on the uploads page *@
-            <a href="/uploads" class="btn btn-info mb-3">Add items</a>
+            <a href="/uploads?albumName=@albumName" class="btn btn-info mb-3">Add items</a>
         </div>
     </div>
     @if (Model.Items == null || !Model.Items.Any())

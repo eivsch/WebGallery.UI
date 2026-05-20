@@ -42,9 +42,9 @@ namespace WebGallery.UI.Controllers
             _username = usernameResolver.Username;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] string albumName)
         {
-            var vm = new UploadsViewModel();
+            var vm = new UploadsViewModel { AlbumName = albumName };
 
             return View(vm);
         }
