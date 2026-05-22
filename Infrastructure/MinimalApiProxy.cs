@@ -98,7 +98,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         var response = await _client.PostAsync($"users/{username}/albums/{albumName}/media-items", jsonContent);
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"The API returned a {response.StatusCode} status code.");
+            throw new Exception($"The API returned a {response.StatusCode} status code. With content: {await response.Content.ReadAsStringAsync()}");
         }
     }
 
@@ -307,7 +307,7 @@ public record MediaDTO
     public List<TagDTO> Tags { get; set; }
     public string AlbumName { get; set; }
     public int? Index { get; set; }
-    public int? Size { get; set; }
+    public long? Size { get; set; }
     public DateTimeOffset Created {get;set;}
 }
 
