@@ -175,12 +175,21 @@ function viewGeneratedImages(button) {
             items.className = 'bio-generated-images__list';
 
             const mediaLinks = photosContainer.querySelectorAll('a.photo-item');
+            const fileNames = [];
             mediaLinks.forEach(function (link) {
                 const fileName = link.getAttribute('data-name') || '';
                 if (!fileName) {
                     return;
                 }
 
+                fileNames.push(fileName);
+            });
+
+            fileNames.sort(function (a, b) {
+                return a.localeCompare(b);
+            });
+
+            fileNames.forEach(function (fileName) {
                 const listItem = document.createElement('li');
                 listItem.className = 'bio-generated-images__item';
                 listItem.setAttribute('data-name', fileName);
