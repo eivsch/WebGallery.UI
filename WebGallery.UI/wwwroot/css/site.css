@@ -79,6 +79,14 @@
     display: list-item;
 }
 
+.bio-generated-images__item {
+    cursor: pointer;
+}
+
+.bio-generated-images__item:hover {
+    text-decoration: underline;
+}
+
 .tag-list-item{
     margin-right: 3%;
 }

@@ -31,7 +31,7 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> ShowImage(string base64EncodedAppPath)
         {
             var file = await _fileSystemService.DownloadImageFromFileServer(base64EncodedAppPath);
-            FileContentResult result = new FileContentResult(file, "image/jpeg"); 
+            FileContentResult result = new(file, "image/jpeg"); 
 
             return result;
         }
@@ -40,7 +40,10 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> ShowVideo(string base64EncodedAppPath)
         {
             var file = await _fileSystemService.DownloadVideoFromFileServer(base64EncodedAppPath);
-            FileContentResult result = new FileContentResult(file, "video/mp4"); 
+            FileContentResult result = new(file, "video/mp4")
+            {
+                EnableRangeProcessing = true,
+            };
 
             return result;
         }

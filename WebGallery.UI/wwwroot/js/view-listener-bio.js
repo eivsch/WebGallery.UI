@@ -182,6 +182,10 @@ function viewGeneratedImages(button) {
                 }
 
                 const listItem = document.createElement('li');
+                listItem.className = 'bio-generated-images__item';
+                listItem.setAttribute('data-name', fileName);
+                listItem.setAttribute('role', 'button');
+                listItem.setAttribute('tabindex', '0');
                 listItem.textContent = fileName;
                 items.appendChild(listItem);
             });
@@ -289,6 +293,90 @@ function setupVideoThumbnailButton() {
             viewGeneratedImages(generatedImagesBtn);
         };
     }
+
+    var generatedImagesContainer = document.getElementById('generatedVideoImagesContainer');
+    if (generatedImagesContainer) {
+        generatedImagesContainer.onclick = function (event) {
+            var target = event.target.closest('.bio-generated-images__item');
+            if (!target) {
+                return;
+            }
+
+            var fileName = target.getAttribute('data-name') || target.textContent || '';
+            seekVideoToGeneratedImageTimestamp(fileName);
+        };
+
+        generatedImagesContainer.onkeydown = function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            var target = event.target.closest('.bio-generated-images__item');
+            if (!target) {
+                return;
+            }
+
+            event.preventDefault();
+            var fileName = target.getAttribute('data-name') || target.textContent || '';
+            seekVideoToGeneratedImageTimestamp(fileName);
+        };
+    }
+}
+
+function seekVideoToGeneratedImageTimestamp(fileName) {
+    var video = document.querySelector('video');
+    if (!video || !fileName) {
+        return;
+    }
+
+    var seconds = parseGeneratedImageTimestamp(fileName);
+    if (seconds === null) {
+        return;
+    }
+
+    var setCurrentTime = function () {
+        try {
+            if (video.tabIndex < 0) {
+                video.tabIndex = -1;
+            }
+            
+            video.currentTime = seconds;
+            video.focus();
+        }
+        catch (error) {
+            console.error('Unable to seek video to generated image timestamp.', error);
+        }
+    };
+
+    if (video.readyState >= 1) {
+        setCurrentTime();
+        return;
+    }
+
+    video.addEventListener('loadedmetadata', setCurrentTime, { once: true });
+}
+
+function parseGeneratedImageTimestamp(fileName) {
+    var fileNameNoExt = fileName.replace(/\.jpg$/i, '');
+    var underscoreIndex = fileNameNoExt.lastIndexOf('_');
+    if (underscoreIndex < 0) {
+        return null;
+    }
+
+    var timestamp = fileNameNoExt.substring(underscoreIndex + 1);
+    var timestampParts = timestamp.split('.');
+    if (timestampParts.length !== 2 || timestampParts[0].length !== 6 || timestampParts[1].length !== 3) {
+        return null;
+    }
+
+    var hours = parseInt(timestampParts[0].substring(0, 2), 10);
+    var minutes = parseInt(timestampParts[0].substring(2, 4), 10);
+    var seconds = parseInt(timestampParts[0].substring(4, 6), 10);
+    var milliseconds = parseInt(timestampParts[1], 10);
+
+    var totalSeconds = (hours * 3600) + (minutes * 60) + seconds + (milliseconds / 1000);
+    
+    return totalSeconds;
 }
 
 // Initialize the video thumbnail button on page load
