@@ -66,8 +66,17 @@
     max-height: 100%;
 }
 
-.tag-list, li {
+.tag-list, .tag-list li {
     display: inline;
+}
+
+.bio-generated-images__list {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.bio-generated-images__list li {
+    display: list-item;
 }
 
 .tag-list-item{

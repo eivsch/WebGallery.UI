@@ -161,6 +161,7 @@ namespace WebGallery.UI.Controllers
                     Id = hit.MediaItem.Id,
                     AppPath = Path.Combine(hit.AlbumName, hit.MediaItem.Name),
                     MediaType = Utils.DetermineMediaType(hit.MediaItem.Name),
+                    Name = hit.MediaItem.Name,
                 };
 
                 items.Add(imageVm);

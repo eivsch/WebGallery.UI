@@ -124,6 +124,89 @@ function focusInput() {
     }
 }
 
+function viewGeneratedImages(button) {
+    const container = document.getElementById('generatedVideoImagesContainer');
+    if (!button || !container) {
+        return;
+    }
+
+    if (container.dataset.loaded === 'true') {
+        const isVisible = container.style.display !== 'none';
+        container.style.display = isVisible ? 'none' : 'block';
+        return;
+    }
+
+    const album = button.getAttribute('data-album') || '';
+    const fileNameNoExt = button.getAttribute('data-file-name-no-ext') || '';
+    if (album === '' || fileNameNoExt === '') {
+        return;
+    }
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Loading...';
+
+    fetch('/single/search?albums=' + encodeURIComponent(album) + '&mediaNameContains=' + encodeURIComponent(fileNameNoExt), {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error('Failed to load generated images');
+        }
+
+        return response.text();
+    })
+    .then(function (html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const photosContainer = doc.querySelector('main.main-content .container-fluid.photos');
+
+        container.innerHTML = '';
+
+        if (photosContainer) {
+            const galleryLink = document.createElement('a');
+            const searchUrl = '/single/search?albums=' + encodeURIComponent(album) + '&mediaNameContains=' + encodeURIComponent(fileNameNoExt);
+            galleryLink.href = searchUrl;
+            galleryLink.textContent = 'View as gallery';
+            container.appendChild(galleryLink);
+
+            const items = document.createElement('ul');
+            items.className = 'bio-generated-images__list';
+
+            const mediaLinks = photosContainer.querySelectorAll('a.photo-item');
+            mediaLinks.forEach(function (link) {
+                const fileName = link.getAttribute('data-name') || '';
+                if (!fileName) {
+                    return;
+                }
+
+                const listItem = document.createElement('li');
+                listItem.textContent = fileName;
+                items.appendChild(listItem);
+            });
+
+            if (items.children.length > 0) {
+                container.appendChild(items);
+            } else {
+                container.innerHTML = '<p>No associated image names were found.</p>';
+            }
+        }
+
+        container.dataset.loaded = 'true';
+        container.style.display = 'block';
+    })
+    .catch(function () {
+        container.innerHTML = '<p>Unable to load associated images.</p>';
+        container.dataset.loaded = 'true';
+        container.style.display = 'block';
+    })
+    .finally(function () {
+        button.disabled = false;
+        button.textContent = originalText;
+    });
+}
+
 function bioSwitch(album, sortOrder) {
     window.history.pushState("", "", '/Bio/' + album + '/' + sortOrder);
     setupVideoThumbnailButton();
@@ -197,6 +280,13 @@ function setupVideoThumbnailButton() {
                 genImgBtn.textContent = "Failed!";
                 genImgBtn.disabled = false;
             });
+        };
+    }
+
+    var generatedImagesBtn = document.getElementById('viewGeneratedImages');
+    if (generatedImagesBtn) {
+        generatedImagesBtn.onclick = function () {
+            viewGeneratedImages(generatedImagesBtn);
         };
     }
 }
