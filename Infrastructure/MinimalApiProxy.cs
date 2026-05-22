@@ -259,6 +259,17 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
     }
+
+    public async Task PatchRebuildIndex(string username, string albumName, string type)
+    {
+        if (string.IsNullOrWhiteSpace(albumName)) throw new ArgumentException("albumName is required", nameof(albumName));
+
+        HttpResponseMessage response = await _client.PatchAsync($"users/{username}/albums/{albumName}/rebuild-index?rebuildType={type}", null);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
 public record CredentialsDTO

@@ -30,6 +30,8 @@ namespace WebGallery.UI.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
+            ViewBag.Current = "Admin";
+
             var albums = await _minimalApiProxy.GetAlbums(_username);
             return View(albums);
         }
@@ -160,6 +162,17 @@ namespace WebGallery.UI.Controllers
             {
                 await _minimalApiProxy.DeleteMedia(_username, albumName, fileName);
                 await _fileSystemService.DeleteFileFromFileServer(albumName, fileName); // Ensure the file is deleted from the file system as well
+            }
+
+            return RedirectToAction(nameof(Album), new { albumName });
+        }
+
+        [HttpGet("albums/{albumName}/rebuild-index")]
+        public async Task<IActionResult> RebuildIndex(string albumName, [FromQuery] string type)
+        {
+            if (!string.IsNullOrWhiteSpace(albumName))
+            {
+                await _minimalApiProxy.PatchRebuildIndex(_username, albumName, type);
             }
 
             return RedirectToAction(nameof(Album), new { albumName });
