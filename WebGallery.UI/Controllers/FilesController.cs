@@ -40,19 +40,15 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> ShowVideo(string base64EncodedAppPath)
         {
             var rangeHeader = Request.Headers.Range.ToString();
-            var response = await _fileSystemService.DownloadVideoFromFileServer(base64EncodedAppPath, rangeHeader);
+            var ifRangeHeader = Request.Headers.IfRange.ToString();
+            using var response = await _fileSystemService.DownloadVideoFromFileServer(base64EncodedAppPath, rangeHeader, ifRangeHeader);
             if (!response.IsSuccessStatusCode)
             {
-                response.Dispose();
                 return StatusCode((int)response.StatusCode);
             }
 
-            var stream = await response.Content.ReadAsStreamAsync();
-            HttpContext.Response.OnCompleted(() =>
-            {
-                response.Dispose();
-                return Task.CompletedTask;
-            });
+            Response.StatusCode = (int)response.StatusCode;
+            Response.ContentType = response.Content.Headers.ContentType?.ToString() ?? "video/mp4";
 
             if (response.Content.Headers.ContentLength.HasValue)
                 Response.ContentLength = response.Content.Headers.ContentLength.Value;
@@ -65,9 +61,17 @@ namespace WebGallery.UI.Controllers
             if (acceptRanges != null && acceptRanges.Count > 0)
                 Response.Headers["Accept-Ranges"] = string.Join(",", acceptRanges);
 
-            Response.StatusCode = (int)response.StatusCode;
+            var etag = response.Headers.ETag?.ToString();
+            if (string.IsNullOrWhiteSpace(etag) == false)
+                Response.Headers["ETag"] = etag;
 
-            return File(stream, response.Content.Headers.ContentType?.ToString() ?? "video/mp4");
+            if (response.Content.Headers.LastModified.HasValue)
+                Response.Headers["Last-Modified"] = response.Content.Headers.LastModified.Value.ToString("R");
+
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            await stream.CopyToAsync(Response.Body, 81920, HttpContext.RequestAborted);
+
+            return new EmptyResult();
         }
     }
 }
