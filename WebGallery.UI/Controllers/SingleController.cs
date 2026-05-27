@@ -87,7 +87,7 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, bool? allTagsMustMatch = false, int? hitsToSkip = null)
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, bool? allTagsMustMatch = false, int? hitsToSkip = null, bool shuffle = false)
         {
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
@@ -108,6 +108,11 @@ namespace WebGallery.UI.Controllers
             _searchCache.Remove(_username);
             _searchCache.Add(_username, searchDetails);
 
+            if (shuffle)
+            {
+                ShuffleSearchHits();
+            }
+            
             List<SingleGalleryImageViewModel> items = PopulateItemList(0, searchHits);
 
             SingleGalleryViewModel vm = SinglePageGenerator.SetDisplayProperties(items);
@@ -115,8 +120,21 @@ namespace WebGallery.UI.Controllers
             vm.TotalImageCount = searchDetails.HasMoreResults ? searchHits.Count + 1 : searchHits.Count;
             vm.CurrentOffset = hitsToSkip ?? 0;
             vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.IsRandomized = shuffle;
 
             return View("Index", vm);
+
+            void ShuffleSearchHits()
+            {
+                Random rnd = new();
+                for (int i = searchHits.Count - 1; i > 0; i--)
+                {
+                    int j = rnd.Next(0, i + 1);
+                    SearchHitDTO temp = searchHits[i];
+                    searchHits[i] = searchHits[j];
+                    searchHits[j] = temp;
+                }
+            }
         }
 
         [HttpGet("search/scroll")]
