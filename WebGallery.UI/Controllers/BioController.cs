@@ -45,58 +45,37 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Bio";
 
-            // Get a random picture
-            Random rnd = new();
-            AlbumMetaDTO album;
-            int albumMediaIndex;
-            
             List<AlbumMetaDTO> albums = await GetAlbumsAsync();
             if (albums == null) return null;
 
-            int albumIndex = rnd.Next(0, albums.Count); 
-            album = albums[albumIndex];
-            albumMediaIndex = rnd.Next(0, album.TotalCount);
+            Random rnd = new();
+            int albumIndex = rnd.Next(0, albums.Count);
+            AlbumMetaDTO album = albums[albumIndex];
+            int albumMediaIndex = rnd.Next(0, album.TotalCount);
 
-            return RedirectToAction("Index", "Bio", new { album = album.AlbumName, index = albumMediaIndex });
+            BioViewModel vm = await BuildBioViewModelAsync(album.AlbumName, albumMediaIndex);
+            return View(vm);
         }
 
         [HttpGet("{album}/{index}")]
         public async Task<IActionResult> Index(string album, int index)
         {
-            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, index, 1);
-            MediaDTO media = albumContents.Items[0];
-
-            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
-            IEnumerable<TagMetaDTO> tags = albums.SelectMany(s => s.Tags);
-            IEnumerable<string> allTags = tags.Select(s => s.TagName).Distinct();
-
-            BioViewModel vm = new()
-            {
-                AllTags = allTags.ToList(),
-                BioPictureViewModel = new BioPictureViewModel
-                {
-                    Id = media.Id,
-                    Name = media.Name,
-                    AppPath = $"{album}/{media.Name}",
-                    Tags = media.Tags.Select(s => s.TagName).ToList(),
-                    AlbumMediaIndex = index,
-                    Album = album,
-                }
-            };
-
+            ViewBag.Current = "Bio";
+            BioViewModel vm = await BuildBioViewModelAsync(album, index);
             return View(vm);
         }
 
         [HttpGet("id/{id}")]
         public async Task<IActionResult> Index(string id)
         {
+            ViewBag.Current = "Bio";
+
             List<SearchHitDTO> result = await _minimalApiProxy.GetSearch(_username, null, null, null, id, 1, false);
             if (result.Count == 0) return NoContent();
             SearchHitDTO searchHit = result[0];
 
             List<AlbumMetaDTO> albums = await GetAlbumsAsync();
-            IEnumerable<TagMetaDTO> tags = albums.SelectMany(s => s.Tags);
-            IEnumerable<string> allTags = tags.Select(s => s.TagName).Distinct();
+            IEnumerable<string> allTags = albums.SelectMany(s => s.Tags).Select(s => s.TagName).Distinct();
 
             BioViewModel vm = new()
             {
@@ -113,6 +92,29 @@ namespace WebGallery.UI.Controllers
             };
 
             return View(vm);
+        }
+
+        private async Task<BioViewModel> BuildBioViewModelAsync(string album, int index)
+        {
+            AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, index, 1);
+            MediaDTO media = albumContents.Items[0];
+
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
+            IEnumerable<string> allTags = albums.SelectMany(s => s.Tags).Select(s => s.TagName).Distinct();
+
+            return new BioViewModel
+            {
+                AllTags = allTags.ToList(),
+                BioPictureViewModel = new BioPictureViewModel
+                {
+                    Id = media.Id,
+                    Name = media.Name,
+                    AppPath = $"{album}/{media.Name}",
+                    Tags = media.Tags.Select(s => s.TagName).ToList(),
+                    AlbumMediaIndex = index,
+                    Album = album,
+                }
+            };
         }
 
         [HttpGet("switch/{album}/{index}")]

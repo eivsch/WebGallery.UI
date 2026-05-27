@@ -29,6 +29,7 @@
 else 
 {
     string imageUri = $"/files/image/{appPathBase64}";
+    <div>@Model.Name</div>
     <a href="@imageUri" data-fancybox data-type="image" data-caption="@Model.Name">
         <img src="@imageUri" alt="Image" class="bio-img">
     </a>
@@ -93,3 +94,8 @@ else
 </div>
 
 <div id="generatedVideoImagesContainer" class="bio-generated-images" style="display:none;" aria-live="polite"></div>
+
+<div class="bio-content__deletebtn">
+    <a href="/Bio/picture/delete/@Model.Album/@Model.Name"
+       onclick="return confirm('Are you sure you want to delete \'@Model.Name\'? This cannot be undone.')">Delete</a>
+</div>
