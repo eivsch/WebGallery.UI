@@ -38,6 +38,7 @@ namespace WebGallery.UI
                 options.SlidingExpiration = true;
             });
 
+            services.AddMemoryCache();
             services.AddControllersWithViews();
 
             services.AddHttpClient<WebGalleryApiClient>(c => 

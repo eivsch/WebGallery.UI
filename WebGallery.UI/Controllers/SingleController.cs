@@ -8,6 +8,7 @@ using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using WebGallery.UI.Generators;
 using WebGallery.UI.Helpers;
 using WebGallery.UI.ViewModels.Single;
@@ -31,16 +32,19 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class SingleController : Controller
     {
-        private static Dictionary<string, SearchDetails> _searchCache = [];
-        
+        private static readonly TimeSpan SearchCacheExpiry = TimeSpan.FromMinutes(30);
+        private const string SearchCacheKeyPrefix = "search_";
+
         readonly MinimalApiProxy _minimalApiProxy;
+        readonly IMemoryCache _cache;
         readonly string _username;
 
         const int DISPLAY_COUNT_MAX = 32;
 
-        public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
+        public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IMemoryCache cache)
         {
             _minimalApiProxy = minimalApiProxy;
+            _cache = cache;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
         }
@@ -105,8 +109,7 @@ namespace WebGallery.UI.Controllers
                 HasMoreResults = maxSize == searchHits.Count,
             };
 
-            _searchCache.Remove(_username);
-            _searchCache.Add(_username, searchDetails);
+            _cache.Set(SearchCacheKeyPrefix + _username, searchDetails, SearchCacheExpiry);
 
             if (shuffle)
             {
@@ -140,9 +143,7 @@ namespace WebGallery.UI.Controllers
         [HttpGet("search/scroll")]
         public async Task <IActionResult> ScrollSearch(int from)
         {
-            if (_searchCache.ContainsKey(_username) == false) RedirectToAction("Index", "Customizer");
-            
-            SearchDetails cachedResults = _searchCache[_username];
+            if (!_cache.TryGetValue(SearchCacheKeyPrefix + _username, out SearchDetails cachedResults)) return RedirectToAction("Index", "Customizer");
             if (from >= cachedResults.Hits.Count && cachedResults.HasMoreResults)
             {
                 return await Search(cachedResults.Albums, cachedResults.Tags, cachedResults.FileExtensions, cachedResults.MediaNameContains, cachedResults.MaxSize, cachedResults.AllTagsMustMatch, hitsToSkip: from);
