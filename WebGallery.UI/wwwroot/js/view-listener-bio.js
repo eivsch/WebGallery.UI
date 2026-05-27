@@ -1,15 +1,6 @@
 ﻿function tagExists(tag) {
-    var exists = false;
-    var existingTags = $('#bioPictureTags').children();
-    existingTags.each(function (index) {
-        console.log(index + ": " + $(this).text());
-        if (tag == $(this).text()) {
-            exists = true;
-            return false;
-        }
-    });
-
-    return exists;
+    var normalised = tag.replace(/^#/, '');
+    return $('#bioPictureTags').children('[data-tag-name="' + normalised + '"]').length > 0;
 }
 
 function addTag(tag) {
@@ -20,18 +11,28 @@ function addTag(tag) {
 
     // Add
     if (!exists) {
+        var normalised = tag.replace(/^#/, '');
+        var displayTag = tag.startsWith('#') ? tag : '#' + tag;
         $.post(
             // Url
             "/bio/tag",
             // Data
             {
-                tag: tag,
+                tag: normalised,
                 pictureId: picId,
                 album: album,
             }
             // OnSuccess
             , function () {
-                $('#bioPictureTags').append('<li class="tag-list-item">' + tag + '</li>');
+                var li = $('<li class="tag-list-item"></li>')
+                    .attr('data-tag-name', normalised)
+                    .text(displayTag + ' ')
+                    .append(
+                        $('<i class="far fa-minus-square"></i>').on('click', function () {
+                            deleteTag(normalised, picId, album);
+                        })
+                    );
+                $('#bioPictureTags').append(li);
             });
 
         return true;
@@ -391,4 +392,25 @@ function parseGeneratedImageTimestamp(fileName) {
 // Initialize the video thumbnail button on page load
 document.addEventListener('DOMContentLoaded', function() {
     setupVideoThumbnailButton();
+});
+
+function showBioLoading() {
+    var el = document.getElementById('bio-loading');
+    if (el) el.style.display = 'block';
+}
+
+function hideBioLoading() {
+    var el = document.getElementById('bio-loading');
+    if (el) el.style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowLeft') {
+        var prev = document.querySelector('.bio-nav-prev');
+        if (prev) prev.click();
+    } else if (e.key === 'ArrowRight') {
+        var next = document.querySelector('.bio-nav-next');
+        if (next) next.click();
+    }
 });

@@ -57,13 +57,10 @@
     transform: scale(1.05);
 }
 
-/* .bio-figure {
-    height: 600px;
-} */
-
 .bio-img {
     max-width: 100%;
-    max-height: 100%;
+    max-height: 80vh;
+    object-fit: contain;
 }
 
 .tag-list, .tag-list li {
@@ -117,9 +114,6 @@
 
 .bio-nav-item {
     margin-bottom: 15px;
-}
-
-.bio-nav-item {
     font-size: 25px;
     display: inline-block;
     color: gray;
@@ -127,6 +121,27 @@
 
 .bio-nav-item a {
     color: gray;
+    transition: color 0.2s ease, transform 0.15s ease;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.bio-nav-item a:hover {
+    color: #ef6c57;
+    transform: scale(1.2);
+}
+
+.bio-nav-item a:focus-visible {
+    outline: 2px solid #ef6c57;
+    outline-offset: 3px;
+    color: #ef6c57;
+}
+
+.bio-loading {
+    font-size: 1.8rem;
+    color: #ef6c57;
+    margin-bottom: 10px;
 }
 
 
