@@ -19,6 +19,7 @@
     string videoUri = $"/files/video/{appPathBase64}";
     string thumbsUri = $"/files/image/{WebGallery.UI.Helpers.Utils.GetThumbsBase64(Model.AppPath)}";
     <div style="position:relative;">
+        <div>@Model.Name</div>
         <video class="bio-img" controls preload="none" poster="@thumbsUri" style="width:100%;height:auto;">
             <source src="@videoUri" type="video/mp4" />
             Your browser does not support the video tag.
@@ -67,5 +68,12 @@ else
                 </button>
             </div>
         </div>
+        <div class="row">
+            <div class="bio-nav-item">
+                <button id="viewGeneratedImages" type="button" data-album="@(Model.Album + "_video_images")" data-file-name-no-ext="@System.IO.Path.GetFileNameWithoutExtension(Model.Name)">Generated images</button>
+            </div>
+        </div>
     }
 </div>
+
+<div id="generatedVideoImagesContainer" class="bio-generated-images" style="display:none;" aria-live="polite"></div>

@@ -46,11 +46,21 @@ namespace Infrastructure.FileServer
             return await response.Content.ReadAsByteArrayAsync();
         }
 
-        public async Task<byte[]> DownloadVideoFromFileServer(string videoIdentifier)
+        public async Task<HttpResponseMessage> DownloadVideoFromFileServer(string videoIdentifier, string rangeHeader, string ifRangeHeader)
         {
-            var response = await _client.GetAsync($"{_fileServerUrl}/files/video?file={videoIdentifier}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_fileServerUrl}/files/video?file={videoIdentifier}");
+            if (string.IsNullOrWhiteSpace(rangeHeader) == false)
+            {
+                request.Headers.TryAddWithoutValidation("Range", rangeHeader);
+            }
 
-            return await response.Content.ReadAsByteArrayAsync();
+            if (string.IsNullOrWhiteSpace(ifRangeHeader) == false)
+            {
+                request.Headers.TryAddWithoutValidation("If-Range", ifRangeHeader);
+            }
+
+            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            return response;
         }
 
         public async Task<SavedFileInfo> UploadFileToFileServer(string albumname, string filename, Stream file)

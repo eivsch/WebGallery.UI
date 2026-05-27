@@ -6,6 +6,7 @@ namespace WebGallery.UI.ViewModels.Single
     {
         public string Id { get; set; }
         public string AppPath { get; set; }
+        public string Name { get; set; }
         public int IndexGlobal { get; set; }
         public int GalleryIndex { get; set; }
         public MediaType MediaType { get; set; }
