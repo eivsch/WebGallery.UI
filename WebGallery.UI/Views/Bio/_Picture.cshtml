@@ -50,11 +50,27 @@ else
 
 <div class="bio-nav-container">
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))"><<<  </a>
+        <a class="bio-nav-prev" href="" aria-label="Previous"
+           data-ajax="true"
+           data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)"
+           data-ajax-update="#bio-img-partial"
+           data-ajax-begin="showBioLoading()"
+           data-ajax-complete="hideBioLoading()"
+           data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))">
+            <i class="fas fa-chevron-left"></i>
+        </a>
     </div>
     <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - <a class="regular-text-link" href="/admin/albums/@Model.Album">@Model.Album</a></div>
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">  >>></a>
+        <a class="bio-nav-next" href="" aria-label="Next"
+           data-ajax="true"
+           data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)"
+           data-ajax-update="#bio-img-partial"
+           data-ajax-begin="showBioLoading()"
+           data-ajax-complete="hideBioLoading()"
+           data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">
+            <i class="fas fa-chevron-right"></i>
+        </a>
     </div>
     @if (mediaType == MediaType.Video)
     {

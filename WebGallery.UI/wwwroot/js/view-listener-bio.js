@@ -392,3 +392,24 @@ function parseGeneratedImageTimestamp(fileName) {
 document.addEventListener('DOMContentLoaded', function() {
     setupVideoThumbnailButton();
 });
+
+function showBioLoading() {
+    var el = document.getElementById('bio-loading');
+    if (el) el.style.display = 'block';
+}
+
+function hideBioLoading() {
+    var el = document.getElementById('bio-loading');
+    if (el) el.style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowLeft') {
+        var prev = document.querySelector('.bio-nav-prev');
+        if (prev) prev.click();
+    } else if (e.key === 'ArrowRight') {
+        var next = document.querySelector('.bio-nav-next');
+        if (next) next.click();
+    }
+});
