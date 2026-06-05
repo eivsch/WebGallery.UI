@@ -150,7 +150,9 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> Album(string albumName)
         {
             var albumContents = await _minimalApiProxy.GetAlbumContents(_username, albumName, 0, 1000); // adjust size as needed
+            var allAlbums = await _minimalApiProxy.GetAlbums(_username);
             ViewBag.AlbumName = albumName;
+            ViewBag.AllAlbums = allAlbums;
             return View("Album", albumContents);
         }
 
@@ -162,6 +164,44 @@ namespace WebGallery.UI.Controllers
             {
                 await _minimalApiProxy.DeleteMedia(_username, albumName, fileName);
                 await _fileSystemService.DeleteFileFromFileServer(albumName, fileName); // Ensure the file is deleted from the file system as well
+            }
+
+            return RedirectToAction(nameof(Album), new { albumName });
+        }
+
+        [HttpPost("albums/{albumName}/move-file")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoveFile(string albumName, string fileName, string targetAlbum, string mediaLocator)
+        {
+            if (string.IsNullOrWhiteSpace(albumName) || string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(targetAlbum))
+            {
+                TempData["AdminAlbumError"] = "Source album, file name and target album are required.";
+                return RedirectToAction(nameof(Album), new { albumName });
+            }
+
+            if (string.Equals(albumName, targetAlbum, StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["AdminAlbumError"] = "Target album must be different from source album.";
+                return RedirectToAction(nameof(Album), new { albumName });
+            }
+
+            try
+            {
+                var locator = string.IsNullOrWhiteSpace(mediaLocator) ? fileName : mediaLocator;
+                MoveMediaResponseDTO moveMediaResponseDTO = await _minimalApiProxy.TryMoveMedia(_username, albumName, locator, targetAlbum, fileName);
+                if (!moveMediaResponseDTO.Success)
+                {
+                    TempData["AdminAlbumError"] = "Move failed with error: " + moveMediaResponseDTO.ErrorMessage;
+                    return RedirectToAction(nameof(Album), new { albumName });
+                }
+
+                await _fileSystemService.MoveFile(albumName, targetAlbum, fileName);
+
+                TempData["AdminAlbumMessage"] = "File moved successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["AdminAlbumError"] = "Failed to move file: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Album), new { albumName });
