@@ -6,8 +6,21 @@ namespace WebGallery.UI.ViewModels.Customizer
     public class SearchesViewModel
     {
         public List<SavedSearchDTO> SavedSearches { get; set; } = [];
-        public IEnumerable<string> AllTags { get; set; } = [];
-        public IEnumerable<string> AllAlbums { get; set; } = [];
+        public IEnumerable<TagStatsViewModel> AllTags { get; set; } = [];
+        public IEnumerable<AlbumStatsViewModel> AllAlbums { get; set; } = [];
+        public int TotalItems { get; set; }
+    }
+
+    public class TagStatsViewModel
+    {
+        public string TagName { get; set; }
+        public int Count { get; set; }
+    }
+
+    public class AlbumStatsViewModel
+    {
+        public string AlbumName { get; set; }
+        public int Count { get; set; }
     }
 
     public class SaveSearchRequest

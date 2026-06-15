@@ -33,15 +33,20 @@ namespace WebGallery.UI.Controllers
 
             List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
             int totalItems = a.Sum(x => x.TotalCount);
-            IEnumerable<string> allTags = a.SelectMany(s => s.Tags).Select(s => s.TagName).Distinct();
-            IEnumerable<string> allAlbums = a.Select(s => s.AlbumName).Distinct();
+            IEnumerable<TagStatsViewModel> allTags = a.SelectMany(s => s.Tags)
+                .GroupBy(g => g.TagName)
+                .Select(s => new TagStatsViewModel { TagName = s.Key, Count = s.Sum(t => t.Count) });
+            IEnumerable<AlbumStatsViewModel> allAlbums = a
+                .GroupBy(g => g.AlbumName)
+                .Select(s => new AlbumStatsViewModel { AlbumName = s.Key, Count = s.Sum(ab => ab.TotalCount) });
 
             List<SavedSearchDTO> searches = await _minimalApiProxy.GetSavedSearches(_username);
             SearchesViewModel vm = new ()
             {
                 SavedSearches = searches,
                 AllTags = allTags,
-                AllAlbums = allAlbums
+                AllAlbums = allAlbums,
+                TotalItems = totalItems
             };
 
             return View(vm);

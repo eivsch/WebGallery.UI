@@ -80,6 +80,70 @@ document.addEventListener('DOMContentLoaded', function () {
     const deleteBtn = document.getElementById('deleteSavedSearchBtn');
     const albumsInput = document.getElementById('albumsInput');
     const tagsInput = document.getElementById('tagsInput');
+    const albumMatchCount = document.getElementById('albumMatchCount');
+    const tagMatchCount = document.getElementById('tagMatchCount');
+
+    function getOptionCountsMap(selectElement) {
+        if (!selectElement) return {};
+
+        return Array.from(selectElement.options).reduce(function (acc, option) {
+            const value = option.value;
+            const count = parseInt(option.getAttribute('data-count'), 10);
+
+            acc[value] = Number.isNaN(count) ? 0 : count;
+            return acc;
+        }, {});
+    }
+
+    const albumCountsByName = getOptionCountsMap(albumsInput);
+    const tagCountsByName = getOptionCountsMap(tagsInput);
+
+    function getSelectedValues(selectElement) {
+        if (!selectElement) return [];
+
+        if (window.jQuery) {
+            const values = jQuery(selectElement).val();
+            if (Array.isArray(values)) {
+                return values;
+            }
+        }
+
+        return Array.from(selectElement.selectedOptions || []).map(function (option) {
+            return option.value;
+        });
+    }
+
+    function sumSelectedCounts(selectElement, countsByName) {
+        if (!selectElement) return 0;
+
+        return getSelectedValues(selectElement).reduce(function (sum, value) {
+            const count = countsByName[value] || 0;
+            return sum + count;
+        }, 0);
+    }
+
+    function updateDynamicMatchCount() {
+        if (!albumMatchCount && !tagMatchCount) return;
+
+        const totalAlbumItems = albumMatchCount ? (parseInt(albumMatchCount.getAttribute('data-total-items'), 10) || 0) : 0;
+        const totalTagItems = tagMatchCount ? (parseInt(tagMatchCount.getAttribute('data-total-items'), 10) || 0) : 0;
+        const selectedAlbumValues = getSelectedValues(albumsInput);
+        const selectedTagValues = getSelectedValues(tagsInput);
+        const selectedAlbumCount = selectedAlbumValues.length > 0
+            ? sumSelectedCounts(albumsInput, albumCountsByName)
+            : totalAlbumItems;
+        const selectedTagCount = selectedTagValues.length > 0
+            ? sumSelectedCounts(tagsInput, tagCountsByName)
+            : totalTagItems;
+
+        if (albumMatchCount) {
+            albumMatchCount.textContent = 'Albums: ' + selectedAlbumCount + ' of ' + totalAlbumItems;
+        }
+
+        if (tagMatchCount) {
+            tagMatchCount.textContent = 'Tags: ' + selectedTagCount + ' of ' + totalTagItems;
+        }
+    }
 
     function setAlbumsFromCsv(albumsCsv) {
         if (!albumsInput) return;
@@ -96,6 +160,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.jQuery && jQuery.fn && jQuery.fn.select2) {
             jQuery(albumsInput).trigger('change');
         }
+
+        updateDynamicMatchCount();
     }
 
     function getSelectedAlbumsAsCsv() {
@@ -120,6 +186,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.jQuery && jQuery.fn && jQuery.fn.select2) {
             jQuery(tagsInput).trigger('change');
         }
+
+        updateDynamicMatchCount();
     }
 
     function getSelectedTagsAsCsv() {
@@ -138,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 form.reset();
                 setAlbumsFromCsv('');
                 setTagsFromCsv('');
+                updateDynamicMatchCount();
                 return;
             }
             setAlbumsFromCsv(selected.getAttribute('data-albums') || '');
@@ -146,8 +215,25 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('mediaNameContainsInput').value = selected.getAttribute('data-medianamecontains') || '';
             document.getElementById('allTagsMustMatch').checked = selected.getAttribute('data-alltagsmustmatch') === "True" || selected.getAttribute('data-alltagsmustmatch') === "true";
             // Add maxsize if you have a field for it
+            updateDynamicMatchCount();
         });
     }
+
+    if (albumsInput) {
+        albumsInput.addEventListener('change', updateDynamicMatchCount);
+        if (window.jQuery) {
+            jQuery(albumsInput).on('change select2:select select2:unselect', updateDynamicMatchCount);
+        }
+    }
+
+    if (tagsInput) {
+        tagsInput.addEventListener('change', updateDynamicMatchCount);
+        if (window.jQuery) {
+            jQuery(tagsInput).on('change select2:select select2:unselect', updateDynamicMatchCount);
+        }
+    }
+
+    updateDynamicMatchCount();
 
     // Save or update search
     if (saveBtn && form) {
