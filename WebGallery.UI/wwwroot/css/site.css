@@ -382,6 +382,14 @@
     margin-bottom: 20px;
 }
 
+.search-form .select2-container {
+    text-align: left;
+}
+
+.search-form .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    text-align: left;
+}
+
 #searchForm {
     margin-top: 20px;
 }

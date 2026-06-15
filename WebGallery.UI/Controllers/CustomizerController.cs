@@ -31,10 +31,17 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Customizer";
 
+            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
+            int totalItems = a.Sum(x => x.TotalCount);
+            IEnumerable<string> allTags = a.SelectMany(s => s.Tags).Select(s => s.TagName).Distinct();
+            IEnumerable<string> allAlbums = a.Select(s => s.AlbumName).Distinct();
+
             List<SavedSearchDTO> searches = await _minimalApiProxy.GetSavedSearches(_username);
             SearchesViewModel vm = new ()
             {
-                SavedSearches = searches
+                SavedSearches = searches,
+                AllTags = allTags,
+                AllAlbums = allAlbums
             };
 
             return View(vm);

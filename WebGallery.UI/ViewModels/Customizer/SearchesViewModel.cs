@@ -6,6 +6,8 @@ namespace WebGallery.UI.ViewModels.Customizer
     public class SearchesViewModel
     {
         public List<SavedSearchDTO> SavedSearches { get; set; } = [];
+        public IEnumerable<string> AllTags { get; set; } = [];
+        public IEnumerable<string> AllAlbums { get; set; } = [];
     }
 
     public class SaveSearchRequest
