@@ -200,7 +200,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch, int? hitsToSkip = null)
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null)
     {
         string uri = $"users/{username}/search";
         Dictionary<string, string> paramss = [];
@@ -216,6 +216,10 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             paramss.Add("maxSize", maxSize.ToString());
         if (hitsToSkip.HasValue)
             paramss.Add("hitsToSkip", hitsToSkip.Value.ToString());
+        if (createdAfter is not null)
+            paramss.Add("createdAfterDate", createdAfter);
+        if (createdBefore is not null)
+            paramss.Add("createdBeforeDate", createdBefore);
 
         paramss.Add("allTagsMustMatch", allTagsMustMatch.ToString().ToLowerInvariant());
 
@@ -370,6 +374,8 @@ public record SavedSearchDTO
     public string MediaNameContains { get; set; }
     public int? MaxSize { get; set; }
     public bool? AllTagsMustMatch { get; set; }
+    public string CreatedAfter { get; set; }
+    public string CreatedBefore { get; set; }
 }
 
 public record MoveMediaResponseDTO

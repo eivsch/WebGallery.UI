@@ -27,7 +27,9 @@
                                 data-fileextensions="@search.FileExtensions"
                                 data-medianamecontains="@search.MediaNameContains"
                                 data-alltagsmustmatch="@search.AllTagsMustMatch"
-                                data-maxsize="@search.MaxSize">
+                                data-maxsize="@search.MaxSize"
+                                data-createdafter="@search.CreatedAfter"
+                                data-createdbefore="@search.CreatedBefore">
                             @search.SearchName
                         </option>
                     }
@@ -66,6 +68,14 @@
                 </div>
                 <div class="form-group">
                     <input type="text" name="mediaNameContains" class="form-control" placeholder="Filename (partial match)" id="mediaNameContainsInput">
+                </div>
+                <div class="form-group">
+                    <label class="form-label text-white" for="createdAfterInput">Created after:</label>
+                    <input type="date" name="createdAfter" class="form-control" placeholder="Created After Date" id="createdAfterInput">
+                </div>
+                <div class="form-group">
+                    <label class="form-label text-white" for="createdBeforeInput">Created before:</label>
+                    <input type="date" name="createdBefore" class="form-control" placeholder="Created Before Date" id="createdBeforeInput">
                 </div>
                 <div class="form-check mb-3">
                     <input type="checkbox" name="shuffle" class="form-check-input" id="shuffle" value="true">

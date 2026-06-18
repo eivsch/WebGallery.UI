@@ -25,6 +25,8 @@ namespace WebGallery.UI.Controllers
         public string MediaNameContains { get; set; }
         public int? MaxSize { get; set; }
         public bool? AllTagsMustMatch { get; set; }
+        public string CreatedAfter { get; set; }
+        public string CreatedBefore { get; set; }
         public bool HasMoreResults { get; set; }
     }
 
@@ -91,12 +93,12 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, bool? allTagsMustMatch = false, int? hitsToSkip = null, bool shuffle = false)
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, bool? allTagsMustMatch = false, int? hitsToSkip = null, bool shuffle = false, string createdAfter = null, string createdBefore = null)
         {
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
 
-            List<SearchHitDTO> searchHits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true, hitsToSkip);
+            List<SearchHitDTO> searchHits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true, hitsToSkip, createdAfter, createdBefore);
             SearchDetails searchDetails = new()
             {
                 Hits = searchHits,
@@ -106,6 +108,8 @@ namespace WebGallery.UI.Controllers
                 MediaNameContains = mediaNameContains,
                 MaxSize = maxSize,
                 AllTagsMustMatch = allTagsMustMatch,
+                CreatedAfter = createdAfter,
+                CreatedBefore = createdBefore,
                 HasMoreResults = maxSize == searchHits.Count,
             };
 
@@ -146,7 +150,7 @@ namespace WebGallery.UI.Controllers
             if (!_cache.TryGetValue(SearchCacheKeyPrefix + _username, out SearchDetails cachedResults)) return RedirectToAction("Index", "Customizer");
             if (from >= cachedResults.Hits.Count && cachedResults.HasMoreResults)
             {
-                return await Search(cachedResults.Albums, cachedResults.Tags, cachedResults.FileExtensions, cachedResults.MediaNameContains, cachedResults.MaxSize, cachedResults.AllTagsMustMatch, hitsToSkip: from);
+                return await Search(cachedResults.Albums, cachedResults.Tags, cachedResults.FileExtensions, cachedResults.MediaNameContains, cachedResults.MaxSize, cachedResults.AllTagsMustMatch, hitsToSkip: from, createdAfter: cachedResults.CreatedAfter, createdBefore: cachedResults.CreatedBefore);
             }
 
             List<SingleGalleryImageViewModel> items = PopulateItemList(from, cachedResults.Hits);

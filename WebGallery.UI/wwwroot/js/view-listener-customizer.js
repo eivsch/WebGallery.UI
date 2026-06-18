@@ -10,11 +10,15 @@
     const mediaNameContains = document.getElementById('mediaNameContainsInput').value;
     const allTagsMustMatch = document.getElementById('allTagsMustMatch').checked;
     const shuffle = document.getElementById('shuffle').checked;
+    const createdAfter = document.getElementById('createdAfterInput').value;
+    const createdBefore = document.getElementById('createdBeforeInput').value;
 
     const queryParams = new URLSearchParams();
     if (selectedAlbums) queryParams.append('albums', selectedAlbums);
     if (selectedTags) queryParams.append('tags', selectedTags);
     if (fileExtensions) queryParams.append('fileExtensions', fileExtensions);
+    if (createdAfter) queryParams.append('createdAfter', createdAfter);
+    if (createdBefore) queryParams.append('createdBefore', createdBefore);
     if (mediaNameContains) queryParams.append('mediaNameContains', mediaNameContains);
     if (allTagsMustMatch) queryParams.append('allTagsMustMatch', 'true');
     if (shuffle) queryParams.append('shuffle', 'true');
@@ -137,11 +141,11 @@ document.addEventListener('DOMContentLoaded', function () {
             : totalTagItems;
 
         if (albumMatchCount) {
-            albumMatchCount.textContent = 'Albums: ' + selectedAlbumCount + ' of ' + totalAlbumItems;
+            albumMatchCount.textContent = 'Albums: ' + selectedAlbumCount + ' of ' + totalAlbumItems + ' items';
         }
 
         if (tagMatchCount) {
-            tagMatchCount.textContent = 'Tags: ' + selectedTagCount + ' of ' + totalTagItems;
+            tagMatchCount.textContent = 'Tags: ' + selectedTagCount + ' of ' + totalTagItems + ' items';
         }
     }
 
