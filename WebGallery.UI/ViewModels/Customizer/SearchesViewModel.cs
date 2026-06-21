@@ -32,5 +32,7 @@ namespace WebGallery.UI.ViewModels.Customizer
         public int? MaxSize { get; set; }
         public bool? AllTagsMustMatch { get; set; }
         public string SearchName { get; set; }
+        public string CreatedAfter { get; set; }
+        public string CreatedBefore { get; set; }
     }
 }

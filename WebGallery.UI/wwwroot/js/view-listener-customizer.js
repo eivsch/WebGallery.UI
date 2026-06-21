@@ -218,7 +218,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('fileExtensionsInput').value = selected.getAttribute('data-fileextensions') || '';
             document.getElementById('mediaNameContainsInput').value = selected.getAttribute('data-medianamecontains') || '';
             document.getElementById('allTagsMustMatch').checked = selected.getAttribute('data-alltagsmustmatch') === "True" || selected.getAttribute('data-alltagsmustmatch') === "true";
-            // Add maxsize if you have a field for it
+            document.getElementById('createdAfterInput').value = selected.getAttribute('data-createdafter') || '';
+            document.getElementById('createdBeforeInput').value = selected.getAttribute('data-createdbefore') || '';
             updateDynamicMatchCount();
         });
     }
@@ -263,7 +264,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 MediaNameContains: document.getElementById('mediaNameContainsInput').value || "",
                 AllTagsMustMatch: document.getElementById('allTagsMustMatch').checked,
                 SearchName: searchName,
-                MaxSize: null // Add if you have a field for this
+                MaxSize: null,
+                CreatedAfter: document.getElementById('createdAfterInput').value || null,
+                CreatedBefore: document.getElementById('createdBeforeInput').value || null
             };
 
             try {

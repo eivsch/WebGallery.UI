@@ -66,7 +66,9 @@ namespace WebGallery.UI.Controllers
                 FileExtensions = searchDetails.FileExtensions,
                 MediaNameContains = searchDetails.MediaNameContains,
                 MaxSize = searchDetails.MaxSize,
-                AllTagsMustMatch = searchDetails.AllTagsMustMatch
+                AllTagsMustMatch = searchDetails.AllTagsMustMatch,
+                CreatedAfter = searchDetails.CreatedAfter,
+                CreatedBefore = searchDetails.CreatedBefore
             };
 
             await _minimalApiProxy.SaveSearch(_username, searchDto);
