@@ -2,7 +2,11 @@
 
 <a href="/uploads?albumName=@Model.UploadAlbumName">Return to uploads page</a>
 <h3>Success!</h3>
-<p>Uploaded album <a href="/admin/albums/@Model.UploadAlbumName">'@Model.UploadAlbumName'</a> with @Model.UploadFileCount files</p>
+<p>
+    Uploaded album <a href="/admin/albums/@Model.UploadAlbumName">'@Model.UploadAlbumName'</a>
+    with <strong id="uploadedCount">@Model.UploadFileCount</strong> files.
+</p>
+<p id="listInfoText">Showing files from this upload request.</p>
 
 <table>
     <tr>
@@ -10,12 +14,65 @@
         <th>Size (bytes)</th>
         @* <th>Destination</th> *@
     </tr>
-    @foreach (var file in Model.UploadedFiles)
-    {
-        <tr>
-            <td>@file.FileName</td>
-            <td>@file.FileSize</td>
-            @* <td>@file.UploadDestinationPath</td> *@
-        </tr>
-    }
+    <tbody id="uploadedFilesTableBody">
+        @foreach (var file in Model.UploadedFiles)
+        {
+            <tr>
+                <td>@file.FileName</td>
+                <td>@file.FileSize</td>
+                @* <td>@file.UploadDestinationPath</td> *@
+            </tr>
+        }
+    </tbody>
 </table>
+
+<script>
+    (function () {
+        const storageKey = 'webgallery.upload.summary';
+        const summaryRaw = sessionStorage.getItem(storageKey);
+        if (!summaryRaw) {
+            return;
+        }
+
+        try {
+            const summary = JSON.parse(summaryRaw);
+            if (!summary || summary.albumName !== '@Model.UploadAlbumName') {
+                return;
+            }
+
+            const uploadedCountElement = document.getElementById('uploadedCount');
+            const listInfoTextElement = document.getElementById('listInfoText');
+            const tableBody = document.getElementById('uploadedFilesTableBody');
+
+            const recentFiles = Array.isArray(summary.recentUploadedFiles) ? summary.recentUploadedFiles : [];
+            const totalUploadedCount = Number(summary.totalUploadedCount) || 0;
+
+            uploadedCountElement.textContent = totalUploadedCount.toString();
+
+            if (totalUploadedCount > recentFiles.length) {
+                listInfoTextElement.textContent = `Showing last ${recentFiles.length} of ${totalUploadedCount} uploaded files.`;
+            } else {
+                listInfoTextElement.textContent = `Showing ${recentFiles.length} uploaded files.`;
+            }
+
+            tableBody.innerHTML = '';
+            for (const file of recentFiles) {
+                const row = document.createElement('tr');
+
+                const fileNameCell = document.createElement('td');
+                fileNameCell.textContent = file.fileName || '';
+                row.appendChild(fileNameCell);
+
+                const fileSizeCell = document.createElement('td');
+                fileSizeCell.textContent = Number(file.fileSize || 0).toString();
+                row.appendChild(fileSizeCell);
+
+                tableBody.appendChild(row);
+            }
+
+            sessionStorage.removeItem(storageKey);
+        } catch (error) {
+            sessionStorage.removeItem(storageKey);
+        }
+    })();
+</script>

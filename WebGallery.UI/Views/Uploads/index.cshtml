@@ -26,44 +26,135 @@
 
 <script>
     const form = document.querySelector('.upload-form');
-    form.addEventListener('submit', function (e) {
+    const submitButton = form.querySelector('input[type="submit"]');
+    const albumNameInput = document.getElementById('AlbumName');
+    const filesInput = document.getElementById('FilesToUpload');
+    const progressBar = document.getElementById('progressBar');
+    const progressContainer = document.getElementById('uploadProgress');
+    const uploadSummaryStorageKey = 'webgallery.upload.summary';
+    const chunkSize = 100;
+    let isUploading = false;
+
+    form.addEventListener('submit', async function (e) {
         e.preventDefault(); // Prevent the default form submission
 
-        const progressBar = document.getElementById('progressBar');
-        const progressContainer = document.getElementById('uploadProgress');
+        if (isUploading) {
+            return;
+        }
+
+        const albumName = albumNameInput.value.trim();
+        const files = Array.from(filesInput.files || []);
+
+        if (!albumName) {
+            alert('Please enter an album name.');
+            return;
+        }
+
+        if (files.length === 0) {
+            alert('Please select one or more files to upload.');
+            return;
+        }
+
+        isUploading = true;
+        submitButton.disabled = true;
+        submitButton.value = 'Uploading...';
         progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
 
-        const formData = new FormData(form);
-        const xhr = new XMLHttpRequest();
+        const totalBytes = files.reduce((sum, file) => sum + (file.size || 0), 0);
+        const totalChunks = Math.ceil(files.length / chunkSize);
+j
+        let uploadedBytesFromCompletedChunks = 0;
+        let lastSuccessHtml = '';
+        let totalUploadedCount = 0;
+        const recentUploadedFiles = [];
 
-        xhr.open('POST', form.action, true);
+        const uploadChunk = (chunkFiles, chunkIndex) => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('AlbumName', albumName);
 
-        // Update the progress bar during the upload
-        xhr.upload.onprogress = function (e) {
-            if (e.lengthComputable) {
-                const percentComplete = (e.loaded / e.total) * 100;
-                progressBar.style.width = percentComplete + '%';
-                progressBar.textContent = Math.round(percentComplete) + '%';
+                for (const file of chunkFiles) {
+                    formData.append('FilesToUpload', file, file.name);
+                }
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', form.action, true);
+
+                xhr.upload.onprogress = function (progressEvent) {
+                    if (!progressEvent.lengthComputable || totalBytes <= 0) {
+                        return;
+                    }
+
+                    const uploadedBytesCurrentChunk = progressEvent.loaded;
+                    const uploadedBytesOverall = uploadedBytesFromCompletedChunks + uploadedBytesCurrentChunk;
+                    const percentComplete = Math.min(100, (uploadedBytesOverall / totalBytes) * 100);
+
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.textContent = `${Math.round(percentComplete)}% (${chunkIndex + 1}/${totalChunks})`;
+                };
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        resolve(xhr.responseText);
+                    } else {
+                        reject(new Error(`Upload failed for chunk ${chunkIndex + 1} with status ${xhr.status}.`));
+                    }
+                };
+
+                xhr.onerror = function () {
+                    reject(new Error(`Network error while uploading chunk ${chunkIndex + 1}.`));
+                };
+
+                xhr.onabort = function () {
+                    reject(new Error(`Upload aborted for chunk ${chunkIndex + 1}.`));
+                };
+
+                xhr.send(formData);
+            });
+        };
+
+        try {
+            for (let i = 0; i < files.length; i += chunkSize) {
+                const chunkFiles = files.slice(i, i + chunkSize);
+                const chunkIndex = Math.floor(i / chunkSize);
+                lastSuccessHtml = await uploadChunk(chunkFiles, chunkIndex);
+
+                const chunkBytes = chunkFiles.reduce((sum, file) => sum + (file.size || 0), 0);
+                uploadedBytesFromCompletedChunks += chunkBytes;
+                totalUploadedCount += chunkFiles.length;
+
+                for (const file of chunkFiles) {
+                    recentUploadedFiles.push({
+                        fileName: file.name,
+                        fileSize: file.size || 0
+                    });
+                }
+
+                if (recentUploadedFiles.length > 100) {
+                    recentUploadedFiles.splice(0, recentUploadedFiles.length - 100);
+                }
             }
-        };
 
-        // Handle the response after the upload completes
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                // Redirect to the success page
-                document.open();
-                document.write(xhr.responseText);
-                document.close();
-            } else {
-                alert('Upload failed. Please try again.');
-            }
-        };
+            progressBar.style.width = '100%';
+            progressBar.textContent = '100%';
 
-        // Handle errors during the upload
-        xhr.onerror = function () {
-            alert('An error occurred during the upload. Please try again.');
-        };
+            sessionStorage.setItem(uploadSummaryStorageKey, JSON.stringify({
+                albumName,
+                totalUploadedCount,
+                recentUploadedFiles
+            }));
 
-        xhr.send(formData); // Send the form data
+            // Render the success page returned by the final chunk request.
+            document.open();
+            document.write(lastSuccessHtml);
+            document.close();
+        } catch (error) {
+            isUploading = false;
+            submitButton.disabled = false;
+            submitButton.value = 'Upload Images';
+            alert(error.message || 'Upload failed. Please try again.');
+        }
     });
 </script>
