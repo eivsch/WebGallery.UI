@@ -8,6 +8,7 @@
 
     const fileExtensions = document.getElementById('fileExtensionsInput').value;
     const mediaNameContains = document.getElementById('mediaNameContainsInput').value;
+    const maxSizeInput = document.getElementById('maxSizeInput');
     const allTagsMustMatch = document.getElementById('allTagsMustMatch').checked;
     const shuffle = document.getElementById('shuffle').checked;
     const createdAfter = document.getElementById('createdAfterInput').value;
@@ -20,6 +21,7 @@
     if (createdAfter) queryParams.append('createdAfter', createdAfter);
     if (createdBefore) queryParams.append('createdBefore', createdBefore);
     if (mediaNameContains) queryParams.append('mediaNameContains', mediaNameContains);
+    if (maxSizeInput && maxSizeInput.value) queryParams.append('maxSize', maxSizeInput.value);
     if (allTagsMustMatch) queryParams.append('allTagsMustMatch', 'true');
     if (shuffle) queryParams.append('shuffle', 'true');
 
@@ -77,6 +79,7 @@ jQuery(document).ready(function ($) {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    const defaultSearchMaxSize = 200;
     const saveBtn = document.getElementById('saveSearchBtn');
     const form = document.getElementById('searchForm');
     const status = document.getElementById('saveSearchStatus');
@@ -86,6 +89,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const tagsInput = document.getElementById('tagsInput');
     const albumMatchCount = document.getElementById('albumMatchCount');
     const tagMatchCount = document.getElementById('tagMatchCount');
+    const maxSizeInput = document.getElementById('maxSizeInput');
+    const maxSizeWarning = document.getElementById('maxSizeWarning');
+
+    function normalizeMaxSizeInput() {
+        if (!maxSizeInput) return;
+
+        const totalItems = parseInt(maxSizeInput.getAttribute('data-total-items'), 10);
+        const parsedValue = parseInt(maxSizeInput.value, 10);
+
+        if (!Number.isNaN(parsedValue) && !Number.isNaN(totalItems) && parsedValue > totalItems) {
+            maxSizeInput.value = totalItems.toString();
+        }
+
+        const normalizedValue = parseInt(maxSizeInput.value, 10);
+        const shouldShowWarning = !Number.isNaN(normalizedValue) && normalizedValue > defaultSearchMaxSize;
+
+        if (maxSizeWarning) {
+            maxSizeWarning.style.display = shouldShowWarning ? 'block' : 'none';
+        }
+    }
 
     function getOptionCountsMap(selectElement) {
         if (!selectElement) return {};
@@ -217,6 +240,10 @@ document.addEventListener('DOMContentLoaded', function () {
             setTagsFromCsv(selected.getAttribute('data-tags') || '');
             document.getElementById('fileExtensionsInput').value = selected.getAttribute('data-fileextensions') || '';
             document.getElementById('mediaNameContainsInput').value = selected.getAttribute('data-medianamecontains') || '';
+            if (maxSizeInput) {
+                maxSizeInput.value = selected.getAttribute('data-maxsize') || '200';
+                normalizeMaxSizeInput();
+            }
             document.getElementById('allTagsMustMatch').checked = selected.getAttribute('data-alltagsmustmatch') === "True" || selected.getAttribute('data-alltagsmustmatch') === "true";
             document.getElementById('createdAfterInput').value = selected.getAttribute('data-createdafter') || '';
             document.getElementById('createdBeforeInput').value = selected.getAttribute('data-createdbefore') || '';
@@ -236,6 +263,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.jQuery) {
             jQuery(tagsInput).on('change select2:select select2:unselect', updateDynamicMatchCount);
         }
+    }
+
+    if (maxSizeInput) {
+        maxSizeInput.addEventListener('input', normalizeMaxSizeInput);
+        maxSizeInput.addEventListener('change', normalizeMaxSizeInput);
+        normalizeMaxSizeInput();
     }
 
     updateDynamicMatchCount();
@@ -264,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 MediaNameContains: document.getElementById('mediaNameContainsInput').value || "",
                 AllTagsMustMatch: document.getElementById('allTagsMustMatch').checked,
                 SearchName: searchName,
-                MaxSize: null,
+                MaxSize: maxSizeInput && maxSizeInput.value ? parseInt(maxSizeInput.value, 10) : null,
                 CreatedAfter: document.getElementById('createdAfterInput').value || null,
                 CreatedBefore: document.getElementById('createdBeforeInput').value || null
             };

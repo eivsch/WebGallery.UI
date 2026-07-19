@@ -77,6 +77,11 @@
                     <label class="form-label text-white" for="createdBeforeInput">Created before:</label>
                     <input type="date" name="createdBefore" class="form-control" placeholder="Created Before Date" id="createdBeforeInput">
                 </div>
+                <div class="form-group">
+                    <label class="form-label text-white" for="maxSizeInput">Max search size:</label>
+                    <input type="number" name="maxSize" class="form-control" id="maxSizeInput" value="200" min="1" max="@Model.TotalItems" step="1" data-total-items="@Model.TotalItems">
+                    <small id="maxSizeWarning" class="text-warning" style="display:none;">Values above 200 may affect search performance.</small>
+                </div>
                 <div class="form-check mb-3">
                     <input type="checkbox" name="shuffle" class="form-check-input" id="shuffle" value="true">
                     <label class="form-check-label text-white" for="shuffle">Shuffle results</label>

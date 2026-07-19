@@ -36,12 +36,13 @@ namespace WebGallery.UI.Controllers
     {
         private static readonly TimeSpan SearchCacheExpiry = TimeSpan.FromMinutes(30);
         private const string SearchCacheKeyPrefix = "search_";
+        private const int SearchBatchLimit = 200;
 
         readonly MinimalApiProxy _minimalApiProxy;
         readonly IMemoryCache _cache;
         readonly string _username;
 
-        const int DISPLAY_COUNT_MAX = 32;
+        const int DISPLAY_COUNT_MAX = 48;
 
         public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IMemoryCache cache)
         {
@@ -98,7 +99,11 @@ namespace WebGallery.UI.Controllers
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
 
-            List<SearchHitDTO> searchHits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true, hitsToSkip, createdAfter, createdBefore);
+            int requestedSize = GetRequestedSearchSize(maxSize);
+            int startingOffset = hitsToSkip ?? 0;
+            List<SearchHitDTO> searchHits = await GetSearchHitsAsync(albums, tags, fileExtensions, mediaNameContains, requestedSize, allTagsMustMatch ?? true, startingOffset, createdAfter, createdBefore);
+            bool hasMoreResults = searchHits.Count == requestedSize;
+
             SearchDetails searchDetails = new()
             {
                 Hits = searchHits,
@@ -106,11 +111,11 @@ namespace WebGallery.UI.Controllers
                 Tags = tags,
                 FileExtensions = fileExtensions,
                 MediaNameContains = mediaNameContains,
-                MaxSize = maxSize,
+                MaxSize = requestedSize,
                 AllTagsMustMatch = allTagsMustMatch,
                 CreatedAfter = createdAfter,
                 CreatedBefore = createdBefore,
-                HasMoreResults = maxSize == searchHits.Count,
+                HasMoreResults = hasMoreResults,
             };
 
             _cache.Set(SearchCacheKeyPrefix + _username, searchDetails, SearchCacheExpiry);
@@ -142,6 +147,45 @@ namespace WebGallery.UI.Controllers
                     searchHits[j] = temp;
                 }
             }
+        }
+
+        private static int GetRequestedSearchSize(int? maxSize)
+        {
+            int requestedSize = maxSize ?? SearchBatchLimit;
+            return requestedSize > 0 ? requestedSize : SearchBatchLimit;
+        }
+
+        private async Task<List<SearchHitDTO>> GetSearchHitsAsync(string albums, string tags, string fileExtensions, string mediaNameContains, int requestedSize, bool allTagsMustMatch, int hitsToSkip, string createdAfter, string createdBefore)
+        {
+            List<SearchHitDTO> searchHits = [];
+            int currentOffset = hitsToSkip;
+
+            while (searchHits.Count < requestedSize)
+            {
+                int remaining = requestedSize - searchHits.Count;
+                int batchSize = Math.Min(SearchBatchLimit, remaining);
+                List<SearchHitDTO> batch = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, batchSize, allTagsMustMatch, currentOffset, createdAfter, createdBefore);
+
+                if (batch.Count == 0)
+                {
+                    break;
+                }
+
+                searchHits.AddRange(batch);
+                currentOffset += batch.Count;
+
+                if (batch.Count < batchSize)
+                {
+                    break;
+                }
+            }
+
+            if (searchHits.Count > requestedSize)
+            {
+                searchHits = searchHits.Take(requestedSize).ToList();
+            }
+
+            return searchHits;
         }
 
         [HttpGet("search/scroll")]
