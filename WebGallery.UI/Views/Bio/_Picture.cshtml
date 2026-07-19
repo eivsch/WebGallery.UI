@@ -29,6 +29,7 @@
 else 
 {
     string imageUri = $"/files/image/{appPathBase64}";
+    <div>@Model.Name</div>
     <a href="@imageUri" data-fancybox data-type="image" data-caption="@Model.Name">
         <img src="@imageUri" alt="Image" class="bio-img">
     </a>
@@ -50,11 +51,27 @@ else
 
 <div class="bio-nav-container">
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))"><<<  </a>
+        <a class="bio-nav-prev" href="" aria-label="Previous"
+           data-ajax="true"
+           data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)"
+           data-ajax-update="#bio-img-partial"
+           data-ajax-begin="showBioLoading()"
+           data-ajax-complete="hideBioLoading()"
+           data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))">
+            <i class="fas fa-chevron-left"></i>
+        </a>
     </div>
     <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - <a class="regular-text-link" href="/admin/albums/@Model.Album">@Model.Album</a></div>
     <div class="bio-nav-item">
-        <a href="" data-ajax="true" data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)" data-ajax-update="#bio-img-partial" data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">  >>></a>
+        <a class="bio-nav-next" href="" aria-label="Next"
+           data-ajax="true"
+           data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)"
+           data-ajax-update="#bio-img-partial"
+           data-ajax-begin="showBioLoading()"
+           data-ajax-complete="hideBioLoading()"
+           data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">
+            <i class="fas fa-chevron-right"></i>
+        </a>
     </div>
     @if (mediaType == MediaType.Video)
     {
@@ -70,10 +87,15 @@ else
         </div>
         <div class="row">
             <div class="bio-nav-item">
-                <button id="viewGeneratedImages" type="button" data-album="@(Model.Album + "_video_images")" data-file-name-no-ext="@System.IO.Path.GetFileNameWithoutExtension(Model.Name)">Generated images</button>
+                <button id="viewGeneratedImages" type="button" data-album="@(Model.Album + "_video_images")" data-file-name-no-ext="@System.IO.Path.GetFileNameWithoutExtension(Model.Name)_">Generated images</button>
             </div>
         </div>
     }
 </div>
 
 <div id="generatedVideoImagesContainer" class="bio-generated-images" style="display:none;" aria-live="polite"></div>
+
+<div class="bio-content__deletebtn">
+    <a href="/Bio/picture/delete/@Model.Album/@Model.Name"
+       onclick="return confirm('Are you sure you want to delete \'@Model.Name\'? This cannot be undone.')">Delete</a>
+</div>

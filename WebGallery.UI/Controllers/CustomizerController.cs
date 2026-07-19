@@ -31,10 +31,22 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Customizer";
 
+            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
+            int totalItems = a.Sum(x => x.TotalCount);
+            IEnumerable<TagStatsViewModel> allTags = a.SelectMany(s => s.Tags)
+                .GroupBy(g => g.TagName)
+                .Select(s => new TagStatsViewModel { TagName = s.Key, Count = s.Sum(t => t.Count) });
+            IEnumerable<AlbumStatsViewModel> allAlbums = a
+                .GroupBy(g => g.AlbumName)
+                .Select(s => new AlbumStatsViewModel { AlbumName = s.Key, Count = s.Sum(ab => ab.TotalCount) });
+
             List<SavedSearchDTO> searches = await _minimalApiProxy.GetSavedSearches(_username);
             SearchesViewModel vm = new ()
             {
-                SavedSearches = searches
+                SavedSearches = searches,
+                AllTags = allTags,
+                AllAlbums = allAlbums,
+                TotalItems = totalItems
             };
 
             return View(vm);
@@ -54,7 +66,9 @@ namespace WebGallery.UI.Controllers
                 FileExtensions = searchDetails.FileExtensions,
                 MediaNameContains = searchDetails.MediaNameContains,
                 MaxSize = searchDetails.MaxSize,
-                AllTagsMustMatch = searchDetails.AllTagsMustMatch
+                AllTagsMustMatch = searchDetails.AllTagsMustMatch,
+                CreatedAfter = searchDetails.CreatedAfter,
+                CreatedBefore = searchDetails.CreatedBefore
             };
 
             await _minimalApiProxy.SaveSearch(_username, searchDto);

@@ -1,10 +1,32 @@
 @model Infrastructure.MinimalApi.AlbumContentsDTO;
 @{
     var albumName = ViewBag.AlbumName as string;
+    var allAlbums = ViewBag.AllAlbums as IEnumerable<Infrastructure.MinimalApi.AlbumMetaDTO>;
+    var adminMessage = TempData["AdminAlbumMessage"] as string;
+    var adminError = TempData["AdminAlbumError"] as string;
+    var albumNames = new List<string>();
+    if (allAlbums != null)
+    {
+        foreach (var album in allAlbums)
+        {
+            albumNames.Add(album.AlbumName);
+        }
+    }
 }
 <div class="container mt-5">
     <h2 class="mb-4">Admin: '@albumName' Contents</h2>
     <a href="/admin" class="btn btn-secondary mb-3">Back to album list</a>
+
+    @if (string.IsNullOrWhiteSpace(adminMessage) == false)
+    {
+        <div class="alert alert-success">@adminMessage</div>
+    }
+
+    @if (string.IsNullOrWhiteSpace(adminError) == false)
+    {
+        <div class="alert alert-danger">@adminError</div>
+    }
+
     <div class="row">
         @* TODO: create a better UI for this. Use proper buttons instead of anchor tags and maybe some visual progress indicator or spinner.*@
         <div class="col-6">
@@ -49,6 +71,12 @@
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             @Html.AntiForgeryToken()
                         </form>
+                        <button type="button"
+                                class="btn btn-warning btn-sm ms-2 move-file-btn"
+                                data-file-name="@file.Name"
+                                data-media-locator="@file.Id">
+                            Move
+                        </button>
                     </td>
                 </tr>
             }
@@ -56,3 +84,107 @@
         </table>
     }
 </div>
+
+<div class="modal fade" id="moveFileModal" tabindex="-1" aria-labelledby="moveFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="moveFileForm" asp-action="MoveFile" asp-controller="Admin" asp-route-albumName="@albumName" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="moveFileModalLabel">Move file</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" id="moveFileNameInput" name="fileName" />
+                    <input type="hidden" id="moveMediaLocatorInput" name="mediaLocator" />
+
+                    <div class="mb-3">
+                        <label for="moveTargetAlbumSelect" class="form-label">Target album</label>
+                        <select id="moveTargetAlbumSelect" class="form-select" name="targetAlbum" required>
+                            <option value="">-- Select target album --</option>
+                        </select>
+                    </div>
+                    <p id="moveFileDescription" class="text-muted mb-0"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Move</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const moveModalEl = document.getElementById('moveFileModal');
+            const moveButtons = document.querySelectorAll('.move-file-btn');
+            if (!moveModalEl || moveButtons.length === 0 || !window.bootstrap) {
+                return;
+            }
+
+            const moveModal = new bootstrap.Modal(moveModalEl);
+            const moveFileForm = document.getElementById('moveFileForm');
+            const moveTargetAlbumSelect = document.getElementById('moveTargetAlbumSelect');
+            const moveFileNameInput = document.getElementById('moveFileNameInput');
+            const moveMediaLocatorInput = document.getElementById('moveMediaLocatorInput');
+            const moveFileDescription = document.getElementById('moveFileDescription');
+
+            const currentAlbum = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(albumName ?? string.Empty));
+            const albumNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(albumNames));
+            let optionsLoaded = false;
+
+            function loadTargetAlbumOptions() {
+                if (optionsLoaded) {
+                    return;
+                }
+
+                for (const album of albumNames) {
+                    if (!album || album.toLowerCase() === currentAlbum.toLowerCase()) {
+                        continue;
+                    }
+
+                    const option = document.createElement('option');
+                    option.value = album;
+                    option.textContent = album;
+                    moveTargetAlbumSelect.appendChild(option);
+                }
+
+                optionsLoaded = true;
+            }
+
+            moveButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    loadTargetAlbumOptions();
+
+                    const fileName = button.getAttribute('data-file-name') || '';
+                    const mediaLocator = button.getAttribute('data-media-locator') || fileName;
+
+                    moveFileNameInput.value = fileName;
+                    moveMediaLocatorInput.value = mediaLocator;
+                    moveTargetAlbumSelect.value = '';
+                    moveFileDescription.textContent = fileName ? `Move '${fileName}' to another album.` : 'Move this file to another album.';
+
+                    moveModal.show();
+                });
+            });
+
+            moveFileForm.addEventListener('submit', (event) => {
+                const selectedTarget = (moveTargetAlbumSelect.value || '').trim();
+                if (!selectedTarget) {
+                    event.preventDefault();
+                    alert('Please select a target album.');
+                    return;
+                }
+
+                if (selectedTarget.toLowerCase() === currentAlbum.toLowerCase()) {
+                    event.preventDefault();
+                    alert('Target album must be different from source album.');
+                    return;
+                }
+            });
+        })();
+    </script>
+}

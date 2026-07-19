@@ -39,6 +39,28 @@ namespace Infrastructure.FileServer
             }
         }
 
+        public async Task MoveFile(string sourceFolder, string targetFolder, string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(sourceFolder)) throw new ArgumentException("sourceFolder is required", nameof(sourceFolder));
+            if (string.IsNullOrWhiteSpace(targetFolder)) throw new ArgumentException("targetFolder is required", nameof(targetFolder));
+            if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("fileName is required", nameof(fileName));
+
+            var body = new
+            {
+                SourceFolder = sourceFolder,
+                TargetFolder = targetFolder,
+                FileName = fileName
+            };
+
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync($"{_fileServerUrl}/files/move", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to move file. The file server returned a {response.StatusCode} status code.");
+            }
+        }
+
         public async Task<byte[]> DownloadImageFromFileServer(string imageIdentifier)
         {
             var response = await _client.GetAsync($"{_fileServerUrl}/files/image?file={imageIdentifier}");

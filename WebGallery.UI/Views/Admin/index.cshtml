@@ -21,10 +21,11 @@
         <table class="table table-dark table-striped admin-album-table">
             <thead>
                 <tr>
-                    <th>Select</th>
-                    <th>Album Name</th>
-                    <th>Created</th>
-                    <th>Total Items</th>
+                    <th></th>
+                    <th class="sortable-header" data-sort-col="1" data-sort-type="string" scope="col" tabindex="0" aria-label="Sort by Album Name">Album Name <span class="sort-indicator" aria-hidden="true">⇕</span></th>
+                    <th class="sortable-header" data-sort-col="2" data-sort-type="date" scope="col" tabindex="0" aria-label="Sort by Created">Created <span class="sort-indicator" aria-hidden="true">⇕</span></th>
+                    <th class="sortable-header" data-sort-col="3" data-sort-type="number" scope="col" tabindex="0" aria-label="Sort by Total Items">Items <span class="sort-indicator" aria-hidden="true">⇕</span></th>
+                    <th class="sortable-header" data-sort-col="4" data-sort-type="number" scope="col" tabindex="0" aria-label="Sort by Likes">Likes <span class="sort-indicator" aria-hidden="true">⇕</span></th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -38,6 +39,7 @@
                     <td class="align-middle"><a href="/admin/albums/@album.AlbumName">@album.AlbumName</a></td>
                     <td class="align-middle">@album.Created.ToString("yyyy-MM-dd")</td>
                     <td class="align-middle">@album.TotalCount</td>
+                    <td class="align-middle">@album.TotalLikes</td>
                     <td class="align-middle">
                         <form asp-action="Delete" asp-controller="Admin" method="post" class="d-inline-block">
                             <input type="hidden" name="albumName" value="@album.AlbumName" />
@@ -78,7 +80,7 @@
                     <option value="@album.AlbumName">@album.AlbumName</option>
                 }
             </select>
-            <div class="form-text">Or create a new album below � if you enter a name there it will be used instead of the selected album.</div>
+            <div class="form-text">Or create a new album below � if you enter a name there it will be used instead of the selected album.</div>
           </div>
 
           <div class="mb-3">
@@ -119,6 +121,77 @@
             const mergeForm = document.getElementById('mergeForm');
             const confirmBtn = document.getElementById('confirmMergeBtn');
             const operationMessage = document.getElementById('operationMessage');
+            const albumTable = document.querySelector('.admin-album-table');
+            const sortableHeaders = albumTable ? albumTable.querySelectorAll('.sortable-header') : [];
+            const tableBody = albumTable ? albumTable.querySelector('tbody') : null;
+            let sortState = { column: null, direction: 'asc' };
+
+            function getCellComparableValue(row, colIndex, sortType) {
+                const cell = row.cells[colIndex];
+                const text = cell ? cell.textContent.trim() : '';
+
+                if (sortType === 'number') {
+                    const value = parseInt(text, 10);
+                    return Number.isNaN(value) ? 0 : value;
+                }
+
+                if (sortType === 'date') {
+                    const timestamp = Date.parse(text);
+                    return Number.isNaN(timestamp) ? 0 : timestamp;
+                }
+
+                return text.toLowerCase();
+            }
+
+            function updateSortIndicators(activeHeader, direction) {
+                sortableHeaders.forEach(header => {
+                    header.classList.remove('active');
+                    const indicator = header.querySelector('.sort-indicator');
+                    if (indicator) {
+                        indicator.textContent = '⇕';
+                    }
+                });
+
+                if (!activeHeader) {
+                    return;
+                }
+
+                activeHeader.classList.add('active');
+                const activeIndicator = activeHeader.querySelector('.sort-indicator');
+                if (activeIndicator) {
+                    activeIndicator.textContent = direction === 'asc' ? '▲' : '▼';
+                }
+            }
+
+            function sortTableByHeader(header) {
+                if (!tableBody) {
+                    return;
+                }
+
+                const colIndex = parseInt(header.getAttribute('data-sort-col'), 10);
+                const sortType = header.getAttribute('data-sort-type') || 'string';
+                const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+                const direction = sortState.column === colIndex && sortState.direction === 'asc' ? 'desc' : 'asc';
+                sortState = { column: colIndex, direction };
+
+                rows.sort((rowA, rowB) => {
+                    const valA = getCellComparableValue(rowA, colIndex, sortType);
+                    const valB = getCellComparableValue(rowB, colIndex, sortType);
+
+                    let comparison = 0;
+                    if (sortType === 'string') {
+                        comparison = String(valA).localeCompare(String(valB));
+                    } else {
+                        comparison = valA - valB;
+                    }
+
+                    return direction === 'asc' ? comparison : -comparison;
+                });
+
+                rows.forEach(row => tableBody.appendChild(row));
+                updateSortIndicators(header, direction);
+            }
 
             function showMessage(type, text, autoHideMs = 3000) {
                 operationMessage.style.display = '';
@@ -146,6 +219,19 @@
             }
 
             checkboxes.forEach(cb => cb.addEventListener('change', updateMergeButtonState));
+
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function () {
+                    sortTableByHeader(header);
+                });
+
+                header.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        sortTableByHeader(header);
+                    }
+                });
+            });
 
             // When user clicks Merge Selected
             mergeSelectedBtn.addEventListener('click', function () {

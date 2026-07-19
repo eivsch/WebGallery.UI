@@ -11,6 +11,7 @@ namespace Infrastructure.FileServer
         Task<byte[]> DownloadImageFromFileServer(string imageIdentifier);
         Task<HttpResponseMessage> DownloadVideoFromFileServer(string videoIdentifier, string rangeHeader, string ifRangeHeader);
         Task DeleteFileFromFileServer(string albumName, string fileName);
+        Task MoveFile(string sourceFolder, string targetFolder, string fileName);
         Task GenerateVideoThumbnailAsync(string appPathBase64, string seekTime = "00:00:01.000");
         Task<SavedFileInfo> GenerateVideoImageAsync(string appPathB64, string seekTime = "00:00:01.000");
         Task MergeFolders(string targetFolder, List<string> sourceFolders);

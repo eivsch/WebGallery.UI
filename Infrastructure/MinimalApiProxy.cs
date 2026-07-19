@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Infrastructure.Common;
 using Infrastructure.FileServer;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Infrastructure.MinimalApi;
 
@@ -163,7 +165,42 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         else return false;
     }
 
-    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch, int? hitsToSkip = null)
+    public async Task<MoveMediaResponseDTO> TryMoveMedia(string username, string sourceAlbum, string mediaLocator, string targetAlbum, string mediaName)
+    {
+        if (string.IsNullOrWhiteSpace(sourceAlbum)) throw new ArgumentException("sourceAlbum is required", nameof(sourceAlbum));
+        if (string.IsNullOrWhiteSpace(mediaLocator)) throw new ArgumentException("mediaLocator is required", nameof(mediaLocator));
+        if (string.IsNullOrWhiteSpace(targetAlbum)) throw new ArgumentException("targetAlbum is required", nameof(targetAlbum));
+        if (string.IsNullOrWhiteSpace(mediaName)) throw new ArgumentException("mediaName is required", nameof(mediaName));
+
+        var body = new
+        {
+            TargetAlbumName = targetAlbum,
+            MediaName = mediaName
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PatchAsync($"/users/{username}/albums/{sourceAlbum}/{mediaLocator}/move", jsonContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            string responseStr = await response.Content.ReadAsStringAsync();
+            MoveMediaResponseDTO data = JsonSerializer.Deserialize<MoveMediaResponseDTO>(responseStr, _jsonOpts);
+
+            return data;
+        }
+        else if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            string responseStr = await response.Content.ReadAsStringAsync();
+            ProblemDetails problemDetails = JsonSerializer.Deserialize<ProblemDetails>(responseStr, _jsonOpts);
+            return new MoveMediaResponseDTO { Success = false, ErrorMessage = problemDetails.Detail };
+        }
+        else
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code. With content: {await response.Content.ReadAsStringAsync()}");
+        }
+    }
+
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null)
     {
         string uri = $"users/{username}/search";
         Dictionary<string, string> paramss = [];
@@ -179,6 +216,10 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             paramss.Add("maxSize", maxSize.ToString());
         if (hitsToSkip.HasValue)
             paramss.Add("hitsToSkip", hitsToSkip.Value.ToString());
+        if (createdAfter is not null)
+            paramss.Add("createdAfterDate", createdAfter);
+        if (createdBefore is not null)
+            paramss.Add("createdBeforeDate", createdBefore);
 
         paramss.Add("allTagsMustMatch", allTagsMustMatch.ToString().ToLowerInvariant());
 
@@ -333,4 +374,12 @@ public record SavedSearchDTO
     public string MediaNameContains { get; set; }
     public int? MaxSize { get; set; }
     public bool? AllTagsMustMatch { get; set; }
+    public string CreatedAfter { get; set; }
+    public string CreatedBefore { get; set; }
+}
+
+public record MoveMediaResponseDTO
+{
+    public bool Success { get; set; }
+    public string ErrorMessage { get; set; }
 }

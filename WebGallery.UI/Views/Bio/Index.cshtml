@@ -2,6 +2,9 @@
 
 <main class="main-content">
     <div class="bio-content">
+        <div id="bio-loading" class="bio-loading" style="display:none;" aria-live="polite" aria-label="Loading">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
         <div id="bio-img-partial">
             <partial name="_Picture" model="Model.BioPictureViewModel" />
         </div>
@@ -12,9 +15,6 @@
             {
                 <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>
             }
-        </div>
-        <div class="bio-content__deletebtn">
-            <a href="/Bio/picture/delete/@Model.BioPictureViewModel.Album/@Model.BioPictureViewModel.Name">Delete</a>
         </div>
     </div>
 
