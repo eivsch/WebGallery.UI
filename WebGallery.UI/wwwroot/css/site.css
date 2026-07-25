@@ -707,3 +707,42 @@ a.regular-text-link {
 .date-range-separator {
     color: rgba(255, 255, 255, 0.55);
 }
+
+.pager-col {
+    max-width: 100%;
+}
+
+.pager-nav {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.pager-list {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    .pager-row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .pager-col {
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .pager-nav {
+        padding: 0 0.5rem;
+    }
+
+    .pager-list .page-link {
+        padding: 0.35rem 0.55rem;
+        font-size: 0.86rem;
+    }
+}

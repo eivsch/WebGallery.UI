@@ -99,7 +99,7 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = id;
             vm.TotalImageCount = data.TotalCount;
             vm.CurrentOffset = offset;
-            vm.DisplayCount = items.Count;
+            vm.DisplayCount = displayCount;
 
             return View("Album", vm);
         }
