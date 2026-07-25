@@ -1,12 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Infrastructure.MinimalApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebGallery.UI.Helpers;
 using WebGallery.UI.ViewModels;
 
 
@@ -33,6 +37,34 @@ namespace WebGallery.UI.Controllers
             ViewBag.Current = "Home";
 
             return View();
+        }
+
+        [HttpGet("home/banner-image")]
+        public async Task<IActionResult> GetBannerImage()
+        {
+            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(
+                _username,
+                albums: null,
+                tags: "banner image",
+                fileExtension: "jpg,jpeg,png,gif,webp,bmp",
+                mediaNameContains: null,
+                maxSize: 1000,
+                allTagsMustMatch: true);
+
+            if (hits == null || hits.Count == 0)
+            {
+                return PartialView("_BannerImage", string.Empty);
+            }
+
+            Random rnd = new();
+            SearchHitDTO selected = hits[rnd.Next(0, hits.Count)];
+
+            string appPath = Path.Combine(selected.AlbumName, selected.MediaItem.Name);
+            byte[] appPathBytes = Encoding.UTF8.GetBytes(appPath);
+            string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
+            string bannerImageUri = $"/files/image/{appPathBase64}";
+
+            return PartialView("_BannerImage", bannerImageUri);
         }
 
         [HttpGet("home/stats")]

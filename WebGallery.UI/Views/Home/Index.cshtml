@@ -1,19 +1,4 @@
-﻿@using Microsoft.Extensions.Configuration
-
-@inject IConfiguration Configuration
-
-@{
-    string bannerImageUri = "";
-    string appPath = Configuration.GetValue("HomeBannerImageAppPath", "");
-    if (!string.IsNullOrWhiteSpace(appPath))
-    {
-        var appPathBytes = System.Text.Encoding.UTF8.GetBytes(appPath);
-        string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
-        bannerImageUri = $"/files/image/{appPathBase64}";
-    }
-}
-
-<main class="main-landing">
+﻿<main class="main-landing">
     <div class="row">
         <div class="col-12">
             <div class="row pt-4 mb-5 text-center">
@@ -27,7 +12,7 @@
     <div class="landing-section">
         <div class="row">
             <div class="col-md-2">
-                <img src="@bannerImageUri" alt="Banner Image" class="landing-img-banner">
+                <div data-url="/home/banner-image" data-async-view></div>
             </div>
             <div class="col-md-9">
                 <div class="landing-section--stats text-white">

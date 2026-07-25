@@ -1,0 +1,10 @@
+@model string
+
+@if (!string.IsNullOrWhiteSpace(Model))
+{
+    <img src="@Model" alt="Banner Image" class="landing-img-banner">
+}
+else
+{
+    <small class="text-white">No images with tag 'banner image' exists</small>
+}
