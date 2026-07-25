@@ -2,7 +2,8 @@
 headline.textContent = "Tags";
 
 const tagsContainer = document.querySelector('div.row.align-items-stretch');
-const pageSize = 48;
+const pageSize = window.webGalleryDisplay?.pageSize ?? 48;
+const paginationWindowSize = Math.max(1, window.webGalleryDisplay?.paginationWindowSize ?? 7);
 const currentPage = getCurrentPage();
 
 const albums = await getAlbums();
@@ -157,11 +158,10 @@ function renderPagination(totalPages, currentPageNumber) {
     list.appendChild(createPageItem("First", 1, currentPageNumber === 1));
     list.appendChild(createPageItem("Previous", Math.max(1, currentPageNumber - 1), currentPageNumber === 1));
 
-    const windowSize = 7;
-    const halfWindow = Math.floor(windowSize / 2);
+    const halfWindow = Math.floor(paginationWindowSize / 2);
     let firstPage = Math.max(1, currentPageNumber - halfWindow);
-    let lastPage = Math.min(totalPages, firstPage + windowSize - 1);
-    firstPage = Math.max(1, lastPage - windowSize + 1);
+    let lastPage = Math.min(totalPages, firstPage + paginationWindowSize - 1);
+    firstPage = Math.max(1, lastPage - paginationWindowSize + 1);
 
     for (let page = firstPage; page <= lastPage; page++) {
         list.appendChild(createPageItem(page.toString(), page, false, page === currentPageNumber));

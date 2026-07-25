@@ -10,7 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
+using WebGallery.UI.Configuration;
 using WebGallery.UI.Generators;
 using WebGallery.UI.Generators.Helpers;
 using WebGallery.UI.Helpers;
@@ -25,12 +27,14 @@ namespace WebGallery.UI.Controllers
     {
         private readonly ILogger<AlbumsController> _logger;
         private readonly MinimalApiProxy _minimalApiProxy;
+        private readonly DisplayOptions _displayOptions;
         readonly string _username;
 
-        public AlbumsController(ILogger<AlbumsController> logger, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
+        public AlbumsController(ILogger<AlbumsController> logger, MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IOptions<DisplayOptions> displayOptions)
         {
             _logger = logger;
             _minimalApiProxy = minimalApiProxy;
+            _displayOptions = displayOptions.Value;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
         }
@@ -73,11 +77,17 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAlbum(string id, int offset = 0, int displayCount = 32)
+        public async Task<IActionResult> GetAlbum(string id, int offset = 0, int? displayCount = null)
         {
             ViewBag.Current = "Albums";
 
-            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: displayCount);
+            int resolvedDisplayCount = displayCount.GetValueOrDefault(_displayOptions.PageSize);
+            if (resolvedDisplayCount <= 0)
+            {
+                resolvedDisplayCount = _displayOptions.PageSize;
+            }
+
+            AlbumContentsDTO data = await _minimalApiProxy.GetAlbumContents(_username, id, offset, numberOfItems: resolvedDisplayCount);
 
             List<SingleGalleryImageViewModel> items = new();
             int indexCounter = offset;
@@ -99,7 +109,7 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = id;
             vm.TotalImageCount = data.TotalCount;
             vm.CurrentOffset = offset;
-            vm.DisplayCount = displayCount;
+            vm.DisplayCount = resolvedDisplayCount;
 
             return View("Album", vm);
         }

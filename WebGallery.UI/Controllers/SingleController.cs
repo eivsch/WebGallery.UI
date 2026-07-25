@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using WebGallery.UI.Configuration;
 using WebGallery.UI.Generators;
 using WebGallery.UI.Helpers;
 using WebGallery.UI.ViewModels.Single;
@@ -40,14 +42,14 @@ namespace WebGallery.UI.Controllers
 
         readonly MinimalApiProxy _minimalApiProxy;
         readonly IMemoryCache _cache;
+        readonly DisplayOptions _displayOptions;
         readonly string _username;
 
-        const int DISPLAY_COUNT_MAX = 48;
-
-        public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IMemoryCache cache)
+        public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IMemoryCache cache, IOptions<DisplayOptions> displayOptions)
         {
             _minimalApiProxy = minimalApiProxy;
             _cache = cache;
+            _displayOptions = displayOptions.Value;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
         }
@@ -62,7 +64,7 @@ namespace WebGallery.UI.Controllers
             if (albums == null) return null;
 
             List<SingleGalleryImageViewModel> items = new();
-            while (currentCount < DISPLAY_COUNT_MAX)
+            while (currentCount < _displayOptions.PageSize)
             {
                 int randomAlbumIndex = rnd.Next(0, albums.Count);
                 AlbumMetaDTO album = albums[randomAlbumIndex];
@@ -85,9 +87,9 @@ namespace WebGallery.UI.Controllers
 
             var vm = SinglePageGenerator.SetDisplayProperties(items);
             vm.GalleryTitle = "Randomized album";
-            vm.TotalImageCount = DISPLAY_COUNT_MAX;
+            vm.TotalImageCount = _displayOptions.PageSize;
             vm.CurrentOffset = 0;
-            vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.DisplayCount = _displayOptions.PageSize;
             vm.IsRandomized = true;
 
             return View("Index", vm);
@@ -131,7 +133,7 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = "Search results";
             vm.TotalImageCount = searchDetails.HasMoreResults ? searchHits.Count + 1 : searchHits.Count;
             vm.CurrentOffset = hitsToSkip ?? 0;
-            vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.DisplayCount = _displayOptions.PageSize;
             vm.IsRandomized = shuffle;
 
             return View("Index", vm);
@@ -203,7 +205,7 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = "Search results";
             vm.TotalImageCount = cachedResults.Hits.Count;
             vm.CurrentOffset = from;
-            vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.DisplayCount = _displayOptions.PageSize;
 
             return View("Index", vm);
         }
@@ -214,13 +216,13 @@ namespace WebGallery.UI.Controllers
             return View("CustomJs");
         }
 
-        private static List<SingleGalleryImageViewModel> PopulateItemList(int from, List<SearchHitDTO> searchHits)
+        private List<SingleGalleryImageViewModel> PopulateItemList(int from, List<SearchHitDTO> searchHits)
         {
             List<SingleGalleryImageViewModel> items = [];
             int i = 0;
             foreach (SearchHitDTO hit in searchHits.Skip(from))
             {
-                if (i >= DISPLAY_COUNT_MAX) break;
+            if (i >= _displayOptions.PageSize) break;
                 else i++;
 
                 SingleGalleryImageViewModel imageVm = new()

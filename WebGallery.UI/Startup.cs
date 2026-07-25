@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WebGallery.UI.Configuration;
 
 namespace WebGallery.UI
 {
@@ -40,6 +41,7 @@ namespace WebGallery.UI
 
             services.AddMemoryCache();
             services.AddControllersWithViews();
+            services.Configure<DisplayOptions>(Configuration.GetSection("Display"));
 
             services.AddHttpClient<WebGalleryApiClient>(c => 
             {

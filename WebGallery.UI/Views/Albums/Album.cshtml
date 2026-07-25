@@ -1,12 +1,14 @@
-﻿@using WebGallery.UI.Models
+﻿@using Microsoft.Extensions.Configuration
+@using WebGallery.UI.Models
+@inject IConfiguration Configuration
 
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
 @{
-    int pageSize = Model.DisplayCount > 0 ? Model.DisplayCount : 32;
+    int pageSize = Math.Max(1, Model.DisplayCount);
     int totalPages = Math.Max(1, (int)Math.Ceiling((double)Model.TotalImageCount / pageSize));
     int currentPage = Math.Min(totalPages, (Model.CurrentOffset / pageSize) + 1);
-    int windowSize = 7;
+    int windowSize = Math.Max(1, Configuration.GetValue<int>("Display:PaginationWindowSize", 7));
     int halfWindow = windowSize / 2;
     int firstPage = Math.Max(1, currentPage - halfWindow);
     int lastPage = Math.Min(totalPages, firstPage + windowSize - 1);

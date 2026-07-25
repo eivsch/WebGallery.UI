@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 
 @* @model List<WebGallery.UI.ViewModels.Tags.TagsViewModel> *@
 
@@ -56,6 +57,14 @@
 </main>
 
 @section Scripts {
+    @{ int configuredPageSize = Configuration.GetValue<int>("Display:PageSize", 48); }
+    @{ int configuredPaginationWindowSize = Configuration.GetValue<int>("Display:PaginationWindowSize", 7); }
+    <script type="text/javascript">
+        window.webGalleryDisplay = {
+            pageSize: @configuredPageSize,
+            paginationWindowSize: @configuredPaginationWindowSize
+        };
+    </script>
     <script type="module" src="~/js/view-listener-tags.js"></script>
     @* <script type="text/javascript">const username = "eivsch";</script> *@
 }
