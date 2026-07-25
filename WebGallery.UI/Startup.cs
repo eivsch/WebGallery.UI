@@ -45,8 +45,12 @@ namespace WebGallery.UI
             {
                 c.BaseAddress = new Uri(Configuration.GetValue("ConnectionStrings:ApiEndpoint", ""));
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
+                c.Timeout = TimeSpan.FromSeconds(600);
             });
-            services.AddHttpClient<WebGalleryFileServerClient>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            services.AddHttpClient<WebGalleryFileServerClient>(c =>
+            {
+                c.Timeout = TimeSpan.FromSeconds(600);
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {   
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
             });
