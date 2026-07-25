@@ -6,6 +6,6 @@ namespace WebGallery.UI.ViewModels
     {
         public string Header { get; set; }
         public string Headerlink { get; set; }
-        public List<string> InfoItems { get; set; }
+        public List<InfoItemViewModel> InfoItems { get; set; }
     }
 }

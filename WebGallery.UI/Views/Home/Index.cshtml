@@ -22,7 +22,7 @@
                                 *loading*...
                             </div>
                         </div>
-                        @* <div class="col-md-4">
+                        <div class="col-md-4">
                             <div data-url="/home/stats?itemType=gif" data-async-view>
                                 *loading*...
                             </div>
@@ -31,7 +31,7 @@
                             <div data-url="/home/stats?itemType=video" data-async-view>
                                 *loading*...
                             </div>
-                        </div> *@
+                        </div>
                         <div class="col-md-4">
                             <div data-url="/home/stats?itemType=album" data-async-view>
                                 *loading*...
@@ -51,6 +51,63 @@
     <div class="row pt-4 mb-5 text-center">
         <div class="col-12">
             <h3 class="text-white mb-4">Popular Tags</h3>
+        </div>
+    </div>
+
+    <div class="row pt-4 mb-3 text-center">
+        <div class="col-12">
+            <h3 class="text-white mb-4">Shortcuts</h3>
+        </div>
+    </div>
+
+    <div class="row g-3 justify-content-center mb-5 mx-2">
+        <div class="col-6 col-md-2">
+            <a href="/single" class="shortcut-card">
+                <span class="shortcut-card__icon">🎲</span>
+                <span class="shortcut-card__label">Random images</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/home/random-bio?fileExtensions=mp4,avi,mov,mkv,flv,wmv,webm,m4v" class="shortcut-card">
+                <span class="shortcut-card__icon">🎲</span>
+                <span class="shortcut-card__label">Random video</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/single/search?fileExtensions=gif&shuffle=true" class="shortcut-card">
+                <span class="shortcut-card__icon">🎲</span>
+                <span class="shortcut-card__label">Random GIF</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/albums?randomAlbumOrder=true&randomCoverImage=true" class="shortcut-card">
+                <span class="shortcut-card__icon">🎲</span>
+                <span class="shortcut-card__label">Random album order</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/single/search?tags=unwatched&fileExtensions=mp4,avi,mov,mkv,flv,wmv,webm,m4v" class="shortcut-card">
+                <span class="shortcut-card__icon">👁</span>
+                <span class="shortcut-card__label">Unwatched videos</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/single/search?tags=unwatched" class="shortcut-card">
+                <span class="shortcut-card__icon">👁</span>
+                <span class="shortcut-card__label">Unwatched (all)</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/single/search?createdAfter=@DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd")" class="shortcut-card">
+                <span class="shortcut-card__icon">🕐</span>
+                <span class="shortcut-card__label">Added last 30 days</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/single/search?createdAfter=@DateTime.UtcNow.AddDays(-7).ToString("yyyy-MM-dd")" class="shortcut-card">
+                <span class="shortcut-card__icon">🕐</span>
+                <span class="shortcut-card__label">Added last 7 days</span>
+            </a>
         </div>
     </div>
 

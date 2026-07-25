@@ -11,6 +11,15 @@
     }
     @foreach (var infoItem in Model.InfoItems)
     {
-        <p>@infoItem</p>
+        <p>
+            @if (!string.IsNullOrWhiteSpace(infoItem.Url))
+            {
+                <a href="@infoItem.Url" style="text-decoration: none; color: inherit;">@infoItem.Text</a>
+            }
+            else
+            {
+                @infoItem.Text
+            }
+        </p>
     }
 </div>

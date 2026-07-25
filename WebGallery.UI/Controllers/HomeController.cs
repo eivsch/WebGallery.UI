@@ -21,6 +21,7 @@ namespace WebGallery.UI.Controllers
     {
         private readonly MinimalApiProxy _minimalApiProxy;
         readonly string _username;
+        private const int SearchBatchLimit = 1000;
 
         public HomeController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext)
         {
@@ -37,6 +38,26 @@ namespace WebGallery.UI.Controllers
             ViewBag.Current = "Home";
 
             return View();
+        }
+
+        [HttpGet("home/random-bio")]
+        public async Task<IActionResult> RandomBio(string fileExtensions)
+        {
+            List<SearchHitDTO> results = await _minimalApiProxy.GetSearch(
+                _username,
+                albums: null,
+                tags: null,
+                fileExtension: fileExtensions,
+                mediaNameContains: null,
+                maxSize: SearchBatchLimit,
+                allTagsMustMatch: false);
+
+            if (results == null || results.Count == 0)
+                return RedirectToAction("Index");
+
+            Random rnd = new();
+            SearchHitDTO selected = results[rnd.Next(0, results.Count)];
+            return Redirect($"/bio/id/{selected.MediaItem.Id}");
         }
 
         [HttpGet("home/banner-image")]
@@ -86,6 +107,12 @@ namespace WebGallery.UI.Controllers
                 case "media":
                     vm = await GetMediaStats();
                     break;
+                case "gif":
+                    vm = await GetGifStats();
+                    break;
+                case "video":
+                    vm = await GetVideoStats();
+                    break;
                 default:
                     return null;
             }
@@ -102,17 +129,29 @@ namespace WebGallery.UI.Controllers
         async Task<StatsInfoCardViewModel> GetAlbumStats()
         {
             List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
-            List<string> infos = [];
-            infos.Add($"Total: {a.Count}");
+            List<InfoItemViewModel> infos = [];
+            infos.Add(new InfoItemViewModel { Text = $"Total: {a.Count}", Url = null });
             
             AlbumMetaDTO lastAdded = a.OrderByDescending(x => x.Created).ToList()[0];
-            infos.Add($"Most Recent: '{lastAdded.AlbumName}' - {lastAdded.Created.ToString()[..10]}");
+            infos.Add(new InfoItemViewModel 
+            { 
+                Text = $"Most Recent: '{lastAdded.AlbumName}' - {lastAdded.Created.ToString()[..10]}", 
+                Url = $"/albums/{lastAdded.AlbumName}"
+            });
 
             AlbumMetaDTO mostLikesTotal = a.OrderByDescending(x => x.TotalLikes).ToList()[0];
-            infos.Add($"Most likes in total: '{mostLikesTotal.AlbumName}' - {mostLikesTotal.TotalLikes}");
+            infos.Add(new InfoItemViewModel 
+            { 
+                Text = $"Most likes in total: '{mostLikesTotal.AlbumName}' - {mostLikesTotal.TotalLikes}", 
+                Url = $"/albums/{mostLikesTotal.AlbumName}"
+            });
 
             AlbumMetaDTO mostUniqueLikes = a.OrderByDescending(x => x.TotalUniqueLikes).ToList()[0];
-            infos.Add($"Most unique item likes: '{mostUniqueLikes.AlbumName}' - {mostUniqueLikes.TotalUniqueLikes}");
+            infos.Add(new InfoItemViewModel 
+            { 
+                Text = $"Most unique item likes: '{mostUniqueLikes.AlbumName}' - {mostUniqueLikes.TotalUniqueLikes}", 
+                Url = $"/albums/{mostUniqueLikes.AlbumName}"
+            });
 
             StatsInfoCardViewModel vm = new()
             {
@@ -127,13 +166,13 @@ namespace WebGallery.UI.Controllers
         async Task<StatsInfoCardViewModel> GetTagStats()
         {
             List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
-            List<string> infos = [];
+            List<InfoItemViewModel> infos = [];
             int totalTags = a.Select(s => s.Tags.Count).Sum();
-            infos.Add($"Total: {totalTags}");
+            infos.Add(new InfoItemViewModel { Text = $"Total: {totalTags}", Url = null });
 
             IEnumerable<TagMetaDTO> allTags = a.SelectMany(s => s.Tags);
             int uniqueTags = allTags.Select(s => s.TagName).Distinct().Count();
-            infos.Add($"Total unique: {uniqueTags}");
+            infos.Add(new InfoItemViewModel { Text = $"Total unique: {uniqueTags}", Url = null });
 
             IEnumerable<TagMetaDTO> grouped = allTags.GroupBy(g => g.TagName)
                 .Select(sl => new TagMetaDTO
@@ -145,7 +184,11 @@ namespace WebGallery.UI.Controllers
             if (grouped.Any())
             {
                 TagMetaDTO r = grouped.OrderByDescending(o => o.Count).Take(1).ToList()[0];
-                infos.Add($"Most popular tag: {r.Count}");
+                infos.Add(new InfoItemViewModel 
+                { 
+                    Text = $"Most popular tag: '{r.TagName}' - {r.Count}", 
+                    Url = $"/single/search?tags={Uri.EscapeDataString(r.TagName)}"
+                });
             }
 
             StatsInfoCardViewModel vm = new()
@@ -160,12 +203,21 @@ namespace WebGallery.UI.Controllers
 
         async Task<StatsInfoCardViewModel> GetMediaStats()
         {
-            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
-            List<string> infos = [];
-            int totalItems = a.Select(s => s.TotalCount).Sum();
-            infos.Add($"Total: {totalItems}");
+            int total = await GetTotalCountAsync(null);
+            SearchHitDTO mostRecent = await GetMostRecentAsync(null);
 
-            // TODO: most recent
+            List<InfoItemViewModel> infos = [];
+            infos.Add(new InfoItemViewModel { Text = $"Total: {total}", Url = null });
+
+            if (mostRecent != null)
+            {
+                var bioUrl = $"/bio/id/{mostRecent.MediaItem.Id}";
+                infos.Add(new InfoItemViewModel
+                {
+                    Text = $"Most recent: {mostRecent.MediaItem.Name} - {mostRecent.MediaItem.Created.ToString("yyyy-MM-dd")}",
+                    Url = bioUrl
+                });
+            }
 
             // TODO: most liked
 
@@ -179,17 +231,136 @@ namespace WebGallery.UI.Controllers
             return vm;
         }
 
+        async Task<StatsInfoCardViewModel> GetGifStats()
+        {
+            int total = await GetTotalCountAsync("gif");
+            SearchHitDTO mostRecent = await GetMostRecentAsync("gif");
+
+            List<InfoItemViewModel> infos = [];
+            infos.Add(new InfoItemViewModel { Text = $"Total: {total}", Url = null });
+
+            if (mostRecent != null)
+            {
+                var bioUrl = $"/bio/id/{mostRecent.MediaItem.Id}";
+                infos.Add(new InfoItemViewModel
+                {
+                    Text = $"Most recent: {mostRecent.MediaItem.Name} - {mostRecent.MediaItem.Created.ToString("yyyy-MM-dd")}",
+                    Url = bioUrl
+                });
+            }
+
+            StatsInfoCardViewModel vm = new()
+            {
+                Header = "GIFs",
+                Headerlink = "/single/search?fileExtensions=gif",
+                InfoItems = infos
+            };
+
+            return vm;
+        }
+
+        async Task<StatsInfoCardViewModel> GetVideoStats()
+        {
+            int total = await GetTotalCountAsync("mp4,avi,mov,mkv,flv,wmv,webm,m4v");
+            SearchHitDTO mostRecent = await GetMostRecentAsync("mp4,avi,mov,mkv,flv,wmv,webm,m4v");
+
+            List<InfoItemViewModel> infos = [];
+            infos.Add(new InfoItemViewModel { Text = $"Total: {total}", Url = null });
+
+            if (mostRecent != null)
+            {
+                var bioUrl = $"/bio/id/{mostRecent.MediaItem.Id}";
+                infos.Add(new InfoItemViewModel
+                {
+                    Text = $"Most recent: {mostRecent.MediaItem.Name} - {mostRecent.MediaItem.Created.ToString("yyyy-MM-dd")}",
+                    Url = bioUrl
+                });
+            }
+
+            StatsInfoCardViewModel vm = new()
+            {
+                Header = "Videos",
+                Headerlink = "/single/search?fileExtensions=mp4,avi,mov,mkv,flv,wmv,webm,m4v",
+                InfoItems = infos
+            };
+
+            return vm;
+        }
+
+
         string GetHeaderLink(string itemType)
         {
             string headerLink = itemType switch
             {
                 "picture" => "/single",
                 "album" => "/albums",
-                "tag" => "tags",
+                "tag" => "/tags",
                 _ => "/single"
             };
 
             return headerLink;
+        }
+
+        private async Task<int> GetTotalCountAsync(string fileExtension)
+        {
+            // Fetch a small batch just to count — paginate if needed
+            List<SearchHitDTO> allResults = [];
+            int currentOffset = 0;
+            bool hasMore = true;
+
+            while (hasMore)
+            {
+                List<SearchHitDTO> batch = await _minimalApiProxy.GetSearch(
+                    _username,
+                    albums: null,
+                    tags: null,
+                    fileExtension: fileExtension,
+                    mediaNameContains: null,
+                    maxSize: SearchBatchLimit,
+                    allTagsMustMatch: false,
+                    hitsToSkip: currentOffset);
+
+                if (batch == null || batch.Count == 0)
+                {
+                    hasMore = false;
+                }
+                else
+                {
+                    allResults.AddRange(batch);
+                    if (batch.Count < SearchBatchLimit)
+                        hasMore = false;
+                    else
+                        currentOffset += batch.Count;
+                }
+            }
+
+            return allResults.Count;
+        }
+
+        private async Task<SearchHitDTO> GetMostRecentAsync(string fileExtension)
+        {
+            // Use progressively wider date windows to find the most recent item
+            // without loading all items into memory.
+            int[] windowDays = [7, 30, 90, 365, 365 * 3, 365 * 10, 365 * 50];
+
+            foreach (int days in windowDays)
+            {
+                string createdAfter = DateTime.UtcNow.AddDays(-days).ToString("yyyy-MM-dd");
+                List<SearchHitDTO> batch = await _minimalApiProxy.GetSearch(
+                    _username,
+                    albums: null,
+                    tags: null,
+                    fileExtension: fileExtension,
+                    mediaNameContains: null,
+                    maxSize: SearchBatchLimit,
+                    allTagsMustMatch: false,
+                    createdAfter: createdAfter);
+
+                if (batch?.Count > 0)
+                    return batch.OrderByDescending(x => x.MediaItem.Created).First();
+            }
+
+            return null;
         }
     }
 }
