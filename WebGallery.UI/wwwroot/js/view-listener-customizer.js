@@ -91,6 +91,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const tagMatchCount = document.getElementById('tagMatchCount');
     const maxSizeInput = document.getElementById('maxSizeInput');
     const maxSizeWarning = document.getElementById('maxSizeWarning');
+    const relativeDateRangeButtons = document.querySelectorAll('[data-relative-date-range]');
+
+    function formatLocalDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return year + '-' + month + '-' + day;
+    }
+
+    function applyRelativeDateRange(days) {
+        const createdAfterInput = document.getElementById('createdAfterInput');
+        const createdBeforeInput = document.getElementById('createdBeforeInput');
+
+        if (!createdAfterInput || !createdBeforeInput) return;
+
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - days);
+
+        createdAfterInput.value = formatLocalDate(startDate);
+        createdBeforeInput.value = '';
+    }
 
     function normalizeMaxSizeInput() {
         if (!maxSizeInput) return;
@@ -269,6 +292,18 @@ document.addEventListener('DOMContentLoaded', function () {
         maxSizeInput.addEventListener('input', normalizeMaxSizeInput);
         maxSizeInput.addEventListener('change', normalizeMaxSizeInput);
         normalizeMaxSizeInput();
+    }
+
+    if (relativeDateRangeButtons.length > 0) {
+        relativeDateRangeButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const days = parseInt(button.getAttribute('data-relative-date-range'), 10);
+
+                if (Number.isNaN(days) || days <= 0) return;
+
+                applyRelativeDateRange(days);
+            });
+        });
     }
 
     updateDynamicMatchCount();

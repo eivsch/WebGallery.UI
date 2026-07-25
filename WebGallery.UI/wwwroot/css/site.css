@@ -673,3 +673,37 @@ a.regular-text-link {
 #deleteSavedSearchBtn:hover {
     background-color: #ef6c57;
 }
+
+.date-range-shortcuts {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    margin-top: 0.35rem;
+}
+
+.date-range-shortcut {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    color: #ef6c57;
+    padding: 0;
+    font: inherit;
+    font-size: 0.92rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.date-range-shortcut:hover {
+    color: #fff;
+}
+
+.date-range-shortcut:focus {
+    outline: 1px dotted #ef6c57;
+    outline-offset: 2px;
+}
+
+.date-range-separator {
+    color: rgba(255, 255, 255, 0.55);
+}

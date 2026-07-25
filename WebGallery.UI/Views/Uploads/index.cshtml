@@ -64,7 +64,7 @@
 
         const totalBytes = files.reduce((sum, file) => sum + (file.size || 0), 0);
         const totalChunks = Math.ceil(files.length / chunkSize);
-j
+
         let uploadedBytesFromCompletedChunks = 0;
         let lastSuccessHtml = '';
         let totalUploadedCount = 0;
