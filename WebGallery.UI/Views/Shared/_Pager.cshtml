@@ -1,0 +1,79 @@
+@model WebGallery.UI.ViewModels.Paging.PagerViewModel
+
+@if (Model.ShowPager)
+{
+    int previousPage = Model.PreviousPage;
+    int nextPage = Model.NextPage;
+    bool isPreviousDisabled = Model.CurrentPage == 1;
+    bool isNextDisabled = Model.CurrentPage == Model.TotalPages;
+
+    <div class="row justify-content-center mt-4 mb-3 pager-row">
+        <div class="col-auto pager-col">
+            <nav class="pager-nav" aria-label="@Model.AriaLabel">
+                <ul class="pagination mb-0 pager-list">
+                    @{
+                        string firstUri = Model.BuildPageUrl(1);
+                    }
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link"
+                           href="@(Model.CurrentPage == 1 ? "#" : firstUri)"
+                           tabindex="@(Model.CurrentPage == 1 ? "-1" : null)"
+                           aria-disabled="@(Model.CurrentPage == 1 ? "true" : "false")">
+                            First
+                        </a>
+                    </li>
+
+                    @{
+                        string previousUri = Model.BuildPageUrl(previousPage);
+                    }
+                    <li class="page-item @(isPreviousDisabled ? "disabled" : "")">
+                        <a class="page-link"
+                           href="@(isPreviousDisabled ? "#" : previousUri)"
+                           tabindex="@(isPreviousDisabled ? "-1" : null)"
+                           aria-disabled="@(isPreviousDisabled ? "true" : "false")">
+                            Previous
+                        </a>
+                    </li>
+
+                    @for (int pageNumber = Model.FirstPage; pageNumber <= Model.LastPage; pageNumber++)
+                    {
+                        bool isActive = pageNumber == Model.CurrentPage;
+                        string pageUri = Model.BuildPageUrl(pageNumber);
+                        <li class="page-item @(isActive ? "active" : "")">
+                            <a class="page-link"
+                               href="@(isActive ? "#" : pageUri)"
+                               tabindex="@(isActive ? "-1" : null)"
+                               aria-disabled="@(isActive ? "true" : "false")">
+                                @pageNumber
+                            </a>
+                        </li>
+                    }
+
+                    @{
+                        string nextUri = Model.BuildPageUrl(nextPage);
+                    }
+                    <li class="page-item @(isNextDisabled ? "disabled" : "")">
+                        <a class="page-link"
+                           href="@(isNextDisabled ? "#" : nextUri)"
+                           tabindex="@(isNextDisabled ? "-1" : null)"
+                           aria-disabled="@(isNextDisabled ? "true" : "false")">
+                            Next
+                        </a>
+                    </li>
+
+                    @{
+                        string lastUri = Model.BuildPageUrl(Model.TotalPages);
+                    }
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link"
+                           href="@(Model.CurrentPage == Model.TotalPages ? "#" : lastUri)"
+                           tabindex="@(Model.CurrentPage == Model.TotalPages ? "-1" : null)"
+                           aria-disabled="@(Model.CurrentPage == Model.TotalPages ? "true" : "false")">
+                            Last
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+}

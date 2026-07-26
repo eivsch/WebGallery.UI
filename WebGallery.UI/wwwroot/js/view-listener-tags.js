@@ -1,4 +1,6 @@
-﻿const headline = document.querySelector('h2.text-white');
+﻿import { renderPager } from './pager.js';
+
+const headline = document.querySelector('h2.text-white');
 headline.textContent = "Tags";
 
 const tagsContainer = document.querySelector('div.row.align-items-stretch');
@@ -24,7 +26,19 @@ headline.textContent = `Tags (${tags.length})`;
 await renderTags(pageTags);
 
 if (tags.length > pageSize) {
-    paginationRow = renderPagination(totalPages, clampedPage);
+    paginationRow = renderPager({
+        ariaLabel: "Tag pages",
+        totalItems: tags.length,
+        pageSize,
+        currentOffset: pageStart,
+        windowSize: paginationWindowSize,
+        buildPageUrl,
+    });
+
+    if (paginationRow) {
+        const photosContainer = document.querySelector(".container-fluid.photos");
+        photosContainer?.appendChild(paginationRow);
+    }
 }
 
 if (filterInput) {
@@ -241,76 +255,6 @@ function buildPageUrl(pageNumber) {
     const url = new URL(window.location.href);
     url.searchParams.set("page", pageNumber.toString());
     return url.pathname + url.search;
-}
-
-function renderPagination(totalPages, currentPageNumber) {
-    const photosContainer = document.querySelector(".container-fluid.photos");
-    if (!photosContainer) {
-        return;
-    }
-
-    const row = document.createElement("div");
-    row.classList.add("row", "justify-content-center", "mt-4", "mb-3", "pager-row");
-
-    const col = document.createElement("div");
-    col.classList.add("col-auto", "pager-col");
-
-    const nav = document.createElement("nav");
-    nav.classList.add("pager-nav");
-    nav.setAttribute("aria-label", "Tag pages");
-
-    const list = document.createElement("ul");
-    list.classList.add("pagination", "mb-0", "pager-list");
-
-    list.appendChild(createPageItem("First", 1, currentPageNumber === 1));
-    list.appendChild(createPageItem("Previous", Math.max(1, currentPageNumber - 1), currentPageNumber === 1));
-
-    const halfWindow = Math.floor(paginationWindowSize / 2);
-    let firstPage = Math.max(1, currentPageNumber - halfWindow);
-    let lastPage = Math.min(totalPages, firstPage + paginationWindowSize - 1);
-    firstPage = Math.max(1, lastPage - paginationWindowSize + 1);
-
-    for (let page = firstPage; page <= lastPage; page++) {
-        list.appendChild(createPageItem(page.toString(), page, false, page === currentPageNumber));
-    }
-
-    list.appendChild(createPageItem("Next", Math.min(totalPages, currentPageNumber + 1), currentPageNumber === totalPages));
-    list.appendChild(createPageItem("Last", totalPages, currentPageNumber === totalPages));
-
-    nav.appendChild(list);
-    col.appendChild(nav);
-    row.appendChild(col);
-    photosContainer.appendChild(row);
-
-    return row;
-}
-
-function createPageItem(label, pageNumber, disabled, active = false) {
-    const li = document.createElement("li");
-    li.classList.add("page-item");
-
-    if (disabled) {
-        li.classList.add("disabled");
-    }
-
-    if (active) {
-        li.classList.add("active");
-    }
-
-    const a = document.createElement("a");
-    a.classList.add("page-link");
-    a.textContent = label;
-
-    if (disabled || active) {
-        a.href = "#";
-        a.setAttribute("tabindex", "-1");
-        a.setAttribute("aria-disabled", "true");
-    } else {
-        a.href = buildPageUrl(pageNumber);
-    }
-
-    li.appendChild(a);
-    return li;
 }
 
 async function getAlbums() {
