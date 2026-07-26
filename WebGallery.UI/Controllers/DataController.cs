@@ -31,6 +31,28 @@ namespace WebGallery.UI.Controllers
             return Ok(result);
         }
 
+        [HttpGet("albums/search")]
+        public async Task<IActionResult> SearchAlbums(string q, int maxResults = 200)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return Ok(new List<AlbumMetaDTO>());
+            }
+
+            string query = q.Trim();
+            int clampedMaxResults = Math.Min(Math.Max(maxResults, 1), 500);
+
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username, size: clampedMaxResults);
+            List<AlbumMetaDTO> filtered = albums
+                .Where(w => !string.IsNullOrWhiteSpace(w.AlbumName)
+                    && w.AlbumName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(o => o.AlbumName)
+                .Take(clampedMaxResults)
+                .ToList();
+
+            return Ok(filtered);
+        }
+
         [HttpGet("albums/{album}")]
         public async Task<IActionResult> GetAlbumItems(string album, int from = 0, int itemCount = 32)
         {

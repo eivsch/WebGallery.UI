@@ -36,6 +36,17 @@
             </div>
         </div>
 
+        <div class="row mb-4 justify-content-center">
+            <div class="col-lg-5 col-md-7 col-sm-10">
+                <input id="album-filter-input"
+                       type="text"
+                       class="form-control"
+                       placeholder="Filter albums (example: summer)"
+                       aria-label="Filter albums by name" />
+                <small id="album-filter-status" class="form-text text-white-50 mt-2 d-block"></small>
+            </div>
+        </div>
+
         <div class="row align-items-stretch">
             @*
             Each image row has a witdh of "12", meaning col-lg-x must add up to 12 to fit it on one row
@@ -96,3 +107,15 @@
         </div>
     </div>
 </main>
+
+@section Scripts {
+    @{ int configuredPageSize = Configuration.GetValue<int>("Display:PageSize", 48); }
+    @{ int configuredPaginationWindowSize = Configuration.GetValue<int>("Display:PaginationWindowSize", 7); }
+    <script type="text/javascript">
+        window.webGalleryDisplay = {
+            pageSize: @configuredPageSize,
+            paginationWindowSize: @configuredPaginationWindowSize
+        };
+    </script>
+    <script type="module" src="~/js/view-listener-albums.js"></script>
+}

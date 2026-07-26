@@ -83,7 +83,7 @@ namespace WebGallery.UI.Controllers
 
             vm.TotalAlbumCount = albumPage.TotalCount;
             vm.CurrentOffset = randomAlbumOrder ? 0 : albumPage.From;
-            vm.DisplayCount = randomAlbumOrder ? albumPage.CurrentSize : albumPage.CurrentSize;
+            vm.DisplayCount = resolvedDisplayCount;
             vm.IsRandomized = randomAlbumOrder;
             vm.RandomCoverImage = randomCoverImage;
 
