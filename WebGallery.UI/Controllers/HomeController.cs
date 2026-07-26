@@ -128,7 +128,7 @@ namespace WebGallery.UI.Controllers
 
         async Task<StatsInfoCardViewModel> GetAlbumStats()
         {
-            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAllAlbums(_username);
             List<InfoItemViewModel> infos = [];
             infos.Add(new InfoItemViewModel { Text = $"Total: {a.Count}", Url = null });
             
@@ -165,7 +165,7 @@ namespace WebGallery.UI.Controllers
 
         async Task<StatsInfoCardViewModel> GetTagStats()
         {
-            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAllAlbums(_username);
             List<InfoItemViewModel> infos = [];
             int totalTags = a.Select(s => s.Tags.Count).Sum();
             infos.Add(new InfoItemViewModel { Text = $"Total: {totalTags}", Url = null });

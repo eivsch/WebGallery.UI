@@ -57,10 +57,38 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<List<AlbumMetaDTO>> GetAlbums(string username, int from = 0, int size = 32)
+    public async Task<List<AlbumMetaDTO>> GetAllAlbums(string username, int pageSize = 128)
     {
-        PagedAlbumMetaDTO data = await GetAlbumsPage(username, from, size);
-        return data.Albums;
+        int safePageSize = pageSize <= 0 ? 128 : pageSize;
+        int from = 0;
+        int? totalCount = null;
+        List<AlbumMetaDTO> allAlbums = [];
+
+        while (!totalCount.HasValue || allAlbums.Count < totalCount.Value)
+        {
+            PagedAlbumMetaDTO page = await GetAlbumsPage(username, from, safePageSize);
+            List<AlbumMetaDTO> pageAlbums = page?.Albums ?? [];
+
+            if (totalCount is null)
+            {
+                totalCount = page?.TotalCount ?? 0;
+            }
+
+            if (pageAlbums.Count == 0)
+            {
+                break;
+            }
+
+            allAlbums.AddRange(pageAlbums);
+            from += pageAlbums.Count;
+
+            if (pageAlbums.Count < safePageSize)
+            {
+                break;
+            }
+        }
+
+        return allAlbums;
     }
 
     public async Task<PagedAlbumMetaDTO> GetAlbumsPage(string username, int from = 0, int size = 32)

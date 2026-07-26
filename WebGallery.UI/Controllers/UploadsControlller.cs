@@ -70,7 +70,7 @@ namespace WebGallery.UI.Controllers
 
                 List<SavedFileInfo> uploadedFiles = [];
                 string albumName = "";
-                List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+                List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAllAlbums(_username);
 
                 var reader = new MultipartReader(boundary, Request.Body);
                 var section = await reader.ReadNextSectionAsync(HttpContext.RequestAborted);

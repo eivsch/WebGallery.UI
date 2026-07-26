@@ -31,7 +31,7 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Customizer";
 
-            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAllAlbums(_username);
             int totalItems = a.Sum(x => x.TotalCount);
             IEnumerable<TagStatsViewModel> allTags = a.SelectMany(s => s.Tags)
                 .GroupBy(g => g.TagName)

@@ -32,7 +32,7 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Admin";
 
-            var albums = await _minimalApiProxy.GetAlbums(_username);
+            var albums = await _minimalApiProxy.GetAllAlbums(_username);
             return View(albums);
         }
 
@@ -88,7 +88,7 @@ namespace WebGallery.UI.Controllers
                 try
                 {
                     // Check if album already exists (case-insensitive)
-                    var existingAlbums = await _minimalApiProxy.GetAlbums(_username);
+                    var existingAlbums = await _minimalApiProxy.GetAllAlbums(_username);
                     if (existingAlbums != null && existingAlbums.Any(a => string.Equals(a.AlbumName, newTargetAlbum, StringComparison.OrdinalIgnoreCase)))
                     {
                         return BadRequest(new { success = false, message = "An album with that name already exists. Please choose a different name or select the existing album as the target." });
@@ -150,7 +150,7 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> Album(string albumName)
         {
             var albumContents = await _minimalApiProxy.GetAlbumContents(_username, albumName, 0, 1000); // adjust size as needed
-            var allAlbums = await _minimalApiProxy.GetAlbums(_username);
+            var allAlbums = await _minimalApiProxy.GetAllAlbums(_username);
             ViewBag.AlbumName = albumName;
             ViewBag.AllAlbums = allAlbums;
             return View("Album", albumContents);

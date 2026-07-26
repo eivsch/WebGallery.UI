@@ -37,7 +37,7 @@ namespace WebGallery.UI.Controllers
         private async Task<List<AlbumMetaDTO>> GetAlbumsAsync()
         {
             if (_albumsCache == null)
-                _albumsCache = await _minimalApiProxy.GetAlbums(_username);
+                _albumsCache = await _minimalApiProxy.GetAllAlbums(_username);
             return _albumsCache;
         }
 

@@ -60,7 +60,7 @@ namespace WebGallery.UI.Controllers
             int currentCount = 0;
             Random rnd = new();
 
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAllAlbums(_username);
             if (albums == null) return null;
 
             List<SingleGalleryImageViewModel> items = new();

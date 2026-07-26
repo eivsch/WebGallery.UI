@@ -27,7 +27,7 @@ namespace WebGallery.UI.Controllers
         [HttpGet("albums")]
         public async Task<IActionResult> GetAlbums()
         {
-            List<AlbumMetaDTO> result = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> result = await _minimalApiProxy.GetAllAlbums(_username);
             return Ok(result);
         }
 
@@ -42,7 +42,7 @@ namespace WebGallery.UI.Controllers
             string query = q.Trim();
             int clampedMaxResults = Math.Min(Math.Max(maxResults, 1), 500);
 
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username, size: clampedMaxResults);
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAllAlbums(_username);
             List<AlbumMetaDTO> filtered = albums
                 .Where(w => !string.IsNullOrWhiteSpace(w.AlbumName)
                     && w.AlbumName.Contains(query, StringComparison.OrdinalIgnoreCase))
@@ -63,7 +63,7 @@ namespace WebGallery.UI.Controllers
         [HttpGet("tags")]
         public async Task<IActionResult> GetTags()
         {
-            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> a = await _minimalApiProxy.GetAllAlbums(_username);
             IEnumerable<TagMetaDTO> allTags = a.SelectMany(s => s.Tags);
             List<TagMetaDTO> grouped = allTags.GroupBy(g => g.TagName)
                 .Select(sl => new TagMetaDTO
@@ -88,7 +88,7 @@ namespace WebGallery.UI.Controllers
             string query = q.Trim();
             int clampedMaxResults = Math.Min(Math.Max(maxResults, 1), 500);
 
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAllAlbums(_username);
             IEnumerable<TagMetaDTO> allTags = albums.SelectMany(s => s.Tags);
             List<TagMetaDTO> grouped = allTags
                 .Where(w => !string.IsNullOrWhiteSpace(w.TagName)
