@@ -2,9 +2,14 @@
 headline.textContent = "Tags";
 
 const tagsContainer = document.querySelector('div.row.align-items-stretch');
+const filterInput = document.querySelector('#tag-filter-input');
+const filterStatus = document.querySelector('#tag-filter-status');
 const pageSize = window.webGalleryDisplay?.pageSize ?? 48;
 const paginationWindowSize = Math.max(1, window.webGalleryDisplay?.paginationWindowSize ?? 7);
 const currentPage = getCurrentPage();
+const tagCardPromiseCache = new Map();
+let paginationRow = null;
+let filterRequestId = 0;
 
 const albums = await getAlbums();
 const tags = await getTags();
@@ -16,29 +21,131 @@ const pageTags = tags.slice(pageStart, pageEnd);
 
 headline.textContent = `Tags (${tags.length})`;
 
-for (const tag of pageTags) {
+await renderTags(pageTags);
+
+if (tags.length > pageSize) {
+    paginationRow = renderPagination(totalPages, clampedPage);
+}
+
+if (filterInput) {
+    filterInput.addEventListener('input', debounce(async () => {
+        const requestId = ++filterRequestId;
+        const rawFilter = filterInput.value ?? "";
+        const filterValue = rawFilter.trim();
+
+        if (!filterValue) {
+            if (requestId !== filterRequestId) {
+                return;
+            }
+
+            filterStatus.textContent = "";
+            setPaginationVisibility(true);
+            await renderTags(pageTags);
+            return;
+        }
+
+        setPaginationVisibility(false);
+        filterStatus.textContent = "Searching all tags...";
+
+        const fallbackMatches = await searchTags(filterValue);
+        if (requestId !== filterRequestId) {
+            return;
+        }
+
+        if (fallbackMatches.length === 0) {
+            filterStatus.textContent = "No tags found.";
+            clearTags();
+            return;
+        }
+
+        filterStatus.textContent = `Showing ${fallbackMatches.length} match(es) from all pages.`;
+        await renderTags(fallbackMatches);
+    }, 220));
+}
+
+function normalizeValue(value) {
+    return (value ?? "").trim().toLowerCase();
+}
+
+async function renderTags(tagList) {
+    clearTags();
+
+    const cardPromises = tagList.map((tag) => getTagCardElement(tag));
+    const cards = await Promise.all(cardPromises);
+    cards.filter(Boolean).forEach((card) => tagsContainer.appendChild(card));
+}
+
+function clearTags() {
+    tagsContainer.innerHTML = "";
+}
+
+function setPaginationVisibility(visible) {
+    if (!paginationRow) {
+        return;
+    }
+
+    paginationRow.style.display = visible ? "" : "none";
+}
+
+async function getTagCardElement(tag) {
+    const normalizedTagName = normalizeValue(tag.tagName);
+    if (!normalizedTagName) {
+        return null;
+    }
+
+    if (!tagCardPromiseCache.has(normalizedTagName)) {
+        tagCardPromiseCache.set(normalizedTagName, buildTagCardElement(tag));
+    }
+
+    const card = await tagCardPromiseCache.get(normalizedTagName);
+    if (!card) {
+        return null;
+    }
+
+    return card.cloneNode(true);
+}
+
+async function buildTagCardElement(tag) {
     const albumWithTag = findAlbumWithTag(tag);
     if (!albumWithTag) {
-        continue;
+        return null;
     }
 
     const mediaWithTag = await getThumbnailImageFromAlbum(tag.tagName, albumWithTag);
     if (!mediaWithTag) {
-        continue;
+        return null;
     }
 
-    const thumbnailElem = createThumbnailElem(mediaWithTag, albumWithTag, tag);
-    tagsContainer.appendChild(thumbnailElem);
+    return createThumbnailElem(mediaWithTag, albumWithTag, tag);
 }
 
-if (tags.length > pageSize) {
-    renderPagination(totalPages, clampedPage);
+async function searchTags(filterValue) {
+    const response = await fetch(`data/tags/search?q=${encodeURIComponent(filterValue)}`);
+    if (!response.ok) {
+        return [];
+    }
+
+    return await response.json();
+}
+
+function debounce(fn, delayMs) {
+    let timeoutHandle = null;
+    return (...args) => {
+        if (timeoutHandle !== null) {
+            clearTimeout(timeoutHandle);
+        }
+
+        timeoutHandle = setTimeout(() => {
+            timeoutHandle = null;
+            fn(...args);
+        }, delayMs);
+    };
 }
 
 function findAlbumWithTag(tag) {
     var tagAlbums = [];
     albums.forEach((alb) => {
-        const foundTag = alb.tags.find((el) => el.tagName == tag.tagName);
+        const foundTag = alb.tags.find((el) => normalizeValue(el.tagName) === normalizeValue(tag.tagName));
         if (foundTag) {
             tagAlbums.push(alb);
         }
@@ -174,6 +281,8 @@ function renderPagination(totalPages, currentPageNumber) {
     col.appendChild(nav);
     row.appendChild(col);
     photosContainer.appendChild(row);
+
+    return row;
 }
 
 function createPageItem(label, pageNumber, disabled, active = false) {
@@ -225,7 +334,7 @@ async function getThumbnailImageFromAlbum(tagName, album) {
         const albumContent = await response.json();
         var itemsWithTag = [];
         albumContent.items.forEach((mediaItem) => {
-            const foundTag = mediaItem.tags.find((mediaTag) => mediaTag.tagName == tagName);
+            const foundTag = mediaItem.tags.find((mediaTag) => normalizeValue(mediaTag.tagName) === normalizeValue(tagName));
             if (foundTag) {
                 itemsWithTag.push(mediaItem);
             }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -49,6 +50,35 @@ namespace WebGallery.UI.Controllers
                     Count = sl.Sum(c => c.Count)
                 })
                 .OrderBy(o => o.TagName)
+                .ToList();
+
+            return Ok(grouped);
+        }
+
+        [HttpGet("tags/search")]
+        public async Task<IActionResult> SearchTags(string q, int maxResults = 200)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return Ok(new List<TagMetaDTO>());
+            }
+
+            string query = q.Trim();
+            int clampedMaxResults = Math.Min(Math.Max(maxResults, 1), 500);
+
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            IEnumerable<TagMetaDTO> allTags = albums.SelectMany(s => s.Tags);
+            List<TagMetaDTO> grouped = allTags
+                .Where(w => !string.IsNullOrWhiteSpace(w.TagName)
+                    && w.TagName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .GroupBy(g => g.TagName, StringComparer.OrdinalIgnoreCase)
+                .Select(sl => new TagMetaDTO
+                {
+                    TagName = sl.First().TagName,
+                    Count = sl.Sum(c => c.Count)
+                })
+                .OrderBy(o => o.TagName)
+                .Take(clampedMaxResults)
                 .ToList();
 
             return Ok(grouped);

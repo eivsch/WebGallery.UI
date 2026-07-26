@@ -10,6 +10,16 @@
                 <h2 class="text-white mb-4">Placeholdet text</h2>
             </div>
         </div>
+        <div class="row mb-4 justify-content-center">
+            <div class="col-lg-5 col-md-7 col-sm-10">
+                <input id="tag-filter-input"
+                       type="text"
+                       class="form-control"
+                       placeholder="Filter tags (example: anim)"
+                       aria-label="Filter tags by name" />
+                <small id="tag-filter-status" class="form-text text-white-50 mt-2 d-block"></small>
+            </div>
+        </div>
         <div class="row align-items-stretch">
 @*
           @foreach (var category in Model)
