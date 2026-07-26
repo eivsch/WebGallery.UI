@@ -57,13 +57,19 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<List<AlbumMetaDTO>> GetAlbums(string username)
+    public async Task<List<AlbumMetaDTO>> GetAlbums(string username, int from = 0, int size = 32)
     {
-        HttpResponseMessage response = await _client.GetAsync($"/users/{username}/albums");
+        PagedAlbumMetaDTO data = await GetAlbumsPage(username, from, size);
+        return data.Albums;
+    }
+
+    public async Task<PagedAlbumMetaDTO> GetAlbumsPage(string username, int from = 0, int size = 32)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"/users/{username}/albums?from={from}&size={size}");
         if (response.IsSuccessStatusCode)
         {
             string responseStr = await response.Content.ReadAsStringAsync();
-            List<AlbumMetaDTO> data = JsonSerializer.Deserialize<List<AlbumMetaDTO>>(responseStr, _jsonOpts);
+            PagedAlbumMetaDTO data = JsonSerializer.Deserialize<PagedAlbumMetaDTO>(responseStr, _jsonOpts);
 
             return data;
         }
@@ -327,6 +333,14 @@ public record AlbumMetaDTO
     public int TotalCount {get;set;}
     public int TotalLikes { get;set;}
     public int TotalUniqueLikes { get;set;}
+}
+
+public record PagedAlbumMetaDTO
+{
+    public int TotalCount { get; set; }
+    public int From { get; set; }
+    public int CurrentSize { get; set; }
+    public List<AlbumMetaDTO> Albums { get; set; } = [];
 }
 
 public record TagMetaDTO

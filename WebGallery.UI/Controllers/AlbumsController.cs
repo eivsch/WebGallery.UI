@@ -39,16 +39,26 @@ namespace WebGallery.UI.Controllers
             _username = claim.Value;
         }
 
-        public async Task<IActionResult> Index(bool randomAlbumOrder = false, bool randomCoverImage = false)
+        public async Task<IActionResult> Index(int offset = 0, int? displayCount = null, bool randomAlbumOrder = false, bool randomCoverImage = false)
         {
             ViewBag.Current = "Albums";
             Random rnd = new();
-            
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
-            if (albums == null) return null;
+
+            int resolvedDisplayCount = displayCount.GetValueOrDefault(_displayOptions.PageSize);
+            if (resolvedDisplayCount <= 0)
+            {
+                resolvedDisplayCount = _displayOptions.PageSize;
+            }
+
+            int resolvedOffset = Math.Max(0, offset);
+            PagedAlbumMetaDTO albumPage = randomAlbumOrder
+                ? await GetRandomAlbumsAsync(resolvedDisplayCount)
+                : await _minimalApiProxy.GetAlbumsPage(_username, resolvedOffset, resolvedDisplayCount);
+
+            if (albumPage?.Albums == null) return null;
 
             List<AlbumViewModel> albumVms = new();
-            foreach (AlbumMetaDTO album in albums)
+            foreach (AlbumMetaDTO album in albumPage.Albums)
             {
                 int i = randomCoverImage ? rnd.Next(0, album.TotalCount) : 0;
                 AlbumContentsDTO c = await _minimalApiProxy.GetAlbumContents(_username, album.AlbumName, from: i, numberOfItems: 1);
@@ -70,10 +80,48 @@ namespace WebGallery.UI.Controllers
             }
 
             var vm = AlbumsPageGenerator.SetDisplayProperties(albumVms);
-            if (randomAlbumOrder)
-                albumVms.ShuffleList();
+
+            vm.TotalAlbumCount = albumPage.TotalCount;
+            vm.CurrentOffset = randomAlbumOrder ? 0 : albumPage.From;
+            vm.DisplayCount = randomAlbumOrder ? albumPage.CurrentSize : albumPage.CurrentSize;
+            vm.IsRandomized = randomAlbumOrder;
+            vm.RandomCoverImage = randomCoverImage;
 
             return View(vm);
+
+            async Task<PagedAlbumMetaDTO> GetRandomAlbumsAsync(int pageSize)
+            {
+                List<AlbumMetaDTO> allAlbums = [];
+                int currentOffset = 0;
+
+                while (true)
+                {
+                    PagedAlbumMetaDTO batch = await _minimalApiProxy.GetAlbumsPage(_username, currentOffset, pageSize);
+                    if (batch.Albums.Count == 0)
+                    {
+                        break;
+                    }
+
+                    allAlbums.AddRange(batch.Albums);
+                    currentOffset = batch.From + batch.CurrentSize;
+
+                    if (currentOffset >= batch.TotalCount || batch.CurrentSize < pageSize)
+                    {
+                        break;
+                    }
+                }
+
+                allAlbums.ShuffleList();
+                List<AlbumMetaDTO> randomizedPage = allAlbums.Take(pageSize).ToList();
+
+                return new PagedAlbumMetaDTO
+                {
+                    Albums = randomizedPage,
+                    TotalCount = allAlbums.Count,
+                    From = 0,
+                    CurrentSize = randomizedPage.Count,
+                };
+            }
         }
 
         [HttpGet("{id}")]
