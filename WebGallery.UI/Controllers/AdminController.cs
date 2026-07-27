@@ -217,5 +217,21 @@ namespace WebGallery.UI.Controllers
 
             return RedirectToAction(nameof(Album), new { albumName });
         }
+
+        [HttpGet("albums/{albumName}/rebuild-tags")]
+        public async Task<IActionResult> RebuildTags(string albumName, [FromQuery] string type)
+        {
+            if (!string.IsNullOrWhiteSpace(albumName))
+            {
+                // TODO: Implement api call
+                // Minimal API signature: app.MapPatch("/users/{username}/albums/{albumName}/rebuild-tags", (string username, string albumName) => { ... });
+                //await _minimalApiProxy.PatchRebuildTags(_username, albumName, type);
+            }
+
+            return RedirectToAction(nameof(Album), new { albumName });
+        }
+
+        // TODO: Endpoint for rename album, which will require both Minimal API and File Server calls to rename the folder and update metadata.
+        // Minimal API signature: app.MapPost("/users/{username}/albums/{albumName}/rename", (string username, string albumName, RenameAlbumRequest request) => { ... });
     }
 }
