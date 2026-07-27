@@ -148,6 +148,8 @@ namespace WebGallery.UI.Controllers
                     GalleryIndex = indexCounter++,
                     IndexGlobal = -1,
                     MediaType = Utils.DetermineMediaType(media.Name),
+                    Name = media.Name,
+                    AlbumName = id,
                 };
                 items.Add(imageVm);
             }

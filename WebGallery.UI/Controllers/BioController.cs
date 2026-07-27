@@ -183,6 +183,7 @@ namespace WebGallery.UI.Controllers
             }
 
             await _minimalApiProxy.PostMediaItem(_username, albumName, savedFile);
+            await _minimalApiProxy.PostTag(_username, albumName, savedFile.FileName, "screencap");
 
             return Ok();
         }
