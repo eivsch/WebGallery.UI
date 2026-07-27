@@ -55,7 +55,7 @@
             @foreach (var file in Model.Items)
             {
                 <tr>
-                    <td><a class="regular-text-link" href="/Bio/id/@file.Id">@file.Name)</a></td>
+                    <td><a class="regular-text-link" href="/Bio/id/@file.Id">@file.Name</a></td>
                     @if (file.Size.HasValue)
                     {
                         <td>@Math.Round((file.Size.Value / 1024.0M), 1)</td>
