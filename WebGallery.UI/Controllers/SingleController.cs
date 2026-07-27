@@ -76,6 +76,9 @@ namespace WebGallery.UI.Controllers
                 {
                     Id = media.Id,
                     AppPath = Path.Combine(album.AlbumName, media.Name),
+                    Name = media.Name,
+                    AlbumName = album.AlbumName,
+                    TagSearchText = BuildTagSearchText(media.Tags),
                     GalleryIndex = randomMediaIndex,
                     IndexGlobal = -1,
                     MediaType = Utils.DetermineMediaType(media.Name),
@@ -231,12 +234,26 @@ namespace WebGallery.UI.Controllers
                     AppPath = Path.Combine(hit.AlbumName, hit.MediaItem.Name),
                     MediaType = Utils.DetermineMediaType(hit.MediaItem.Name),
                     Name = hit.MediaItem.Name,
+                    AlbumName = hit.AlbumName,
+                    TagSearchText = BuildTagSearchText(hit.MediaItem.Tags),
                 };
 
                 items.Add(imageVm);
             }
 
             return items;
+        }
+
+        private static string BuildTagSearchText(List<TagDTO> tags)
+        {
+            if (tags is null || tags.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Join(',', tags
+                .Where(w => !string.IsNullOrWhiteSpace(w.TagName))
+                .Select(s => s.TagName));
         }
     }
 }
