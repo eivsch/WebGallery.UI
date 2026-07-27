@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -18,14 +19,19 @@ namespace WebGallery.UI.Controllers
     [Route("[controller]")]
     public class DataController : Controller
     {
+        private const string SingleSearchCacheKeyPrefix = "single_search_";
+        private static readonly TimeSpan SingleSearchCacheExpiry = TimeSpan.FromMinutes(10);
+
         private readonly MinimalApiProxy _minimalApiProxy;
         private readonly DisplayOptions _displayOptions;
+        private readonly IMemoryCache _cache;
         readonly string _username;
 
-        public DataController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IOptions<DisplayOptions> displayOptions)
+        public DataController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IOptions<DisplayOptions> displayOptions, IMemoryCache cache)
         {
             _minimalApiProxy = minimalApiProxy;
             _displayOptions = displayOptions.Value;
+            _cache = cache;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
         }
@@ -157,11 +163,43 @@ namespace WebGallery.UI.Controllers
             }
 
             int safePage = Math.Max(1, page);
+            string cacheKey = BuildSingleSearchCacheKey(query, maxResultsCap, scanBatchSize, maxHitsToScan);
+            if (!_cache.TryGetValue(cacheKey, out SingleSearchCacheEntry cacheEntry))
+            {
+                cacheEntry = await BuildSingleSearchCacheEntryAsync(query, maxResultsCap, scanBatchSize, maxHitsToScan);
+                _cache.Set(cacheKey, cacheEntry, SingleSearchCacheExpiry);
+            }
+
+            int totalMatches = cacheEntry.TotalMatches;
+            int totalPages = Math.Max(1, (int)Math.Ceiling(totalMatches / (double)pageSize));
+            int clampedPage = Math.Min(safePage, totalPages);
+            List<SingleSearchItem> items = cacheEntry.Items
+                .Skip((clampedPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return Ok(new SingleSearchResponse
+            {
+                Page = clampedPage,
+                PageSize = pageSize,
+                TotalMatches = totalMatches,
+                TotalPages = totalPages,
+                MinimumQueryLength = minQueryLength,
+                QueryTooShort = false,
+                ResultCap = maxResultsCap,
+                ResultCapReached = cacheEntry.ResultCapReached,
+                SearchWasTruncated = cacheEntry.SearchWasTruncated,
+                Items = items
+            });
+        }
+
+        private async Task<SingleSearchCacheEntry> BuildSingleSearchCacheEntryAsync(string query, int maxResultsCap, int scanBatchSize, int maxHitsToScan)
+        {
             int hitsToSkip = 0;
             int scannedHits = 0;
-            List<SearchHitDTO> matchedHits = [];
+            List<SingleSearchItem> matchedItems = [];
 
-            while (matchedHits.Count <= maxResultsCap && scannedHits < maxHitsToScan)
+            while (matchedItems.Count <= maxResultsCap && scannedHits < maxHitsToScan)
             {
                 List<SearchHitDTO> batch = await _minimalApiProxy.GetSearch(_username, null, null, null, null, scanBatchSize, false, hitsToSkip);
                 if (batch.Count == 0)
@@ -179,8 +217,8 @@ namespace WebGallery.UI.Controllers
                         continue;
                     }
 
-                    matchedHits.Add(hit);
-                    if (matchedHits.Count > maxResultsCap)
+                    matchedItems.Add(MapToSingleSearchItem(hit));
+                    if (matchedItems.Count > maxResultsCap)
                     {
                         break;
                     }
@@ -192,70 +230,64 @@ namespace WebGallery.UI.Controllers
                 }
             }
 
-            bool resultCapReached = matchedHits.Count > maxResultsCap;
+            bool resultCapReached = matchedItems.Count > maxResultsCap;
             if (resultCapReached)
             {
-                matchedHits = matchedHits.Take(maxResultsCap).ToList();
+                matchedItems = matchedItems.Take(maxResultsCap).ToList();
             }
-
-            int totalMatches = matchedHits.Count;
-            int totalPages = Math.Max(1, (int)Math.Ceiling(totalMatches / (double)pageSize));
-            int clampedPage = Math.Min(safePage, totalPages);
-            List<SearchHitDTO> pageHits = matchedHits
-                .Skip((clampedPage - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
 
             bool searchWasTruncated = resultCapReached || scannedHits >= maxHitsToScan;
-            List<SingleSearchItem> items = pageHits.Select(MapToSingleSearchItem).ToList();
-
-            return Ok(new SingleSearchResponse
+            return new SingleSearchCacheEntry
             {
-                Page = clampedPage,
-                PageSize = pageSize,
-                TotalMatches = totalMatches,
-                TotalPages = totalPages,
-                MinimumQueryLength = minQueryLength,
-                QueryTooShort = false,
-                ResultCap = maxResultsCap,
+                Items = matchedItems,
+                TotalMatches = matchedItems.Count,
                 ResultCapReached = resultCapReached,
                 SearchWasTruncated = searchWasTruncated,
-                Items = items
-            });
+            };
+        }
 
-            static bool MatchesQuery(SearchHitDTO hit, string queryValue)
+        private string BuildSingleSearchCacheKey(string query, int maxResultsCap, int scanBatchSize, int maxHitsToScan)
+        {
+            return string.Join('|',
+                SingleSearchCacheKeyPrefix + _username,
+                query.Trim().ToLowerInvariant(),
+                maxResultsCap,
+                scanBatchSize,
+                maxHitsToScan);
+        }
+
+        private static bool MatchesQuery(SearchHitDTO hit, string queryValue)
+        {
+            if (hit is null)
             {
-                if (hit is null)
-                {
-                    return false;
-                }
-
-                if (!string.IsNullOrWhiteSpace(hit.MediaItem?.Name) && hit.MediaItem.Name.Contains(queryValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                if (!string.IsNullOrWhiteSpace(hit.AlbumName) && hit.AlbumName.Contains(queryValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                return hit.MediaItem?.Tags?.Any(a => !string.IsNullOrWhiteSpace(a.TagName) && a.TagName.Contains(queryValue, StringComparison.OrdinalIgnoreCase)) == true;
+                return false;
             }
 
-            static SingleSearchItem MapToSingleSearchItem(SearchHitDTO hit)
+            if (!string.IsNullOrWhiteSpace(hit.MediaItem?.Name) && hit.MediaItem.Name.Contains(queryValue, StringComparison.OrdinalIgnoreCase))
             {
-                MediaDTO media = hit.MediaItem;
-                return new SingleSearchItem
-                {
-                    Id = media.Id,
-                    Name = media.Name,
-                    AlbumName = hit.AlbumName,
-                    AppPath = Path.Combine(hit.AlbumName, media.Name),
-                    TagSearchText = BuildTagSearchText(media.Tags),
-                    MediaType = Utils.DetermineMediaType(media.Name).ToString()
-                };
+                return true;
             }
+
+            if (!string.IsNullOrWhiteSpace(hit.AlbumName) && hit.AlbumName.Contains(queryValue, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return hit.MediaItem?.Tags?.Any(a => !string.IsNullOrWhiteSpace(a.TagName) && a.TagName.Contains(queryValue, StringComparison.OrdinalIgnoreCase)) == true;
+        }
+
+        private static SingleSearchItem MapToSingleSearchItem(SearchHitDTO hit)
+        {
+            MediaDTO media = hit.MediaItem;
+            return new SingleSearchItem
+            {
+                Id = media.Id,
+                Name = media.Name,
+                AlbumName = hit.AlbumName,
+                AppPath = Path.Combine(hit.AlbumName, media.Name),
+                TagSearchText = BuildTagSearchText(media.Tags),
+                MediaType = Utils.DetermineMediaType(media.Name).ToString()
+            };
         }
 
         private static string BuildTagSearchText(List<TagDTO> tags)
@@ -292,6 +324,14 @@ namespace WebGallery.UI.Controllers
             public string AppPath { get; set; }
             public string TagSearchText { get; set; }
             public string MediaType { get; set; }
+        }
+
+        private class SingleSearchCacheEntry
+        {
+            public List<SingleSearchItem> Items { get; set; } = [];
+            public int TotalMatches { get; set; }
+            public bool ResultCapReached { get; set; }
+            public bool SearchWasTruncated { get; set; }
         }
     }
 }

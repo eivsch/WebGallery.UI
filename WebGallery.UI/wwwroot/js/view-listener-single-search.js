@@ -28,6 +28,7 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
     let dynamicPagerRow = null;
     let deepSearchRequestId = 0;
     let isDeepSearchMode = false;
+    const deepSearchPageCache = new Map();
 
     filterInput.addEventListener('input', debounce(() => {
         const query = (filterInput.value ?? '').trim();
@@ -144,6 +145,13 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
             return;
         }
 
+        const cacheKey = buildDeepSearchCacheKey(query, page);
+        if (deepSearchPageCache.has(cacheKey)) {
+            isDeepSearchMode = true;
+            renderDeepSearchResults(deepSearchPageCache.get(cacheKey), query);
+            return;
+        }
+
         const requestId = ++deepSearchRequestId;
         deepSearchButton.disabled = true;
         filterStatus.textContent = 'Searching all items...';
@@ -166,6 +174,7 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
             }
 
             isDeepSearchMode = true;
+            deepSearchPageCache.set(cacheKey, payload);
             renderDeepSearchResults(payload, query);
         }
         catch {
@@ -207,6 +216,43 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
         else {
             setWarning('');
         }
+
+        prefetchNextDeepSearchPage(query, payload.page, payload.totalPages);
+    }
+
+    function prefetchNextDeepSearchPage(query, currentPage, totalPages) {
+        const nextPage = Math.max(1, currentPage) + 1;
+        if (nextPage > totalPages) {
+            return;
+        }
+
+        const cacheKey = buildDeepSearchCacheKey(query, nextPage);
+        if (deepSearchPageCache.has(cacheKey)) {
+            return;
+        }
+
+        fetch(`/data/single/search?q=${encodeURIComponent(query)}&page=${nextPage}`)
+            .then((response) => {
+                if (!response.ok) {
+                    return null;
+                }
+
+                return response.json();
+            })
+            .then((payload) => {
+                if (!payload || payload.queryTooShort) {
+                    return;
+                }
+
+                deepSearchPageCache.set(cacheKey, payload);
+            })
+            .catch(() => {
+                // Prefetch is best-effort; interactive search remains unaffected.
+            });
+    }
+
+    function buildDeepSearchCacheKey(query, page) {
+        return `${query.toLowerCase()}::${page}`;
     }
 
     function renderDynamicPager(payload, query) {
