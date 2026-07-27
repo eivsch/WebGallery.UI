@@ -608,6 +608,11 @@ th, td {
     padding: 15px;
 }
 
+.admin-album-table th:first-child,
+.admin-album-table td:first-child {
+    padding-right: 0;
+}
+
 .admin-album-table .sortable-header {
     cursor: pointer;
     user-select: none;
@@ -633,6 +638,111 @@ th, td {
 a.regular-text-link {
     color: inherit !important;
     text-decoration: none !important;
+}
+
+.admin-album-table td:first-child a.regular-text-link {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 15px;
+}
+
+.admin-album-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.admin-album-table th:first-child,
+.admin-album-table td:first-child {
+    width: 45%;
+}
+
+.admin-album-table th:nth-child(2),
+.admin-album-table td:nth-child(2) {
+    width: 12%;
+    white-space: nowrap;
+}
+
+.admin-album-table th:nth-child(3),
+.admin-album-table td:nth-child(3) {
+    width: 23%;
+    white-space: nowrap;
+}
+
+.admin-album-table th:nth-child(4),
+.admin-album-table td:nth-child(4) {
+    width: 20%;
+    white-space: nowrap;
+}
+
+@media (max-width: 992px) {
+    .admin-album-table th,
+    .admin-album-table td {
+        padding: 10px;
+    }
+
+    .admin-album-table th:first-child,
+    .admin-album-table td:first-child {
+        width: 42%;
+    }
+
+    .admin-album-table th:nth-child(2),
+    .admin-album-table td:nth-child(2) {
+        width: 13%;
+    }
+
+    .admin-album-table th:nth-child(3),
+    .admin-album-table td:nth-child(3) {
+        width: 22%;
+    }
+
+    .admin-album-table th:nth-child(4),
+    .admin-album-table td:nth-child(4) {
+        width: 23%;
+    }
+
+    .admin-album-table td:first-child a.regular-text-link {
+        padding-right: 10px;
+    }
+
+    .admin-album-table .btn {
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-album-table th,
+    .admin-album-table td {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .admin-album-table th:first-child,
+    .admin-album-table td:first-child {
+        width: 40%;
+    }
+
+    .admin-album-table th:nth-child(2),
+    .admin-album-table td:nth-child(2) {
+        width: 14%;
+    }
+
+    .admin-album-table th:nth-child(3),
+    .admin-album-table td:nth-child(3) {
+        width: 21%;
+    }
+
+    .admin-album-table th:nth-child(4),
+    .admin-album-table td:nth-child(4) {
+        width: 25%;
+    }
+
+    .admin-album-table .btn {
+        font-size: 0.8rem;
+    }
 }
 
 #saveSearchStatus {
