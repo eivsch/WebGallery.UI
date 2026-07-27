@@ -1,3 +1,4 @@
+- Videos doesn't support .avi
 - Performance improvement: The stats gathering on the homepage is very inefficient. Consider adding API endpoints for better efficiency.
 - UX improvement: The uploads page should let the user know what the max size for uploads is
 - UX improvement: On the Bio page, the keyboard arrow navigation on desktop conflicts whenever a video is displayed. Arrows < > are used both for fast forwarding/reversing within the video and for navigating to the next/previous item.
