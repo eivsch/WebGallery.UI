@@ -264,7 +264,7 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
             const videoUri = `/files/video/${appPathBase64}`;
 
             card.innerHTML = [
-                `<a href="${videoUri}" class="d-block photo-item" data-name="${escapeHtml(item.name ?? '')}" data-album="${escapeHtml(item.albumName ?? '')}" data-tags="${escapeHtml(item.tagSearchText ?? '')}" data-fancybox="gallery" data-type="video" data-caption="<div data-current-image='${escapeHtml(item.id ?? '')}'><a href='/Bio/id/${escapeHtml(item.id ?? '')}'>${escapeHtml(item.id ?? '')}</a></div>" data-video-autoplay="false">`,
+                `<a href="${videoUri}" class="d-block photo-item" data-name="${escapeHtml(item.name ?? '')}" data-album="${escapeHtml(item.albumName ?? '')}" data-tags="${escapeHtml(item.tagSearchText ?? '')}" data-fancybox="gallery" data-type="video" data-caption="<div data-current-image='${escapeHtml(item.id ?? '')}'><a href='/Bio/id/${escapeHtml(item.id ?? '')}'>${escapeHtml(item.name ?? '')}</a></div>" data-video-autoplay="false">`,
                 `<img src="/files/image/${thumbBase64}" alt="Video thumbnail" class="img-fluid">`,
                 '</a>',
                 '<div class="play-icon-overlay">',
@@ -280,7 +280,7 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
 
         const imageUri = `/files/image/${appPathBase64}`;
         card.innerHTML = [
-            `<a href="${imageUri}" class="d-block photo-item" data-name="${escapeHtml(item.name ?? '')}" data-album="${escapeHtml(item.albumName ?? '')}" data-tags="${escapeHtml(item.tagSearchText ?? '')}" data-fancybox="gallery" data-type="image" data-caption="<div data-current-image='${escapeHtml(item.id ?? '')}'><a href='/Bio/id/${escapeHtml(item.id ?? '')}'>${escapeHtml(item.id ?? '')}</a></div>">`,
+            `<a href="${imageUri}" class="d-block photo-item" data-name="${escapeHtml(item.name ?? '')}" data-album="${escapeHtml(item.albumName ?? '')}" data-tags="${escapeHtml(item.tagSearchText ?? '')}" data-fancybox="gallery" data-type="image" data-caption="<div data-current-image='${escapeHtml(item.id ?? '')}'><a href='/Bio/id/${escapeHtml(item.id ?? '')}'>${escapeHtml(item.name ?? '')}</a></div>">`,
             `<img src="${imageUri}" alt="Image" class="img-fluid">`,
             '<div class="photo-text-more"><span class="icon icon-search"></span></div>',
             '</a>'
