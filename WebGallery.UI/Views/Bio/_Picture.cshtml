@@ -12,18 +12,22 @@
 
 <div id="image-id-placeholder" style="display:none">@Model.Id</div>
 <div id="album-id-placeholder" style="display:none">@Model.Album</div>
+<div id="media-type-placeholder" style="display:none">@mediaType</div>
 
 <figure class="bio-figure" data-aos="fade-in">
 @if (mediaType == MediaType.Video)
 {
     string videoUri = $"/files/video/{appPathBase64}";
     string thumbsUri = $"/files/image/{WebGallery.UI.Helpers.Utils.GetThumbsBase64(Model.AppPath)}";
-    <div style="position:relative;">
+    <div class="bio-video-wrapper" id="bioVideoWrapper">
         <div>@Model.Name</div>
         <video class="bio-img" controls preload="none" poster="@thumbsUri" style="width:100%;height:auto;">
             <source src="@videoUri" type="video/mp4" />
             Your browser does not support the video tag.
         </video>
+        <button id="videoEnlargeToggle" type="button" class="btn btn-dark btn-sm bio-video-enlarge-btn" aria-label="Toggle theater mode" title="Shortcut: T">
+            <i class="fas fa-expand-alt"></i> Theater mode <span class="bio-key-hint">T</span>
+        </button>
     </div>
 }
 else 
@@ -80,8 +84,8 @@ else
                 <button id="setVideoThumbnail" type="button" data-app-path-b64="@appPathBase64">
                     Set as thumbnail
                 </button>
-                <button id="generateVideoImage" type="button" data-app-path-b64="@appPathBase64" style="margin-left:10px;">
-                    Generate image
+                <button id="generateVideoImage" type="button" data-app-path-b64="@appPathBase64" style="margin-left:10px;" title="Shortcut: X">
+                    Generate image <span class="bio-key-hint">X</span>
                 </button>
             </div>
         </div>
@@ -97,5 +101,6 @@ else
 
 <div class="bio-content__deletebtn">
     <a href="/Bio/picture/delete/@Model.Album/@Model.Name"
-       onclick="return confirm('Are you sure you want to delete \'@Model.Name\'? This cannot be undone.')">Delete</a>
+       class="bio-delete-link"
+       data-confirm-message="Are you sure you want to delete '@Model.Name'? This cannot be undone.">Delete</a>
 </div>

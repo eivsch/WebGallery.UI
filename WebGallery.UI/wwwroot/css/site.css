@@ -63,6 +63,47 @@
     object-fit: contain;
 }
 
+.bio-video-wrapper {
+    position: relative;
+}
+
+.bio-video-enlarge-btn {
+    margin-top: 8px;
+}
+
+.bio-key-hint {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 5px;
+    font-size: 0.75rem;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    opacity: 0.7;
+}
+
+body.theater-mode {
+    --sidebar-width: 0px;
+}
+
+body.theater-mode .header-bar {
+    display: none !important;
+}
+
+body.theater-mode .bio-content {
+    max-width: 96vw;
+    margin-top: 15px;
+}
+
+body.theater-mode .bio-video-wrapper video.bio-img {
+    max-height: 90vh;
+}
+
+/* Reserve the scrollbar gutter so hiding the header (which can remove the
+   vertical scrollbar) doesn't shift centered content to the right. */
+html {
+    scrollbar-gutter: stable;
+}
+
 .tag-list, .tag-list li {
     display: inline;
 }

@@ -304,6 +304,8 @@ function setupVideoThumbnailButton() {
         };
     }
 
+    setupVideoEnlargeToggle();
+
     var generatedImagesContainer = document.getElementById('generatedVideoImagesContainer');
     if (generatedImagesContainer) {
         generatedImagesContainer.onclick = function (event) {
@@ -331,6 +333,45 @@ function setupVideoThumbnailButton() {
             seekVideoToGeneratedImageTimestamp(fileName);
         };
     }
+}
+
+function toggleVideoFullscreen(video) {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    } else if (video.requestFullscreen) {
+        video.requestFullscreen();
+    } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+    } else if (video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen();
+    }
+}
+
+function setEnlargedVideoView(enlarged) {
+    document.body.classList.toggle('theater-mode', enlarged);
+    var toggleBtn = document.getElementById('videoEnlargeToggle');
+    if (toggleBtn) {
+        toggleBtn.innerHTML = enlarged
+            ? '<i class="fas fa-compress-alt"></i> Exit theater mode'
+            : '<i class="fas fa-expand-alt"></i> Theater mode';
+    }
+}
+
+function setupVideoEnlargeToggle() {
+    var toggleBtn = document.getElementById('videoEnlargeToggle');
+    if (!toggleBtn) {
+        // Navigated to a non-video item; drop out of theater mode.
+        document.body.classList.remove('theater-mode');
+        return;
+    }
+
+    toggleBtn.onclick = function () {
+        setEnlargedVideoView(!document.body.classList.contains('theater-mode'));
+    };
 }
 
 function seekVideoToGeneratedImageTimestamp(fileName) {
@@ -404,8 +445,78 @@ function hideBioLoading() {
     if (el) el.style.display = 'none';
 }
 
+// iOS Safari can navigate an <a> before onclick="return confirm(...)" resolves, so
+// intercept the click explicitly and only follow the link once confirmed.
+document.addEventListener('click', function (e) {
+    var deleteLink = e.target.closest('.bio-delete-link');
+    if (!deleteLink) return;
+
+    e.preventDefault();
+    var message = deleteLink.getAttribute('data-confirm-message') || 'Are you sure you want to delete this item? This cannot be undone.';
+    if (window.confirm(message)) {
+        window.location.href = deleteLink.getAttribute('href');
+    }
+});
+
 document.addEventListener('keydown', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.defaultPrevented) return;
+
+    if (e.key === 'Escape') {
+        if (document.body.classList.contains('theater-mode')) {
+            setEnlargedVideoView(false);
+        }
+        return;
+    }
+
+    var video = document.querySelector('video.bio-img');
+
+    // Take over space/F ourselves so the browser's default handling (which can
+    // exit fullscreen instead of just pausing) never kicks in.
+    if (e.code === 'Space' || e.key === ' ') {
+        if (video) {
+            e.preventDefault();
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+        return;
+    }
+
+    if (e.key === 'f' || e.key === 'F') {
+        if (video) {
+            e.preventDefault();
+            toggleVideoFullscreen(video);
+        }
+        return;
+    }
+
+    if (e.key === 't' || e.key === 'T') {
+        var theaterToggle = document.getElementById('videoEnlargeToggle');
+        if (theaterToggle) theaterToggle.click();
+        return;
+    }
+
+    if (e.key === 'x' || e.key === 'X') {
+        var generateImageBtn = document.getElementById('generateVideoImage');
+        if (generateImageBtn) generateImageBtn.click();
+        return;
+    }
+
+    // Native arrow-key seeking only works while the video element itself has focus (e.g. after
+    // clicking a button it's lost), so seek manually here instead of relying on the browser default.
+    if (video && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        e.preventDefault();
+        video.currentTime += e.key === 'ArrowLeft' ? -5 : 5;
+        return;
+    }
+
+    // Prev/next keyboard navigation conflicts with video seek shortcuts, so skip it for videos.
+    var mediaTypeEl = document.getElementById('media-type-placeholder');
+    if (mediaTypeEl && mediaTypeEl.textContent.trim() === 'Video') return;
+
     if (e.key === 'ArrowLeft') {
         var prev = document.querySelector('.bio-nav-prev');
         if (prev) prev.click();
