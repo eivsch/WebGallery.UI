@@ -109,6 +109,12 @@
                 <span class="shortcut-card__label">Added last 7 days</span>
             </a>
         </div>
+        <div class="col-6 col-md-2">
+            <a href="/single/search?createdAfter=@DateTime.UtcNow.AddDays(-7).ToString("yyyy-MM-dd")&fileExtensions=mp4,avi,mov,mkv,flv,wmv,webm,m4v" class="shortcut-card">
+                <span class="shortcut-card__icon">🕐</span>
+                <span class="shortcut-card__label">Added videos last 7 days</span>
+            </a>
+        </div>
     </div>
 
     <div class="row pt-4 mb-5 text-center">
