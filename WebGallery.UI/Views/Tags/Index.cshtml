@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 
 @* @model List<WebGallery.UI.ViewModels.Tags.TagsViewModel> *@
 
@@ -7,6 +8,16 @@
         <div class="row pt-4 mb-5 text-center">
             <div class="col-12">
                 <h2 class="text-white mb-4">Placeholdet text</h2>
+            </div>
+        </div>
+        <div class="row mb-4 justify-content-center">
+            <div class="col-lg-5 col-md-7 col-sm-10">
+                <input id="tag-filter-input"
+                       type="text"
+                       class="form-control"
+                       placeholder="Filter tags (example: anim)"
+                       aria-label="Filter tags by name" />
+                <small id="tag-filter-status" class="form-text text-white-50 mt-2 d-block"></small>
             </div>
         </div>
         <div class="row align-items-stretch">
@@ -56,6 +67,14 @@
 </main>
 
 @section Scripts {
+    @{ int configuredPageSize = Configuration.GetValue<int>("Display:PageSize", 48); }
+    @{ int configuredPaginationWindowSize = Configuration.GetValue<int>("Display:PaginationWindowSize", 7); }
+    <script type="text/javascript">
+        window.webGalleryDisplay = {
+            pageSize: @configuredPageSize,
+            paginationWindowSize: @configuredPaginationWindowSize
+        };
+    </script>
     <script type="module" src="~/js/view-listener-tags.js"></script>
     @* <script type="text/javascript">const username = "eivsch";</script> *@
 }

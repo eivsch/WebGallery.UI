@@ -37,7 +37,7 @@ namespace WebGallery.UI.Controllers
         private async Task<List<AlbumMetaDTO>> GetAlbumsAsync()
         {
             if (_albumsCache == null)
-                _albumsCache = await _minimalApiProxy.GetAlbums(_username);
+                _albumsCache = await _minimalApiProxy.GetAllAlbums(_username);
             return _albumsCache;
         }
 
@@ -183,6 +183,7 @@ namespace WebGallery.UI.Controllers
             }
 
             await _minimalApiProxy.PostMediaItem(_username, albumName, savedFile);
+            await _minimalApiProxy.PostTag(_username, albumName, savedFile.FileName, "screencap");
 
             return Ok();
         }

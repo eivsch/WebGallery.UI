@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WebGallery.UI.Configuration;
 
 namespace WebGallery.UI
 {
@@ -40,13 +41,18 @@ namespace WebGallery.UI
 
             services.AddMemoryCache();
             services.AddControllersWithViews();
+            services.Configure<DisplayOptions>(Configuration.GetSection("Display"));
 
             services.AddHttpClient<WebGalleryApiClient>(c => 
             {
                 c.BaseAddress = new Uri(Configuration.GetValue("ConnectionStrings:ApiEndpoint", ""));
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
+                c.Timeout = TimeSpan.FromSeconds(600);
             });
-            services.AddHttpClient<WebGalleryFileServerClient>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            services.AddHttpClient<WebGalleryFileServerClient>(c =>
+            {
+                c.Timeout = TimeSpan.FromSeconds(600);
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {   
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; }
             });

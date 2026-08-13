@@ -1,11 +1,20 @@
 ﻿@using Microsoft.Extensions.Configuration
 @using WebGallery.UI.Models
+@using WebGallery.UI.Helpers
+@using WebGallery.UI.ViewModels.Paging
+@inject IConfiguration Configuration
 
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
 @{
-    bool hasPreviousPage = Model.CurrentOffset != 0;
-    bool hasNextPage = Model.CurrentOffset + Model.DisplayCount < Model.TotalImageCount;
+    int pageSize = Math.Max(1, Model.DisplayCount);
+    PagerViewModel pager = PagerHelper.Create(
+        Model.TotalImageCount,
+        Model.CurrentOffset,
+        pageSize,
+        Configuration.GetValue<int>("Display:PaginationWindowSize", 7),
+        pageNumber => $"/single/search/scroll?from={(pageNumber - 1) * pageSize}",
+        "Search result pages");
 }
 
 <main class="main-content">
@@ -15,22 +24,45 @@
             <div class="col-12">
                 @if (Model.IsRandomized)
                 {
-                    <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @Model.Images.Count of @Model.TotalImageCount photos in random order</h2>
+                    <h2 id="single-page-headline" class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @Model.Images.Count of @Model.TotalImageCount photos in random order</h2>
                 }
                 else
                 {
-                    <h2 class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @(Model.CurrentOffset + 1)-@(Model.CurrentOffset + Model.Images.Count) of @Model.TotalImageCount Photos</h2>
+                    <h2 id="single-page-headline" class="text-white mb-4">'@Model.GalleryTitle' &mdash; Displaying @(Model.CurrentOffset + 1)-@(Model.CurrentOffset + Model.Images.Count) of @Model.TotalImageCount Photos</h2>
                 }
             </div>
         </div>
 
-        <div class="row align-items-stretch">
+        <div class="row mb-4 justify-content-center">
+            <div class="col-lg-5 col-md-7 col-sm-10">
+                <div class="input-group input-group-sm">
+                    <input id="single-filter-input"
+                           type="text"
+                           class="form-control"
+                           placeholder="Filter current items; 5+ chars to search all"
+                           aria-label="Filter single gallery by name, album, or tag" />
+                    <button id="single-deep-search-btn"
+                            type="button"
+                            class="btn btn-outline-light"
+                            disabled>
+                        Search more
+                    </button>
+                </div>
+                <small id="single-filter-status" class="form-text text-white-50 mt-2 d-block"></small>
+                <small id="single-filter-warning" class="form-text text-warning mt-1 d-block" style="display:none;"></small>
+            </div>
+        </div>
+
+        <div id="single-gallery-grid" class="row align-items-stretch">
             @foreach (var item in Model.Images)
             {
                 var appPathBytes = System.Text.Encoding.UTF8.GetBytes(item.AppPath);
                 string appPathBase64 = System.Convert.ToBase64String(appPathBytes);
 
                 string popUpDelayAtr = item.PopUpDelay == 0 ? "" : $"data-aos-delay={item.PopUpDelay}";
+                string searchableName = item.Name ?? string.Empty;
+                string searchableAlbum = item.AlbumName ?? string.Empty;
+                string searchableTags = item.TagSearchText ?? string.Empty;
 
                 if (item.MediaType == MediaType.Video)
                 {
@@ -38,13 +70,15 @@
                     string thumbsUri = $"/files/image/{thumbsBase64}";
                     string videoUri = $"/files/video/{appPathBase64}";
 
-                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-single-item="true" data-aos="fade-up" @popUpDelayAtr>
                         <a href="@videoUri"
                            class="d-block photo-item"
                            data-name="@item.Name"
+                           data-album="@searchableAlbum"
+                           data-tags="@searchableTags"
                            data-fancybox="gallery"
                            data-type="video"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>"
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>"
                            data-video-autoplay="false">
                             <img src="@thumbsUri" alt="Video thumbnail" class="img-fluid">
                         </a>
@@ -59,13 +93,15 @@
                 else
                 {
                     string imageUri = $"/files/image/{appPathBase64}";
-                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-aos="fade-up" @popUpDelayAtr>
+                    <div class="col-6 col-md-6 col-lg-@item.LargeScreenSize" data-single-item="true" data-aos="fade-up" @popUpDelayAtr>
                         <a href="@imageUri"
                            class="d-block photo-item"
                            data-name="@item.Name"
+                           data-album="@searchableAlbum"
+                           data-tags="@searchableTags"
                            data-fancybox="gallery"
                            data-type="image"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>">
 
                             <img src="@imageUri" alt="Image" class="img-fluid">
                             <div class="photo-text-more">
@@ -77,18 +113,9 @@
             }
         </div>
 
-        @if (!Model.IsRandomized && hasPreviousPage)
+        @if (!Model.IsRandomized)
         {
-            int nextOffset = Model.CurrentOffset - Model.DisplayCount;
-            if (nextOffset < 0) nextOffset = 0;
-            string uri = $"/single/search/scroll?from={nextOffset}";
-            <a href="@uri">Previous</a>
-        }
-        @if (!Model.IsRandomized && hasNextPage)
-        {
-            int nextOffset = Model.CurrentOffset + Model.DisplayCount;
-            string uri = $"/single/search/scroll?from={nextOffset}";
-            <a href="@uri">Next</a>
+            @await Html.PartialAsync("_Pager", pager)
         }
 
         <div class="row justify-content-center">
@@ -105,6 +132,19 @@
 </main>
 
 @section Scripts {
+    @{ int configuredPageSize = Configuration.GetValue<int>("Display:PageSize", 48); }
+    @{ int configuredPaginationWindowSize = Configuration.GetValue<int>("Display:PaginationWindowSize", 7); }
+    @{ int configuredSingleMinChars = Configuration.GetValue<int>("Display:SingleSearchMinQueryLength", 5); }
+    @{ int configuredSingleMaxCap = Configuration.GetValue<int>("Display:SingleSearchMaxResultsCap", 2000); }
+    <script type="text/javascript">
+        window.webGalleryDisplay = {
+            pageSize: @configuredPageSize,
+            paginationWindowSize: @configuredPaginationWindowSize,
+            singleSearchMinQueryLength: @configuredSingleMinChars,
+            singleSearchMaxResultsCap: @configuredSingleMaxCap
+        };
+    </script>
     <script type="text/javascript" src="~/js/view-listener-single.js"></script>
+    <script type="module" src="~/js/view-listener-single-search.js"></script>
     <script type="text/javascript">album = "@Model.Id";</script>
 }

@@ -57,13 +57,47 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<List<AlbumMetaDTO>> GetAlbums(string username)
+    public async Task<List<AlbumMetaDTO>> GetAllAlbums(string username, int pageSize = 128)
     {
-        HttpResponseMessage response = await _client.GetAsync($"/users/{username}/albums");
+        int safePageSize = pageSize <= 0 ? 128 : pageSize;
+        int from = 0;
+        int? totalCount = null;
+        List<AlbumMetaDTO> allAlbums = [];
+
+        while (!totalCount.HasValue || allAlbums.Count < totalCount.Value)
+        {
+            PagedAlbumMetaDTO page = await GetAlbumsPage(username, from, safePageSize);
+            List<AlbumMetaDTO> pageAlbums = page?.Albums ?? [];
+
+            if (totalCount is null)
+            {
+                totalCount = page?.TotalCount ?? 0;
+            }
+
+            if (pageAlbums.Count == 0)
+            {
+                break;
+            }
+
+            allAlbums.AddRange(pageAlbums);
+            from += pageAlbums.Count;
+
+            if (pageAlbums.Count < safePageSize)
+            {
+                break;
+            }
+        }
+
+        return allAlbums;
+    }
+
+    public async Task<PagedAlbumMetaDTO> GetAlbumsPage(string username, int from = 0, int size = 32)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"/users/{username}/albums?from={from}&size={size}");
         if (response.IsSuccessStatusCode)
         {
             string responseStr = await response.Content.ReadAsStringAsync();
-            List<AlbumMetaDTO> data = JsonSerializer.Deserialize<List<AlbumMetaDTO>>(responseStr, _jsonOpts);
+            PagedAlbumMetaDTO data = JsonSerializer.Deserialize<PagedAlbumMetaDTO>(responseStr, _jsonOpts);
 
             return data;
         }
@@ -327,6 +361,14 @@ public record AlbumMetaDTO
     public int TotalCount {get;set;}
     public int TotalLikes { get;set;}
     public int TotalUniqueLikes { get;set;}
+}
+
+public record PagedAlbumMetaDTO
+{
+    public int TotalCount { get; set; }
+    public int From { get; set; }
+    public int CurrentSize { get; set; }
+    public List<AlbumMetaDTO> Albums { get; set; } = [];
 }
 
 public record TagMetaDTO

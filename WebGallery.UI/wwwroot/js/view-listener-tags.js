@@ -1,21 +1,165 @@
-﻿const headline = document.querySelector('h2.text-white');
-headline.textContent = "Tags: ";
+﻿import { renderPager } from './pager.js';
+
+const headline = document.querySelector('h2.text-white');
+headline.textContent = "Tags";
 
 const tagsContainer = document.querySelector('div.row.align-items-stretch');
+const filterInput = document.querySelector('#tag-filter-input');
+const filterStatus = document.querySelector('#tag-filter-status');
+const pageSize = window.webGalleryDisplay?.pageSize ?? 48;
+const paginationWindowSize = Math.max(1, window.webGalleryDisplay?.paginationWindowSize ?? 7);
+const currentPage = getCurrentPage();
+const tagCardPromiseCache = new Map();
+let paginationRow = null;
+let filterRequestId = 0;
 
 const albums = await getAlbums();
 const tags = await getTags();
-for (const i in tags) {
-    const albumWithTag = findAlbumWithTag(tags[i]);
-    const mediaWithTag = await getThumbnailImageFromAlbum(tags[i].tagName, albumWithTag);
-    const thumbnailElem = createThumbnailElem(mediaWithTag, albumWithTag, tags[i]);
-    tagsContainer.appendChild(thumbnailElem);
+const totalPages = Math.max(1, Math.ceil(tags.length / pageSize));
+const clampedPage = Math.min(currentPage, totalPages);
+const pageStart = (clampedPage - 1) * pageSize;
+const pageEnd = pageStart + pageSize;
+const pageTags = tags.slice(pageStart, pageEnd);
+
+headline.textContent = `Tags (${tags.length})`;
+
+await renderTags(pageTags);
+
+if (tags.length > pageSize) {
+    paginationRow = renderPager({
+        ariaLabel: "Tag pages",
+        totalItems: tags.length,
+        pageSize,
+        currentOffset: pageStart,
+        windowSize: paginationWindowSize,
+        buildPageUrl,
+    });
+
+    if (paginationRow) {
+        const photosContainer = document.querySelector(".container-fluid.photos");
+        photosContainer?.appendChild(paginationRow);
+    }
+}
+
+if (filterInput) {
+    filterInput.addEventListener('input', debounce(async () => {
+        const requestId = ++filterRequestId;
+        const rawFilter = filterInput.value ?? "";
+        const filterValue = rawFilter.trim();
+
+        if (!filterValue) {
+            if (requestId !== filterRequestId) {
+                return;
+            }
+
+            filterStatus.textContent = "";
+            setPaginationVisibility(true);
+            await renderTags(pageTags);
+            return;
+        }
+
+        setPaginationVisibility(false);
+        filterStatus.textContent = "Searching all tags...";
+
+        const fallbackMatches = await searchTags(filterValue);
+        if (requestId !== filterRequestId) {
+            return;
+        }
+
+        if (fallbackMatches.length === 0) {
+            filterStatus.textContent = "No tags found.";
+            clearTags();
+            return;
+        }
+
+        filterStatus.textContent = `Showing ${fallbackMatches.length} match(es) from all pages.`;
+        await renderTags(fallbackMatches);
+    }, 220));
+}
+
+function normalizeValue(value) {
+    return (value ?? "").trim().toLowerCase();
+}
+
+async function renderTags(tagList) {
+    clearTags();
+
+    const cardPromises = tagList.map((tag) => getTagCardElement(tag));
+    const cards = await Promise.all(cardPromises);
+    cards.filter(Boolean).forEach((card) => tagsContainer.appendChild(card));
+}
+
+function clearTags() {
+    tagsContainer.innerHTML = "";
+}
+
+function setPaginationVisibility(visible) {
+    if (!paginationRow) {
+        return;
+    }
+
+    paginationRow.style.display = visible ? "" : "none";
+}
+
+async function getTagCardElement(tag) {
+    const normalizedTagName = normalizeValue(tag.tagName);
+    if (!normalizedTagName) {
+        return null;
+    }
+
+    if (!tagCardPromiseCache.has(normalizedTagName)) {
+        tagCardPromiseCache.set(normalizedTagName, buildTagCardElement(tag));
+    }
+
+    const card = await tagCardPromiseCache.get(normalizedTagName);
+    if (!card) {
+        return null;
+    }
+
+    return card.cloneNode(true);
+}
+
+async function buildTagCardElement(tag) {
+    const albumWithTag = findAlbumWithTag(tag);
+    if (!albumWithTag) {
+        return null;
+    }
+
+    const mediaWithTag = await getThumbnailImageFromAlbum(tag.tagName, albumWithTag);
+    if (!mediaWithTag) {
+        return null;
+    }
+
+    return createThumbnailElem(mediaWithTag, albumWithTag, tag);
+}
+
+async function searchTags(filterValue) {
+    const response = await fetch(`data/tags/search?q=${encodeURIComponent(filterValue)}`);
+    if (!response.ok) {
+        return [];
+    }
+
+    return await response.json();
+}
+
+function debounce(fn, delayMs) {
+    let timeoutHandle = null;
+    return (...args) => {
+        if (timeoutHandle !== null) {
+            clearTimeout(timeoutHandle);
+        }
+
+        timeoutHandle = setTimeout(() => {
+            timeoutHandle = null;
+            fn(...args);
+        }, delayMs);
+    };
 }
 
 function findAlbumWithTag(tag) {
     var tagAlbums = [];
     albums.forEach((alb) => {
-        const foundTag = alb.tags.find((el) => el.tagName == tag.tagName);
+        const foundTag = alb.tags.find((el) => normalizeValue(el.tagName) === normalizeValue(tag.tagName));
         if (foundTag) {
             tagAlbums.push(alb);
         }
@@ -37,7 +181,7 @@ function createThumbnailElem(mediaWithTag, album, tag) {
     if (mediaWithTag.name.endsWith(".mp4")) {
         const uriPrefix = "/files/video/";
         const mediaUri = album.albumName + "/" + mediaWithTag.name;
-        const mediaUrib64 = window.btoa(mediaUri);
+        const mediaUrib64 = getBase64Utf8(mediaUri);
         const thumbnailUrib64 = getThumbsBase64(album.albumName, mediaWithTag.name);
 
         const vid = document.createElement("video");
@@ -56,7 +200,7 @@ function createThumbnailElem(mediaWithTag, album, tag) {
     else {
         const uriPrefix = "/files/image/";
         const mediaUri = album.albumName + "/" + mediaWithTag.name;
-        const mediaUrib64 = window.btoa(mediaUri);
+        const mediaUrib64 = getBase64Utf8(mediaUri);
 
         const img = document.createElement("img");
         img.src = uriPrefix + mediaUrib64;
@@ -88,7 +232,29 @@ function getThumbsBase64(albumName, fileName) {
     const fileNameNoExt = fileName.replace(/\.[^/.]+$/, "");
     const thumbsName = fileNameNoExt + ".jpg";
     const thumbsPath = albumName + "/thumbs/" + thumbsName;
-    return btoa(thumbsPath);
+    return getBase64Utf8(thumbsPath);
+}
+
+function getBase64Utf8(value) {
+    const bytes = new TextEncoder().encode(value);
+    let binary = "";
+    bytes.forEach((b) => {
+        binary += String.fromCharCode(b);
+    });
+
+    return window.btoa(binary);
+}
+
+function getCurrentPage() {
+    const params = new URLSearchParams(window.location.search);
+    const page = parseInt(params.get("page"), 10);
+    return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
+function buildPageUrl(pageNumber) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", pageNumber.toString());
+    return url.pathname + url.search;
 }
 
 async function getAlbums() {
@@ -112,7 +278,7 @@ async function getThumbnailImageFromAlbum(tagName, album) {
         const albumContent = await response.json();
         var itemsWithTag = [];
         albumContent.items.forEach((mediaItem) => {
-            const foundTag = mediaItem.tags.find((mediaTag) => mediaTag.tagName == tagName);
+            const foundTag = mediaItem.tags.find((mediaTag) => normalizeValue(mediaTag.tagName) === normalizeValue(tagName));
             if (foundTag) {
                 itemsWithTag.push(mediaItem);
             }

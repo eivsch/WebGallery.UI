@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using WebGallery.UI.Configuration;
 using WebGallery.UI.Generators;
 using WebGallery.UI.Helpers;
 using WebGallery.UI.ViewModels.Single;
@@ -36,17 +38,18 @@ namespace WebGallery.UI.Controllers
     {
         private static readonly TimeSpan SearchCacheExpiry = TimeSpan.FromMinutes(30);
         private const string SearchCacheKeyPrefix = "search_";
+        private const int SearchBatchLimit = 200;
 
         readonly MinimalApiProxy _minimalApiProxy;
         readonly IMemoryCache _cache;
+        readonly DisplayOptions _displayOptions;
         readonly string _username;
 
-        const int DISPLAY_COUNT_MAX = 32;
-
-        public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IMemoryCache cache)
+        public SingleController(MinimalApiProxy minimalApiProxy, IHttpContextAccessor httpContext, IMemoryCache cache, IOptions<DisplayOptions> displayOptions)
         {
             _minimalApiProxy = minimalApiProxy;
             _cache = cache;
+            _displayOptions = displayOptions.Value;
             Claim claim = httpContext.HttpContext.User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Sid);
             _username = claim.Value;
         }
@@ -57,11 +60,11 @@ namespace WebGallery.UI.Controllers
             int currentCount = 0;
             Random rnd = new();
 
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
+            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAllAlbums(_username);
             if (albums == null) return null;
 
             List<SingleGalleryImageViewModel> items = new();
-            while (currentCount < DISPLAY_COUNT_MAX)
+            while (currentCount < _displayOptions.PageSize)
             {
                 int randomAlbumIndex = rnd.Next(0, albums.Count);
                 AlbumMetaDTO album = albums[randomAlbumIndex];
@@ -73,6 +76,9 @@ namespace WebGallery.UI.Controllers
                 {
                     Id = media.Id,
                     AppPath = Path.Combine(album.AlbumName, media.Name),
+                    Name = media.Name,
+                    AlbumName = album.AlbumName,
+                    TagSearchText = BuildTagSearchText(media.Tags),
                     GalleryIndex = randomMediaIndex,
                     IndexGlobal = -1,
                     MediaType = Utils.DetermineMediaType(media.Name),
@@ -84,9 +90,9 @@ namespace WebGallery.UI.Controllers
 
             var vm = SinglePageGenerator.SetDisplayProperties(items);
             vm.GalleryTitle = "Randomized album";
-            vm.TotalImageCount = DISPLAY_COUNT_MAX;
+            vm.TotalImageCount = _displayOptions.PageSize;
             vm.CurrentOffset = 0;
-            vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.DisplayCount = _displayOptions.PageSize;
             vm.IsRandomized = true;
 
             return View("Index", vm);
@@ -98,7 +104,11 @@ namespace WebGallery.UI.Controllers
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
 
-            List<SearchHitDTO> searchHits = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, maxSize, allTagsMustMatch ?? true, hitsToSkip, createdAfter, createdBefore);
+            int requestedSize = GetRequestedSearchSize(maxSize);
+            int startingOffset = hitsToSkip ?? 0;
+            List<SearchHitDTO> searchHits = await GetSearchHitsAsync(albums, tags, fileExtensions, mediaNameContains, requestedSize, allTagsMustMatch ?? true, startingOffset, createdAfter, createdBefore);
+            bool hasMoreResults = searchHits.Count == requestedSize;
+
             SearchDetails searchDetails = new()
             {
                 Hits = searchHits,
@@ -106,11 +116,11 @@ namespace WebGallery.UI.Controllers
                 Tags = tags,
                 FileExtensions = fileExtensions,
                 MediaNameContains = mediaNameContains,
-                MaxSize = maxSize,
+                MaxSize = requestedSize,
                 AllTagsMustMatch = allTagsMustMatch,
                 CreatedAfter = createdAfter,
                 CreatedBefore = createdBefore,
-                HasMoreResults = maxSize == searchHits.Count,
+                HasMoreResults = hasMoreResults,
             };
 
             _cache.Set(SearchCacheKeyPrefix + _username, searchDetails, SearchCacheExpiry);
@@ -126,7 +136,7 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = "Search results";
             vm.TotalImageCount = searchDetails.HasMoreResults ? searchHits.Count + 1 : searchHits.Count;
             vm.CurrentOffset = hitsToSkip ?? 0;
-            vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.DisplayCount = _displayOptions.PageSize;
             vm.IsRandomized = shuffle;
 
             return View("Index", vm);
@@ -144,6 +154,45 @@ namespace WebGallery.UI.Controllers
             }
         }
 
+        private static int GetRequestedSearchSize(int? maxSize)
+        {
+            int requestedSize = maxSize ?? SearchBatchLimit;
+            return requestedSize > 0 ? requestedSize : SearchBatchLimit;
+        }
+
+        private async Task<List<SearchHitDTO>> GetSearchHitsAsync(string albums, string tags, string fileExtensions, string mediaNameContains, int requestedSize, bool allTagsMustMatch, int hitsToSkip, string createdAfter, string createdBefore)
+        {
+            List<SearchHitDTO> searchHits = [];
+            int currentOffset = hitsToSkip;
+
+            while (searchHits.Count < requestedSize)
+            {
+                int remaining = requestedSize - searchHits.Count;
+                int batchSize = Math.Min(SearchBatchLimit, remaining);
+                List<SearchHitDTO> batch = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, batchSize, allTagsMustMatch, currentOffset, createdAfter, createdBefore);
+
+                if (batch.Count == 0)
+                {
+                    break;
+                }
+
+                searchHits.AddRange(batch);
+                currentOffset += batch.Count;
+
+                if (batch.Count < batchSize)
+                {
+                    break;
+                }
+            }
+
+            if (searchHits.Count > requestedSize)
+            {
+                searchHits = searchHits.Take(requestedSize).ToList();
+            }
+
+            return searchHits;
+        }
+
         [HttpGet("search/scroll")]
         public async Task <IActionResult> ScrollSearch(int from)
         {
@@ -159,7 +208,7 @@ namespace WebGallery.UI.Controllers
             vm.GalleryTitle = "Search results";
             vm.TotalImageCount = cachedResults.Hits.Count;
             vm.CurrentOffset = from;
-            vm.DisplayCount = DISPLAY_COUNT_MAX;
+            vm.DisplayCount = _displayOptions.PageSize;
 
             return View("Index", vm);
         }
@@ -170,13 +219,13 @@ namespace WebGallery.UI.Controllers
             return View("CustomJs");
         }
 
-        private static List<SingleGalleryImageViewModel> PopulateItemList(int from, List<SearchHitDTO> searchHits)
+        private List<SingleGalleryImageViewModel> PopulateItemList(int from, List<SearchHitDTO> searchHits)
         {
             List<SingleGalleryImageViewModel> items = [];
             int i = 0;
             foreach (SearchHitDTO hit in searchHits.Skip(from))
             {
-                if (i >= DISPLAY_COUNT_MAX) break;
+            if (i >= _displayOptions.PageSize) break;
                 else i++;
 
                 SingleGalleryImageViewModel imageVm = new()
@@ -185,12 +234,26 @@ namespace WebGallery.UI.Controllers
                     AppPath = Path.Combine(hit.AlbumName, hit.MediaItem.Name),
                     MediaType = Utils.DetermineMediaType(hit.MediaItem.Name),
                     Name = hit.MediaItem.Name,
+                    AlbumName = hit.AlbumName,
+                    TagSearchText = BuildTagSearchText(hit.MediaItem.Tags),
                 };
 
                 items.Add(imageVm);
             }
 
             return items;
+        }
+
+        private static string BuildTagSearchText(List<TagDTO> tags)
+        {
+            if (tags is null || tags.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Join(',', tags
+                .Where(w => !string.IsNullOrWhiteSpace(w.TagName))
+                .Select(s => s.TagName));
         }
     }
 }

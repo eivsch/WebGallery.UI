@@ -1,10 +1,18 @@
-﻿@using WebGallery.UI.Models
+﻿@using Microsoft.Extensions.Configuration
+@using WebGallery.UI.Models
+@inject IConfiguration Configuration
 
 @model WebGallery.UI.ViewModels.Single.SingleGalleryViewModel
 
 @{
-    bool hasPreviousPage = Model.CurrentOffset != 0;
-    bool hasNextPage = Model.CurrentOffset + Model.DisplayCount < Model.TotalImageCount;
+    int pageSize = Math.Max(1, Model.DisplayCount);
+    int totalPages = Math.Max(1, (int)Math.Ceiling((double)Model.TotalImageCount / pageSize));
+    int currentPage = Math.Min(totalPages, (Model.CurrentOffset / pageSize) + 1);
+    int windowSize = Math.Max(1, Configuration.GetValue<int>("Display:PaginationWindowSize", 7));
+    int halfWindow = windowSize / 2;
+    int firstPage = Math.Max(1, currentPage - halfWindow);
+    int lastPage = Math.Min(totalPages, firstPage + windowSize - 1);
+    firstPage = Math.Max(1, lastPage - windowSize + 1);
 }
 
 <main class="main-content">
@@ -49,7 +57,7 @@
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="video"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>">
 
                             <img src="@thumbsUri" alt="Image" class="img-fluid">
                         </a>
@@ -70,7 +78,7 @@
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="image"
-                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Id</a></div>">
+                           data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>">
 
                             <img src="@imageUri" alt="Image" class="img-fluid">
                             <div class="photo-text-more">
@@ -82,18 +90,87 @@
             }
         </div>
 
-        @if (hasPreviousPage)
+        @if (totalPages > 1)
         {
-            int nextOffset = Model.CurrentOffset - Model.DisplayCount;
-            if (nextOffset < 0) nextOffset = 0;
-            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.DisplayCount}";
-            <a href="@uri">Previous</a>
-        }
-        @if (hasNextPage)
-        {
-            int nextOffset = Model.CurrentOffset + Model.DisplayCount;
-            string uri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={Model.DisplayCount}";
-            <a href="@uri">Next</a>
+            int previousPage = Math.Max(1, currentPage - 1);
+            int nextPage = Math.Min(totalPages, currentPage + 1);
+            bool isPreviousDisabled = currentPage == 1;
+            bool isNextDisabled = currentPage == totalPages;
+
+            <div class="row justify-content-center mt-4 mb-3 pager-row">
+                <div class="col-auto pager-col">
+                    <nav class="pager-nav" aria-label="Album pages">
+                        <ul class="pagination mb-0 pager-list">
+                            @{
+                                int firstOffset = 0;
+                                string firstUri = $"/albums/{Model.Id}?offset={firstOffset}&displayCount={pageSize}";
+                            }
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link"
+                                   href="@(currentPage == 1 ? "#" : firstUri)"
+                                   tabindex="@(currentPage == 1 ? "-1" : null)"
+                                   aria-disabled="@(currentPage == 1 ? "true" : "false")">
+                                    First
+                                </a>
+                            </li>
+
+                            @{
+                                int previousOffset = (previousPage - 1) * pageSize;
+                                string previousUri = $"/albums/{Model.Id}?offset={previousOffset}&displayCount={pageSize}";
+                            }
+                            <li class="page-item @(isPreviousDisabled ? "disabled" : "")">
+                                <a class="page-link"
+                                   href="@(isPreviousDisabled ? "#" : previousUri)"
+                                   tabindex="@(isPreviousDisabled ? "-1" : null)"
+                                   aria-disabled="@(isPreviousDisabled ? "true" : "false")">
+                                    Previous
+                                </a>
+                            </li>
+
+                            @for (int pageNumber = firstPage; pageNumber <= lastPage; pageNumber++)
+                            {
+                                bool isActive = pageNumber == currentPage;
+                                int pageOffset = (pageNumber - 1) * pageSize;
+                                string pageUri = $"/albums/{Model.Id}?offset={pageOffset}&displayCount={pageSize}";
+                                <li class="page-item @(isActive ? "active" : "")">
+                                    <a class="page-link"
+                                       href="@(isActive ? "#" : pageUri)"
+                                       tabindex="@(isActive ? "-1" : null)"
+                                       aria-disabled="@(isActive ? "true" : "false")">
+                                        @pageNumber
+                                    </a>
+                                </li>
+                            }
+
+                            @{
+                                int nextOffset = (nextPage - 1) * pageSize;
+                                string nextUri = $"/albums/{Model.Id}?offset={nextOffset}&displayCount={pageSize}";
+                            }
+                            <li class="page-item @(isNextDisabled ? "disabled" : "")">
+                                <a class="page-link"
+                                   href="@(isNextDisabled ? "#" : nextUri)"
+                                   tabindex="@(isNextDisabled ? "-1" : null)"
+                                   aria-disabled="@(isNextDisabled ? "true" : "false")">
+                                    Next
+                                </a>
+                            </li>
+
+                            @{
+                                int lastOffset = (totalPages - 1) * pageSize;
+                                string lastUri = $"/albums/{Model.Id}?offset={lastOffset}&displayCount={pageSize}";
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link"
+                                   href="@(currentPage == totalPages ? "#" : lastUri)"
+                                   tabindex="@(currentPage == totalPages ? "-1" : null)"
+                                   aria-disabled="@(currentPage == totalPages ? "true" : "false")">
+                                    Last
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         }
 
         <div class="row justify-content-center">

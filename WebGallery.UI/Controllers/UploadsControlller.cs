@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using WebGallery.UI.Attributes;
 using WebGallery.UI.Helpers;
@@ -33,12 +34,14 @@ namespace WebGallery.UI.Controllers
         
         private readonly IFileServerProxy _fileSystemService;
         private readonly MinimalApiProxy _minimalApiProxy;
+        private readonly ILogger<UploadsController> _logger;
         private readonly string _username;
 
-        public UploadsController(IFileServerProxy fileSystemService, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver)
+        public UploadsController(IFileServerProxy fileSystemService, MinimalApiProxy minimalApiProxy, UsernameResolver usernameResolver, ILogger<UploadsController> logger)
         {
             _fileSystemService = fileSystemService;
             _minimalApiProxy = minimalApiProxy;
+            _logger = logger;
             _username = usernameResolver.Username;
         }
 
@@ -55,69 +58,82 @@ namespace WebGallery.UI.Controllers
         [HttpPost("large")]
         public async Task<IActionResult> ReceiveFile()
         {
-            if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
-                throw new Exception("Not a multipart request");
-
-            var boundary = MultipartRequestHelper.GetBoundary(
-                MediaTypeHeaderValue.Parse(Request.ContentType), 
-                _defaultFormOptions.MultipartBoundaryLengthLimit
-            );
-
-            List<SavedFileInfo> uploadedFiles = [];
-            string albumName = "";
-            List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAlbums(_username);
-
-            var reader = new MultipartReader(boundary, Request.Body);
-            var section = await reader.ReadNextSectionAsync();
-            while (section != null)
+            try
             {
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(
-                    section.ContentDisposition, 
-                    out var contentDisposition
+                if (!MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
+                    throw new Exception("Not a multipart request");
+
+                var boundary = MultipartRequestHelper.GetBoundary(
+                    MediaTypeHeaderValue.Parse(Request.ContentType), 
+                    _defaultFormOptions.MultipartBoundaryLengthLimit
                 );
 
-                if (hasContentDispositionHeader)
+                List<SavedFileInfo> uploadedFiles = [];
+                string albumName = "";
+                List<AlbumMetaDTO> albums = await _minimalApiProxy.GetAllAlbums(_username);
+
+                var reader = new MultipartReader(boundary, Request.Body);
+                var section = await reader.ReadNextSectionAsync(HttpContext.RequestAborted);
+                while (section != null)
                 {
-                    if (string.IsNullOrWhiteSpace(albumName) && MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
+                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(
+                        section.ContentDisposition, 
+                        out var contentDisposition
+                    );
+
+                    if (hasContentDispositionHeader)
                     {
-                        using (var streamReader = new StreamReader(
-                            section.Body,
-                            Encoding.UTF8,
-                            detectEncodingFromByteOrderMarks: true,
-                            bufferSize: 1024,
-                            leaveOpen: false))
+                        if (string.IsNullOrWhiteSpace(albumName) && MultipartRequestHelper.HasFormDataContentDisposition(contentDisposition))
                         {
-                            var value = await streamReader.ReadToEndAsync();
-                            albumName = value;
-                            if (!albums.Any(a => a.AlbumName == albumName)) await _minimalApiProxy.CreateAlbum(_username, albumName);
+                            using (var streamReader = new StreamReader(
+                                section.Body,
+                                Encoding.UTF8,
+                                detectEncodingFromByteOrderMarks: true,
+                                bufferSize: 1024,
+                                leaveOpen: false))
+                            {
+                                var value = await streamReader.ReadToEndAsync(HttpContext.RequestAborted);
+                                albumName = value;
+                                if (!albums.Any(a => a.AlbumName == albumName)) await _minimalApiProxy.CreateAlbum(_username, albumName);
+                            }
+                        }
+                        else if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
+                        {
+                            var fileName = contentDisposition.FileNameStar.ToString();
+                            if (string.IsNullOrEmpty(fileName))
+                            {
+                                fileName = contentDisposition.FileName.ToString();
+                            }
+
+                            if (string.IsNullOrEmpty(fileName))
+                                throw new Exception("No filename defined.");
+
+                            using (var fileStream = section.Body)
+                            {
+                                SavedFileInfo savedFileInfo = await _fileSystemService.UploadFileToFileServer(albumName, fileName, fileStream);
+                                uploadedFiles.Add(savedFileInfo);
+                                await _minimalApiProxy.PostMediaItem(_username, albumName, savedFileInfo);
+                            }
                         }
                     }
-                    else if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
-                    {
-                        var fileName = contentDisposition.FileNameStar.ToString();
-                        if (string.IsNullOrEmpty(fileName))
-                        {
-                            fileName = contentDisposition.FileName.ToString();
-                        }
 
-                        if (string.IsNullOrEmpty(fileName))
-                            throw new Exception("No filename defined.");
-
-                        using (var fileStream = section.Body)
-                        {
-                            SavedFileInfo savedFileInfo = await _fileSystemService.UploadFileToFileServer(albumName, fileName, fileStream);
-                            uploadedFiles.Add(savedFileInfo);
-                            await _minimalApiProxy.PostMediaItem(_username, albumName, savedFileInfo);
-                        }
-                    }
+                    section = await reader.ReadNextSectionAsync(HttpContext.RequestAborted);
                 }
 
-                section = await reader.ReadNextSectionAsync();
+                var vm = CreateUploadResult(uploadedFiles, albumName);
+
+                return View("success", vm);
             }
-
-            var vm = CreateUploadResult(uploadedFiles, albumName);
-
-            return View("success", vm);
+            catch (OperationCanceledException ex) when (HttpContext.RequestAborted.IsCancellationRequested)
+            {
+                _logger.LogWarning(ex, "Upload request was canceled by the client. User: {Username}", _username);
+                return BadRequest("Upload was canceled before completion.");
+            }
+            catch (IOException ex)
+            {
+                _logger.LogWarning(ex, "Upload request stream terminated unexpectedly. User: {Username}", _username);
+                return BadRequest("Upload stream ended unexpectedly. Please try again, preferably with smaller batches.");
+            }
         }
 
         private UploadResultViewModel CreateUploadResult(List<SavedFileInfo> savedFiles, string albumName)

@@ -32,7 +32,7 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Admin";
 
-            var albums = await _minimalApiProxy.GetAlbums(_username);
+            var albums = await _minimalApiProxy.GetAllAlbums(_username);
             return View(albums);
         }
 
@@ -88,7 +88,7 @@ namespace WebGallery.UI.Controllers
                 try
                 {
                     // Check if album already exists (case-insensitive)
-                    var existingAlbums = await _minimalApiProxy.GetAlbums(_username);
+                    var existingAlbums = await _minimalApiProxy.GetAllAlbums(_username);
                     if (existingAlbums != null && existingAlbums.Any(a => string.Equals(a.AlbumName, newTargetAlbum, StringComparison.OrdinalIgnoreCase)))
                     {
                         return BadRequest(new { success = false, message = "An album with that name already exists. Please choose a different name or select the existing album as the target." });
@@ -150,7 +150,7 @@ namespace WebGallery.UI.Controllers
         public async Task<IActionResult> Album(string albumName)
         {
             var albumContents = await _minimalApiProxy.GetAlbumContents(_username, albumName, 0, 1000); // adjust size as needed
-            var allAlbums = await _minimalApiProxy.GetAlbums(_username);
+            var allAlbums = await _minimalApiProxy.GetAllAlbums(_username);
             ViewBag.AlbumName = albumName;
             ViewBag.AllAlbums = allAlbums;
             return View("Album", albumContents);
@@ -217,5 +217,21 @@ namespace WebGallery.UI.Controllers
 
             return RedirectToAction(nameof(Album), new { albumName });
         }
+
+        [HttpGet("albums/{albumName}/rebuild-tags")]
+        public async Task<IActionResult> RebuildTags(string albumName, [FromQuery] string type)
+        {
+            if (!string.IsNullOrWhiteSpace(albumName))
+            {
+                // TODO: Implement api call
+                // Minimal API signature: app.MapPatch("/users/{username}/albums/{albumName}/rebuild-tags", (string username, string albumName) => { ... });
+                //await _minimalApiProxy.PatchRebuildTags(_username, albumName, type);
+            }
+
+            return RedirectToAction(nameof(Album), new { albumName });
+        }
+
+        // TODO: Endpoint for rename album, which will require both Minimal API and File Server calls to rename the folder and update metadata.
+        // Minimal API signature: app.MapPost("/users/{username}/albums/{albumName}/rename", (string username, string albumName, RenameAlbumRequest request) => { ... });
     }
 }
