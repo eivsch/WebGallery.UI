@@ -169,6 +169,47 @@ namespace WebGallery.UI.Controllers
             return RedirectToAction(nameof(Album), new { albumName });
         }
 
+        [HttpPost("albums/{albumName}/delete-files")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFiles(string albumName, [FromForm] List<string> fileNames)
+        {
+            if (string.IsNullOrWhiteSpace(albumName) || fileNames == null || fileNames.Count == 0)
+            {
+                TempData["AdminAlbumError"] = "Please select at least one file to delete.";
+                return RedirectToAction(nameof(Album), new { albumName });
+            }
+
+            var failedDeletes = new List<string>();
+            var distinctFileNames = fileNames
+                .Where(name => string.IsNullOrWhiteSpace(name) == false)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var fileName in distinctFileNames)
+            {
+                try
+                {
+                    await _minimalApiProxy.DeleteMedia(_username, albumName, fileName);
+                    await _fileSystemService.DeleteFileFromFileServer(albumName, fileName);
+                }
+                catch
+                {
+                    failedDeletes.Add(fileName);
+                }
+            }
+
+            if (failedDeletes.Count == 0)
+            {
+                TempData["AdminAlbumMessage"] = $"Deleted {distinctFileNames.Count} file(s).";
+            }
+            else
+            {
+                TempData["AdminAlbumError"] = $"Deleted {distinctFileNames.Count - failedDeletes.Count} file(s), but failed to delete {failedDeletes.Count} file(s).";
+            }
+
+            return RedirectToAction(nameof(Album), new { albumName });
+        }
+
         [HttpPost("albums/{albumName}/move-file")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MoveFile(string albumName, string fileName, string targetAlbum, string mediaLocator)
@@ -202,6 +243,72 @@ namespace WebGallery.UI.Controllers
             catch (Exception ex)
             {
                 TempData["AdminAlbumError"] = "Failed to move file: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Album), new { albumName });
+        }
+
+        [HttpPost("albums/{albumName}/move-files")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoveFiles(string albumName, [FromForm] List<string> fileNames, [FromForm] List<string> mediaLocators, string targetAlbum)
+        {
+            if (string.IsNullOrWhiteSpace(albumName) || fileNames == null || fileNames.Count == 0 || string.IsNullOrWhiteSpace(targetAlbum))
+            {
+                TempData["AdminAlbumError"] = "Source album, selected file(s) and target album are required.";
+                return RedirectToAction(nameof(Album), new { albumName });
+            }
+
+            if (string.Equals(albumName, targetAlbum, StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["AdminAlbumError"] = "Target album must be different from source album.";
+                return RedirectToAction(nameof(Album), new { albumName });
+            }
+
+            var movedCount = 0;
+            var failedMoves = new List<string>();
+
+            for (var i = 0; i < fileNames.Count; i++)
+            {
+                var fileName = fileNames[i];
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    continue;
+                }
+
+                var mediaLocator = (mediaLocators != null && mediaLocators.Count > i)
+                    ? mediaLocators[i]
+                    : fileName;
+                var locator = string.IsNullOrWhiteSpace(mediaLocator) ? fileName : mediaLocator;
+
+                try
+                {
+                    MoveMediaResponseDTO moveMediaResponseDTO = await _minimalApiProxy.TryMoveMedia(_username, albumName, locator, targetAlbum, fileName);
+                    if (!moveMediaResponseDTO.Success)
+                    {
+                        failedMoves.Add(fileName);
+                        continue;
+                    }
+
+                    await _fileSystemService.MoveFile(albumName, targetAlbum, fileName);
+                    movedCount++;
+                }
+                catch
+                {
+                    failedMoves.Add(fileName);
+                }
+            }
+
+            if (failedMoves.Count == 0)
+            {
+                TempData["AdminAlbumMessage"] = $"Moved {movedCount} file(s) to '{targetAlbum}'.";
+            }
+            else if (movedCount > 0)
+            {
+                TempData["AdminAlbumError"] = $"Moved {movedCount} file(s), but failed to move {failedMoves.Count} file(s).";
+            }
+            else
+            {
+                TempData["AdminAlbumError"] = "Failed to move selected file(s).";
             }
 
             return RedirectToAction(nameof(Album), new { albumName });

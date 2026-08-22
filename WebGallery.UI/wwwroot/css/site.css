@@ -682,7 +682,7 @@ a.regular-text-link {
 }
 
 .admin-album-table--list td:nth-child(2) a,
-.admin-album-table--contents td:first-child a {
+.admin-album-table--contents td:nth-child(2) a {
     display: block;
     width: 100%;
     white-space: nowrap;
@@ -732,23 +732,28 @@ a.regular-text-link {
 
 .admin-album-table--contents th:first-child,
 .admin-album-table--contents td:first-child {
-    width: 45%;
+    width: 5%;
 }
 
 .admin-album-table--contents th:nth-child(2),
 .admin-album-table--contents td:nth-child(2) {
-    width: 12%;
-    white-space: nowrap;
+    width: 45%;
 }
 
 .admin-album-table--contents th:nth-child(3),
 .admin-album-table--contents td:nth-child(3) {
-    width: 23%;
+    width: 12%;
     white-space: nowrap;
 }
 
 .admin-album-table--contents th:nth-child(4),
 .admin-album-table--contents td:nth-child(4) {
+    width: 23%;
+    white-space: nowrap;
+}
+
+.admin-album-table--contents th:nth-child(5),
+.admin-album-table--contents td:nth-child(5) {
     width: 20%;
     white-space: nowrap;
 }
@@ -791,26 +796,31 @@ a.regular-text-link {
 
     .admin-album-table--contents th:first-child,
     .admin-album-table--contents td:first-child {
-        width: 42%;
+        width: 6%;
     }
 
     .admin-album-table--contents th:nth-child(2),
     .admin-album-table--contents td:nth-child(2) {
-        width: 13%;
+        width: 42%;
     }
 
     .admin-album-table--contents th:nth-child(3),
     .admin-album-table--contents td:nth-child(3) {
-        width: 22%;
+        width: 13%;
     }
 
     .admin-album-table--contents th:nth-child(4),
     .admin-album-table--contents td:nth-child(4) {
-        width: 23%;
+        width: 22%;
+    }
+
+    .admin-album-table--contents th:nth-child(5),
+    .admin-album-table--contents td:nth-child(5) {
+        width: 17%;
     }
 
     .admin-album-table--list td:nth-child(2) a,
-    .admin-album-table--contents td:first-child a {
+    .admin-album-table--contents td:nth-child(2) a {
         padding-right: 10px;
     }
 
@@ -859,22 +869,27 @@ a.regular-text-link {
 
     .admin-album-table--contents th:first-child,
     .admin-album-table--contents td:first-child {
-        width: 40%;
+        width: 7%;
     }
 
     .admin-album-table--contents th:nth-child(2),
     .admin-album-table--contents td:nth-child(2) {
-        width: 14%;
+        width: 40%;
     }
 
     .admin-album-table--contents th:nth-child(3),
     .admin-album-table--contents td:nth-child(3) {
-        width: 21%;
+        width: 14%;
     }
 
     .admin-album-table--contents th:nth-child(4),
     .admin-album-table--contents td:nth-child(4) {
-        width: 25%;
+        width: 21%;
+    }
+
+    .admin-album-table--contents th:nth-child(5),
+    .admin-album-table--contents td:nth-child(5) {
+        width: 18%;
     }
 
     .admin-album-table .btn {

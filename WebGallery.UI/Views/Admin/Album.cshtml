@@ -42,9 +42,20 @@
     }
     else
     {
+        <div class="mb-3">
+            <button id="moveSelectedBtn" type="button" class="btn btn-warning me-2" disabled>Move Selected</button>
+            <button id="deleteSelectedBtn" type="button" class="btn btn-danger" disabled>Delete Selected</button>
+
+            <form id="bulkDeleteForm" asp-action="DeleteFiles" asp-controller="Admin" asp-route-albumName="@albumName" method="post" class="d-none">
+                @Html.AntiForgeryToken()
+                <div id="bulkDeleteHiddenInputs"></div>
+            </form>
+        </div>
+
         <table class="table table-dark table-striped admin-album-table admin-album-table--contents">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Filename</th>
                     <th>Size (KB)</th>
                     <th>Created</th>
@@ -55,6 +66,12 @@
             @foreach (var file in Model.Items)
             {
                 <tr>
+                    <td class="align-middle">
+                        <input type="checkbox"
+                               class="file-checkbox"
+                               data-file-name="@file.Name"
+                               data-media-locator="@file.Id" />
+                    </td>
                     <td><a class="regular-text-link" href="/Bio/id/@file.Id">@file.Name</a></td>
                     @if (file.Size.HasValue)
                     {
@@ -88,7 +105,7 @@
 <div class="modal fade" id="moveFileModal" tabindex="-1" aria-labelledby="moveFileModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="moveFileForm" asp-action="MoveFile" asp-controller="Admin" asp-route-albumName="@albumName" method="post">
+            <form id="moveFileForm" asp-action="MoveFiles" asp-controller="Admin" asp-route-albumName="@albumName" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title" id="moveFileModalLabel">Move file</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -96,8 +113,7 @@
                 <div class="modal-body">
                     @Html.AntiForgeryToken()
 
-                    <input type="hidden" id="moveFileNameInput" name="fileName" />
-                    <input type="hidden" id="moveMediaLocatorInput" name="mediaLocator" />
+                    <div id="moveItemsHiddenInputs"></div>
 
                     <div class="mb-3">
                         <label for="moveTargetAlbumSelect" class="form-label">Target album</label>
@@ -121,20 +137,38 @@
         (function () {
             const moveModalEl = document.getElementById('moveFileModal');
             const moveButtons = document.querySelectorAll('.move-file-btn');
-            if (!moveModalEl || moveButtons.length === 0 || !window.bootstrap) {
+            const fileCheckboxes = document.querySelectorAll('.file-checkbox');
+            const moveSelectedBtn = document.getElementById('moveSelectedBtn');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+            const bulkDeleteHiddenInputs = document.getElementById('bulkDeleteHiddenInputs');
+
+            if (!moveModalEl || !window.bootstrap) {
                 return;
             }
 
             const moveModal = new bootstrap.Modal(moveModalEl);
             const moveFileForm = document.getElementById('moveFileForm');
             const moveTargetAlbumSelect = document.getElementById('moveTargetAlbumSelect');
-            const moveFileNameInput = document.getElementById('moveFileNameInput');
-            const moveMediaLocatorInput = document.getElementById('moveMediaLocatorInput');
+            const moveItemsHiddenInputs = document.getElementById('moveItemsHiddenInputs');
             const moveFileDescription = document.getElementById('moveFileDescription');
 
             const currentAlbum = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(albumName ?? string.Empty));
             const albumNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(albumNames));
             let optionsLoaded = false;
+
+            function getSelectedFiles() {
+                return Array.from(document.querySelectorAll('.file-checkbox:checked')).map((cb) => ({
+                    fileName: cb.getAttribute('data-file-name') || '',
+                    mediaLocator: cb.getAttribute('data-media-locator') || ''
+                }));
+            }
+
+            function updateBulkButtonsState() {
+                const selectedCount = getSelectedFiles().length;
+                moveSelectedBtn.disabled = selectedCount === 0;
+                deleteSelectedBtn.disabled = selectedCount === 0;
+            }
 
             function loadTargetAlbumOptions() {
                 if (optionsLoaded) {
@@ -155,21 +189,85 @@
                 optionsLoaded = true;
             }
 
+            function openMoveModal(items) {
+                loadTargetAlbumOptions();
+
+                moveItemsHiddenInputs.innerHTML = '';
+                items.forEach((item) => {
+                    const fileNameInput = document.createElement('input');
+                    fileNameInput.type = 'hidden';
+                    fileNameInput.name = 'fileNames';
+                    fileNameInput.value = item.fileName;
+                    moveItemsHiddenInputs.appendChild(fileNameInput);
+
+                    const mediaLocatorInput = document.createElement('input');
+                    mediaLocatorInput.type = 'hidden';
+                    mediaLocatorInput.name = 'mediaLocators';
+                    mediaLocatorInput.value = item.mediaLocator || item.fileName;
+                    moveItemsHiddenInputs.appendChild(mediaLocatorInput);
+                });
+
+                moveTargetAlbumSelect.value = '';
+
+                if (items.length === 1) {
+                    const singleName = items[0].fileName;
+                    moveFileDescription.textContent = singleName ? `Move '${singleName}' to another album.` : 'Move this file to another album.';
+                } else {
+                    moveFileDescription.textContent = `Move ${items.length} selected files to another album.`;
+                }
+
+                moveModal.show();
+            }
+
             moveButtons.forEach((button) => {
                 button.addEventListener('click', () => {
-                    loadTargetAlbumOptions();
-
                     const fileName = button.getAttribute('data-file-name') || '';
                     const mediaLocator = button.getAttribute('data-media-locator') || fileName;
-
-                    moveFileNameInput.value = fileName;
-                    moveMediaLocatorInput.value = mediaLocator;
-                    moveTargetAlbumSelect.value = '';
-                    moveFileDescription.textContent = fileName ? `Move '${fileName}' to another album.` : 'Move this file to another album.';
-
-                    moveModal.show();
+                    openMoveModal([{ fileName, mediaLocator }]);
                 });
             });
+
+            if (moveSelectedBtn) {
+                moveSelectedBtn.addEventListener('click', () => {
+                    const selectedFiles = getSelectedFiles();
+                    if (!selectedFiles.length) {
+                        return;
+                    }
+
+                    openMoveModal(selectedFiles);
+                });
+            }
+
+            if (deleteSelectedBtn && bulkDeleteForm && bulkDeleteHiddenInputs) {
+                deleteSelectedBtn.addEventListener('click', () => {
+                    const selectedFiles = getSelectedFiles();
+                    if (!selectedFiles.length) {
+                        return;
+                    }
+
+                    const shouldDelete = confirm(`Delete ${selectedFiles.length} selected file(s)?`);
+                    if (!shouldDelete) {
+                        return;
+                    }
+
+                    bulkDeleteHiddenInputs.innerHTML = '';
+                    selectedFiles.forEach((item) => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'fileNames';
+                        input.value = item.fileName;
+                        bulkDeleteHiddenInputs.appendChild(input);
+                    });
+
+                    bulkDeleteForm.submit();
+                });
+            }
+
+            fileCheckboxes.forEach((checkbox) => {
+                checkbox.addEventListener('change', updateBulkButtonsState);
+            });
+
+            updateBulkButtonsState();
 
             moveFileForm.addEventListener('submit', (event) => {
                 const selectedTarget = (moveTargetAlbumSelect.value || '').trim();
