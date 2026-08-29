@@ -69,7 +69,14 @@ namespace WebGallery.UI.Controllers
                 Response.Headers["Last-Modified"] = response.Content.Headers.LastModified.Value.ToString("R");
 
             await using var stream = await response.Content.ReadAsStreamAsync();
-            await stream.CopyToAsync(Response.Body, 81920, HttpContext.RequestAborted);
+            try
+            {
+                await stream.CopyToAsync(Response.Body, 81920, HttpContext.RequestAborted);
+            }
+            catch (OperationCanceledException) when (HttpContext.RequestAborted.IsCancellationRequested)
+            {
+                // Client disconnected or aborted the request (e.g. seeking/closing the video); nothing to do.
+            }
 
             return new EmptyResult();
         }
