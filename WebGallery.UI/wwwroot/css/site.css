@@ -1,4 +1,81 @@
-﻿.bio-content {
+﻿/* Mobile nav toggle: shutter/style.css references an icon font ("icomoon") that
+   isn't actually bundled with the theme, so .icon-menu/.icon-close2 render invisible.
+   These CSS-only bars/X replace that missing icon font. */
+.site-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.hamburger-icon {
+    position: relative;
+    display: inline-block;
+    width: 22px;
+    height: 16px;
+}
+
+.hamburger-icon span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #fff;
+    border-radius: 1px;
+}
+
+.hamburger-icon span:nth-child(1) {
+    top: 0;
+}
+
+.hamburger-icon span:nth-child(2) {
+    top: 7px;
+}
+
+.hamburger-icon span:nth-child(3) {
+    top: 14px;
+}
+
+.site-mobile-menu-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.hamburger-close-icon {
+    position: relative;
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+}
+
+.hamburger-close-icon::before,
+.hamburger-close-icon::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #212529;
+}
+
+.hamburger-close-icon::before {
+    transform: rotate(45deg);
+}
+
+.hamburger-close-icon::after {
+    transform: rotate(-45deg);
+}
+
+.bio-content {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
