@@ -556,13 +556,20 @@ th, td {
   }
 
 .login-form {
-    width: 30%; /* Slightly wider for better usability */
+    width: 90%; /* Fits small screens; capped by max-width on larger ones */
+    max-width: 400px;
     margin: auto;
     margin-top: 100px; /* Reduce top margin for better alignment */
     padding: 30px; /* Add padding for spacing inside the form */
     background-color: #333; /* Dark background to match the site's theme */
     border-radius: 10px; /* Rounded corners for a modern look */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+@media (max-width: 991.98px) {
+    .login-form {
+        margin-top: 30px;
+    }
 }
 
 .login-form label {
