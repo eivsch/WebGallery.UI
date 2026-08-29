@@ -2,6 +2,5 @@
 - UX improvement: The uploads page should let the user know what the max size for uploads is
 - UX improvement: Admin page. Truncate filename if too long, i.e. if the actions are not properly displayed.
 - New functionality: On the bio page, if the image is a screencap, a link back to the video at the timestamp/frame of the video image should be provided.
-- New functionality: Add file size as a search parameter on the search/customizer page.
 - New functionality: Improve structure and navigation overall. Should add something like 'collections' for grouping items? Would be similar to tags, but semantically different and use more efficient storage (API).
 - See todo's in Admin controller (rename album, rebuild album tags)

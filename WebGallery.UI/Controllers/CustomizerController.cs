@@ -66,6 +66,8 @@ namespace WebGallery.UI.Controllers
                 FileExtensions = searchDetails.FileExtensions,
                 MediaNameContains = searchDetails.MediaNameContains,
                 MaxSize = searchDetails.MaxSize,
+                MinFileSize = searchDetails.MinFileSize,
+                MaxFileSize = searchDetails.MaxFileSize,
                 AllTagsMustMatch = searchDetails.AllTagsMustMatch,
                 CreatedAfter = searchDetails.CreatedAfter,
                 CreatedBefore = searchDetails.CreatedBefore

@@ -26,6 +26,8 @@ namespace WebGallery.UI.Controllers
         public string FileExtensions { get; set; }
         public string MediaNameContains { get; set; }
         public int? MaxSize { get; set; }
+        public long? MinFileSize { get; set; }
+        public long? MaxFileSize { get; set; }
         public bool? AllTagsMustMatch { get; set; }
         public string CreatedAfter { get; set; }
         public string CreatedBefore { get; set; }
@@ -99,14 +101,14 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, bool? allTagsMustMatch = false, int? hitsToSkip = null, bool shuffle = false, string createdAfter = null, string createdBefore = null)
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, long? minFileSize = null, long? maxFileSize = null, bool? allTagsMustMatch = false, int? hitsToSkip = null, bool shuffle = false, string createdAfter = null, string createdBefore = null)
         {
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
 
             int requestedSize = GetRequestedSearchSize(maxSize);
             int startingOffset = hitsToSkip ?? 0;
-            List<SearchHitDTO> searchHits = await GetSearchHitsAsync(albums, tags, fileExtensions, mediaNameContains, requestedSize, allTagsMustMatch ?? true, startingOffset, createdAfter, createdBefore);
+            List<SearchHitDTO> searchHits = await GetSearchHitsAsync(albums, tags, fileExtensions, mediaNameContains, requestedSize, minFileSize, maxFileSize, allTagsMustMatch ?? true, startingOffset, createdAfter, createdBefore);
             bool hasMoreResults = searchHits.Count == requestedSize;
 
             SearchDetails searchDetails = new()
@@ -117,6 +119,8 @@ namespace WebGallery.UI.Controllers
                 FileExtensions = fileExtensions,
                 MediaNameContains = mediaNameContains,
                 MaxSize = requestedSize,
+                MinFileSize = minFileSize,
+                MaxFileSize = maxFileSize,
                 AllTagsMustMatch = allTagsMustMatch,
                 CreatedAfter = createdAfter,
                 CreatedBefore = createdBefore,
@@ -160,7 +164,7 @@ namespace WebGallery.UI.Controllers
             return requestedSize > 0 ? requestedSize : SearchBatchLimit;
         }
 
-        private async Task<List<SearchHitDTO>> GetSearchHitsAsync(string albums, string tags, string fileExtensions, string mediaNameContains, int requestedSize, bool allTagsMustMatch, int hitsToSkip, string createdAfter, string createdBefore)
+        private async Task<List<SearchHitDTO>> GetSearchHitsAsync(string albums, string tags, string fileExtensions, string mediaNameContains, int requestedSize, long? minFileSize, long? maxFileSize, bool allTagsMustMatch, int hitsToSkip, string createdAfter, string createdBefore)
         {
             List<SearchHitDTO> searchHits = [];
             int currentOffset = hitsToSkip;
@@ -169,7 +173,7 @@ namespace WebGallery.UI.Controllers
             {
                 int remaining = requestedSize - searchHits.Count;
                 int batchSize = Math.Min(SearchBatchLimit, remaining);
-                List<SearchHitDTO> batch = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, batchSize, allTagsMustMatch, currentOffset, createdAfter, createdBefore);
+                List<SearchHitDTO> batch = await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains, batchSize, allTagsMustMatch, currentOffset, createdAfter, createdBefore, minFileSize, maxFileSize);
 
                 if (batch.Count == 0)
                 {
@@ -199,7 +203,7 @@ namespace WebGallery.UI.Controllers
             if (!_cache.TryGetValue(SearchCacheKeyPrefix + _username, out SearchDetails cachedResults)) return RedirectToAction("Index", "Customizer");
             if (from >= cachedResults.Hits.Count && cachedResults.HasMoreResults)
             {
-                return await Search(cachedResults.Albums, cachedResults.Tags, cachedResults.FileExtensions, cachedResults.MediaNameContains, cachedResults.MaxSize, cachedResults.AllTagsMustMatch, hitsToSkip: from, createdAfter: cachedResults.CreatedAfter, createdBefore: cachedResults.CreatedBefore);
+                return await Search(cachedResults.Albums, cachedResults.Tags, cachedResults.FileExtensions, cachedResults.MediaNameContains, cachedResults.MaxSize, cachedResults.MinFileSize, cachedResults.MaxFileSize, cachedResults.AllTagsMustMatch, hitsToSkip: from, createdAfter: cachedResults.CreatedAfter, createdBefore: cachedResults.CreatedBefore);
             }
 
             List<SingleGalleryImageViewModel> items = PopulateItemList(from, cachedResults.Hits);

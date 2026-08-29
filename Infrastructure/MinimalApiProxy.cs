@@ -234,7 +234,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null)
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxResults, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null, long? minFileSize = null, long? maxFileSize = null)
     {
         string uri = $"users/{username}/search";
         Dictionary<string, string> paramss = [];
@@ -246,8 +246,12 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             paramss.Add("fileExtensions", fileExtension);
         if (mediaNameContains is not null)
             paramss.Add("mediaNameContains", mediaNameContains);
-        if (maxSize.HasValue)
-            paramss.Add("maxSize", maxSize.ToString());
+        if (maxResults.HasValue)
+            paramss.Add("maxResults", maxResults.ToString());
+        if (minFileSize.HasValue)
+            paramss.Add("minFileSize", minFileSize.Value.ToString());
+        if (maxFileSize.HasValue)
+            paramss.Add("maxFileSize", maxFileSize.Value.ToString());
         if (hitsToSkip.HasValue)
             paramss.Add("hitsToSkip", hitsToSkip.Value.ToString());
         if (createdAfter is not null)
@@ -463,6 +467,8 @@ public record SavedSearchDTO
     public string FileExtensions { get; set; }
     public string MediaNameContains { get; set; }
     public int? MaxSize { get; set; }
+    public long? MinFileSize { get; set; }
+    public long? MaxFileSize { get; set; }
     public bool? AllTagsMustMatch { get; set; }
     public string CreatedAfter { get; set; }
     public string CreatedBefore { get; set; }
