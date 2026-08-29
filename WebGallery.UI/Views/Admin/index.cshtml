@@ -3,14 +3,17 @@
 @model List<AlbumMetaDTO>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-<div class="container mt-5 admin-page-shell">
+<main class="main-content">
+<div class="container-fluid mt-5 admin-page-shell">
     <h2 class="mb-4">Admin: Album Management</h2>
 
     <div id="operationMessage" class="mt-2" style="display:none"></div>
 
-    <div class="mb-3">
-        <button id="mergeSelectedBtn" type="button" class="btn btn-primary" disabled>Merge Selected</button>
-        <a href="/uploads" class="btn btn-info">Upload</a>
+    <div class="btn-toolbar mb-3" role="toolbar">
+        <div class="btn-group" role="group">
+            <button id="mergeSelectedBtn" type="button" class="btn btn-primary" disabled>◐ Merge Selected</button>
+            <a href="/uploads" class="btn btn-info">📤 Upload</a>
+        </div>
     </div>
 
     @if (Model == null || !Model.Any())
@@ -41,11 +44,11 @@
                     <td class="align-middle">@album.Created.ToString("yyyy-MM-dd")</td>
                     <td class="align-middle">@album.TotalCount</td>
                     <td class="align-middle">@album.TotalLikes</td>
-                    <td class="align-middle">
-                        <button type="button" class="btn btn-secondary btn-sm rename-album-btn mb-1" data-album-name="@album.AlbumName">Rename</button>
+                    <td class="align-middle admin-album-table__actions">
+                        <button type="button" class="btn btn-outline-warning btn-sm rename-album-btn me-1" data-album-name="@album.AlbumName">✏ Rename</button>
                         <form asp-action="Delete" asp-controller="Admin" method="post" class="d-inline-block">
                             <input type="hidden" name="albumName" value="@album.AlbumName" />
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Are you sure you want to delete the album @Html.Raw(JavaScriptEncoder.Default.Encode(album.AlbumName))?');"> X </button>
+                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); return confirm('Are you sure you want to delete the album @Html.Raw(JavaScriptEncoder.Default.Encode(album.AlbumName))?');">🗑 Delete</button>
                             @Html.AntiForgeryToken()
                         </form>
                     </td>
@@ -103,6 +106,7 @@
     </div>
   </div>
 </div>
+</main>
 
 @section Scripts {
     <script>

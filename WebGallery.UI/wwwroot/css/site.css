@@ -299,17 +299,7 @@ html {
 }
 
 .admin-page-shell {
-    width: calc(100% - var(--sidebar-width));
-    max-width: none;
-    margin-left: auto;
-    margin-right: var(--sidebar-width);
-}
-
-@media (max-width: 991.98px) {
-    .admin-page-shell {
-        width: 100%;
-        margin-right: 0;
-    }
+    width: 100%;
 }
 
 .main-landing {
@@ -666,6 +656,7 @@ th, td {
 .admin-album-table th:first-child,
 .admin-album-table td:first-child {
     padding-right: 0;
+    width: 40px;
 }
 
 .admin-album-table .sortable-header {
@@ -684,9 +675,70 @@ th, td {
     opacity: 1;
 }
 
-.admin-album-table .btn-danger.btn-sm {
-    padding: 2px 10px;
-    font-size: 0.95rem;
+.admin-album-table .btn,
+.admin-album-table .btn-sm {
+    border-radius: 0.35rem;
+    transition: all 0.2s ease;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.admin-album-table__actions {
+    white-space: nowrap;
+}
+
+.admin-album-table__actions form {
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.admin-album-table__actions button:last-child {
+    margin-right: 0;
+}
+
+.admin-album-table .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.admin-album-table .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.admin-album-table .btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.admin-album-table .btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.admin-album-table .btn-outline-info {
+    color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.admin-album-table .btn-outline-info:hover {
+    background-color: #17a2b8;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.admin-album-table--contents th:nth-child(2),
+.admin-album-table--contents td:nth-child(2),
+.admin-album-table--contents th:nth-child(3),
+.admin-album-table--contents td:nth-child(3),
+.admin-album-table--contents th:nth-child(4),
+.admin-album-table--contents td:nth-child(4) {
+    font-size: 0.8rem;
 }
 
 /* Remove styling from <a> tags inside the admin album table's filename column */
@@ -697,150 +749,22 @@ a.regular-text-link {
 
 .admin-album-table--list td:nth-child(2) a,
 .admin-album-table--contents td:nth-child(2) a {
-    display: block;
-    width: 100%;
+    display: inline-block;
+    max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 15px;
+    vertical-align: middle;
 }
 
 .admin-album-table {
-    table-layout: fixed;
     width: 100%;
-}
-
-.admin-album-table--list th:first-child,
-.admin-album-table--list td:first-child {
-    width: 5%;
-}
-
-.admin-album-table--list th:nth-child(2),
-.admin-album-table--list td:nth-child(2) {
-    width: 43%;
-}
-
-.admin-album-table--list th:nth-child(3),
-.admin-album-table--list td:nth-child(3) {
-    width: 18%;
-    white-space: nowrap;
-}
-
-.admin-album-table--list th:nth-child(4),
-.admin-album-table--list td:nth-child(4) {
-    width: 10%;
-    white-space: nowrap;
-}
-
-.admin-album-table--list th:nth-child(5),
-.admin-album-table--list td:nth-child(5) {
-    width: 10%;
-    white-space: nowrap;
-}
-
-.admin-album-table--list th:nth-child(6),
-.admin-album-table--list td:nth-child(6) {
-    width: 14%;
-    white-space: nowrap;
-}
-
-.admin-album-table--contents th:first-child,
-.admin-album-table--contents td:first-child {
-    width: 5%;
-}
-
-.admin-album-table--contents th:nth-child(2),
-.admin-album-table--contents td:nth-child(2) {
-    width: 45%;
-}
-
-.admin-album-table--contents th:nth-child(3),
-.admin-album-table--contents td:nth-child(3) {
-    width: 12%;
-    white-space: nowrap;
-}
-
-.admin-album-table--contents th:nth-child(4),
-.admin-album-table--contents td:nth-child(4) {
-    width: 23%;
-    white-space: nowrap;
-}
-
-.admin-album-table--contents th:nth-child(5),
-.admin-album-table--contents td:nth-child(5) {
-    width: 20%;
-    white-space: nowrap;
 }
 
 @media (max-width: 992px) {
     .admin-album-table th,
     .admin-album-table td {
         padding: 10px;
-    }
-
-    .admin-album-table--list th:first-child,
-    .admin-album-table--list td:first-child {
-        width: 6%;
-    }
-
-    .admin-album-table--list th:nth-child(2),
-    .admin-album-table--list td:nth-child(2) {
-        width: 40%;
-    }
-
-    .admin-album-table--list th:nth-child(3),
-    .admin-album-table--list td:nth-child(3) {
-        width: 20%;
-    }
-
-    .admin-album-table--list th:nth-child(4),
-    .admin-album-table--list td:nth-child(4) {
-        width: 10%;
-    }
-
-    .admin-album-table--list th:nth-child(5),
-    .admin-album-table--list td:nth-child(5) {
-        width: 10%;
-    }
-
-    .admin-album-table--list th:nth-child(6),
-    .admin-album-table--list td:nth-child(6) {
-        width: 14%;
-    }
-
-    .admin-album-table--contents th:first-child,
-    .admin-album-table--contents td:first-child {
-        width: 6%;
-    }
-
-    .admin-album-table--contents th:nth-child(2),
-    .admin-album-table--contents td:nth-child(2) {
-        width: 42%;
-    }
-
-    .admin-album-table--contents th:nth-child(3),
-    .admin-album-table--contents td:nth-child(3) {
-        width: 13%;
-    }
-
-    .admin-album-table--contents th:nth-child(4),
-    .admin-album-table--contents td:nth-child(4) {
-        width: 22%;
-    }
-
-    .admin-album-table--contents th:nth-child(5),
-    .admin-album-table--contents td:nth-child(5) {
-        width: 17%;
-    }
-
-    .admin-album-table--list td:nth-child(2) a,
-    .admin-album-table--contents td:nth-child(2) a {
-        padding-right: 10px;
-    }
-
-    .admin-album-table .btn {
-        padding-left: 0.4rem;
-        padding-right: 0.4rem;
     }
 }
 
@@ -851,64 +775,75 @@ a.regular-text-link {
         font-size: 0.9rem;
     }
 
-    .admin-album-table--list th:first-child,
-    .admin-album-table--list td:first-child {
-        width: 7%;
+    .admin-album-table .btn,
+    .admin-album-table .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
     }
+}
 
-    .admin-album-table--list th:nth-child(2),
-    .admin-album-table--list td:nth-child(2) {
-        width: 37%;
-    }
+/* Admin Index Page Styling */
+.admin-page-shell .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
 
-    .admin-album-table--list th:nth-child(3),
-    .admin-album-table--list td:nth-child(3) {
-        width: 22%;
-    }
+.admin-page-shell .btn-primary:hover:not(:disabled) {
+    background-color: #0056b3;
+    border-color: #003d82;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
 
-    .admin-album-table--list th:nth-child(4),
-    .admin-album-table--list td:nth-child(4) {
-        width: 10%;
-    }
+.admin-page-shell .btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: #fff;
+}
 
-    .admin-album-table--list th:nth-child(5),
-    .admin-album-table--list td:nth-child(5) {
-        width: 10%;
-    }
+.admin-page-shell .btn-info:hover:not(:disabled) {
+    background-color: #138496;
+    border-color: #0c5460;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
 
-    .admin-album-table--list th:nth-child(6),
-    .admin-album-table--list td:nth-child(6) {
-        width: 14%;
-    }
+.admin-page-shell .btn {
+    border-radius: 0.35rem;
+    font-weight: 500;
+    padding: 0.35rem 0.6rem;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
 
-    .admin-album-table--contents th:first-child,
-    .admin-album-table--contents td:first-child {
-        width: 7%;
-    }
+.admin-page-shell .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-    .admin-album-table--contents th:nth-child(2),
-    .admin-album-table--contents td:nth-child(2) {
-        width: 40%;
-    }
+.admin-page-shell .btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
 
-    .admin-album-table--contents th:nth-child(3),
-    .admin-album-table--contents td:nth-child(3) {
-        width: 14%;
-    }
+.admin-page-shell .btn-outline-warning:hover:not(:disabled) {
+    background-color: #ffc107;
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
 
-    .admin-album-table--contents th:nth-child(4),
-    .admin-album-table--contents td:nth-child(4) {
-        width: 21%;
-    }
+.admin-page-shell .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
 
-    .admin-album-table--contents th:nth-child(5),
-    .admin-album-table--contents td:nth-child(5) {
-        width: 18%;
-    }
-
-    .admin-album-table .btn {
-        font-size: 0.8rem;
-    }
+.admin-page-shell .btn-outline-danger:hover:not(:disabled) {
+    background-color: #dc3545;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 #saveSearchStatus {
@@ -1053,5 +988,273 @@ a.regular-text-link {
     .pager-list .page-link {
         padding: 0.35rem 0.55rem;
         font-size: 0.86rem;
+    }
+}
+
+/* Admin Album Toolbar Styling */
+.admin-album-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    overflow-x: auto;
+    padding-right: 0.5rem;
+}
+
+.admin-album-toolbar .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.admin-album-toolbar .btn {
+    font-weight: 500;
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.35rem;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* Primary button styling */
+.admin-album-toolbar .btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #fff;
+}
+
+.admin-album-toolbar .btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.admin-album-toolbar .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.admin-album-toolbar .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #003d82;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.admin-album-toolbar .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.admin-album-toolbar .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Advanced options dropdown button */
+.admin-album-toolbar .dropdown-toggle {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.admin-album-toolbar .dropdown-toggle::after {
+    display: none;
+}
+
+.admin-album-toolbar .dropdown-toggle[aria-expanded="true"] {
+    background-color: #6c757d;
+    color: #fff;
+    border-color: #5a6268;
+}
+
+/* Advanced options card */
+#advancedOptions .card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.35rem;
+}
+
+#advancedOptions .btn-group-vertical {
+    gap: 0.5rem;
+}
+
+#advancedOptions .btn {
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.35rem;
+    text-align: left;
+    justify-content: flex-start;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+#advancedOptions .btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+#advancedOptions .btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: #000;
+    transform: translateX(4px);
+}
+
+#advancedOptions .btn-outline-info {
+    color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+#advancedOptions .btn-outline-info:hover {
+    background-color: #17a2b8;
+    color: #fff;
+    transform: translateX(4px);
+}
+
+/* Bulk action buttons styling */
+.admin-bulk-actions {
+    animation: slideDown 0.3s ease-out;
+}
+
+.admin-bulk-actions .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.admin-bulk-actions .btn {
+    font-weight: 500;
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.35rem;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.admin-bulk-actions .btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.admin-bulk-actions .btn-outline-warning:hover:not(:disabled) {
+    background-color: #ffc107;
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.admin-bulk-actions .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.admin-bulk-actions .btn-outline-danger:hover:not(:disabled) {
+    background-color: #dc3545;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.admin-bulk-actions .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .admin-album-toolbar .btn {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.9rem;
+    }
+
+    #advancedOptions .btn {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.9rem;
+    }
+
+    .admin-album-table .btn-sm {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-album-toolbar {
+        gap: 0.5rem;
+    }
+
+    .admin-album-toolbar .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .admin-album-toolbar .btn-group {
+        gap: 0.3rem;
+    }
+
+    #advancedOptions .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .admin-bulk-actions .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .admin-page-shell .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .admin-album-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .admin-album-toolbar .btn-group {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .admin-album-toolbar .btn {
+        width: 100%;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    #advancedOptions .btn {
+        width: 100%;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .admin-bulk-actions {
+        flex-direction: column;
+    }
+
+    .admin-bulk-actions .btn-group {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .admin-bulk-actions .btn {
+        width: 100%;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
     }
 }
