@@ -298,6 +298,20 @@ html {
     color: blue;
 }
 
+.admin-page-shell {
+    width: calc(100% - var(--sidebar-width));
+    max-width: none;
+    margin-left: auto;
+    margin-right: var(--sidebar-width);
+}
+
+@media (max-width: 991.98px) {
+    .admin-page-shell {
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
 .main-landing {
     width: calc(-250px + 100%);
 }

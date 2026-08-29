@@ -39,7 +39,7 @@ namespace Infrastructure.FileServer
             }
         }
 
-        public async Task MoveFile(string sourceFolder, string targetFolder, string fileName)
+        public async Task MoveFile(string sourceFolder, string targetFolder, string fileName, string newFileName = null)
         {
             if (string.IsNullOrWhiteSpace(sourceFolder)) throw new ArgumentException("sourceFolder is required", nameof(sourceFolder));
             if (string.IsNullOrWhiteSpace(targetFolder)) throw new ArgumentException("targetFolder is required", nameof(targetFolder));
@@ -49,7 +49,8 @@ namespace Infrastructure.FileServer
             {
                 SourceFolder = sourceFolder,
                 TargetFolder = targetFolder,
-                FileName = fileName
+                FileName = fileName,
+                NewFileName = newFileName
             };
 
             var json = JsonSerializer.Serialize(body);
@@ -58,6 +59,26 @@ namespace Infrastructure.FileServer
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Failed to move file. The file server returned a {response.StatusCode} status code.");
+            }
+        }
+
+        public async Task RenameFolder(string oldFolderName, string newFolderName)
+        {
+            if (string.IsNullOrWhiteSpace(oldFolderName)) throw new ArgumentException("oldFolderName is required", nameof(oldFolderName));
+            if (string.IsNullOrWhiteSpace(newFolderName)) throw new ArgumentException("newFolderName is required", nameof(newFolderName));
+
+            var body = new
+            {
+                OldName = oldFolderName,
+                NewName = newFolderName,
+            };
+
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync($"{_fileServerUrl}/files/rename-folder", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to rename folder. The file server returned a {response.StatusCode} status code.");
             }
         }
 

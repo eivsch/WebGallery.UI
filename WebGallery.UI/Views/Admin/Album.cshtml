@@ -13,7 +13,7 @@
         }
     }
 }
-<div class="container mt-5">
+<div class="container mt-5 admin-page-shell">
     <h2 class="mb-4">Admin: '@albumName' Contents</h2>
     <a href="/admin" class="btn btn-secondary mb-3">Back to album list</a>
 
@@ -34,6 +34,7 @@
             <a href="/admin/albums/@albumName/rebuild-index?type=date" class="btn btn-link mb-3" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items according to the date they were added.');">Rebuild on date</a>
             <a href="/albums/@albumName" class="btn btn-link mb-3">View album</a>
             <a href="/uploads?albumName=@albumName" class="btn btn-info mb-3">Add items</a>
+            <button type="button" class="btn btn-secondary mb-3 rename-album-btn" data-album-name="@albumName">Rename album</button>
         </div>
     </div>
     @if (Model.Items == null || !Model.Items.Any())
@@ -89,6 +90,12 @@
                             @Html.AntiForgeryToken()
                         </form>
                         <button type="button"
+                                class="btn btn-secondary btn-sm ms-2 rename-file-btn"
+                                data-file-name="@file.Name"
+                                data-media-locator="@file.Id">
+                            Rename
+                        </button>
+                        <button type="button"
                                 class="btn btn-warning btn-sm ms-2 move-file-btn"
                                 data-file-name="@file.Name"
                                 data-media-locator="@file.Id">
@@ -137,6 +144,7 @@
         (function () {
             const moveModalEl = document.getElementById('moveFileModal');
             const moveButtons = document.querySelectorAll('.move-file-btn');
+            const renameButtons = document.querySelectorAll('.rename-file-btn');
             const fileCheckboxes = document.querySelectorAll('.file-checkbox');
             const moveSelectedBtn = document.getElementById('moveSelectedBtn');
             const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
@@ -227,6 +235,57 @@
                 });
             });
 
+            renameButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const fileName = button.getAttribute('data-file-name') || '';
+                    const mediaLocator = button.getAttribute('data-media-locator') || fileName;
+                    const newFileName = window.prompt('Enter a new file name for: ' + fileName, fileName);
+                    if (newFileName === null) {
+                        return;
+                    }
+
+                    const trimmed = newFileName.trim();
+                    if (!trimmed) {
+                        window.alert('File name cannot be empty.');
+                        return;
+                    }
+
+                    if (trimmed.toLowerCase() === fileName.toLowerCase()) {
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/Admin/albums/' + encodeURIComponent(currentAlbum) + '/rename-file';
+
+                    const fileNameInput = document.createElement('input');
+                    fileNameInput.type = 'hidden';
+                    fileNameInput.name = 'fileName';
+                    fileNameInput.value = fileName;
+                    form.appendChild(fileNameInput);
+
+                    const mediaLocatorInput = document.createElement('input');
+                    mediaLocatorInput.type = 'hidden';
+                    mediaLocatorInput.name = 'mediaLocator';
+                    mediaLocatorInput.value = mediaLocator;
+                    form.appendChild(mediaLocatorInput);
+
+                    const newFileNameInput = document.createElement('input');
+                    newFileNameInput.type = 'hidden';
+                    newFileNameInput.name = 'newFileName';
+                    newFileNameInput.value = trimmed;
+                    form.appendChild(newFileNameInput);
+
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (token) {
+                        form.appendChild(token.cloneNode(true));
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            });
+
             if (moveSelectedBtn) {
                 moveSelectedBtn.addEventListener('click', () => {
                     const selectedFiles = getSelectedFiles();
@@ -282,6 +341,50 @@
                     alert('Target album must be different from source album.');
                     return;
                 }
+            });
+
+            document.querySelectorAll('.rename-album-btn').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const currentAlbumName = button.getAttribute('data-album-name');
+                    const newAlbumName = window.prompt('Enter a new album name for: ' + currentAlbumName, currentAlbumName);
+                    if (newAlbumName === null) {
+                        return;
+                    }
+
+                    const trimmed = newAlbumName.trim();
+                    if (!trimmed) {
+                        window.alert('Album name cannot be empty.');
+                        return;
+                    }
+
+                    if (trimmed.toLowerCase() === currentAlbumName.toLowerCase()) {
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/Admin/rename';
+
+                    const albumInput = document.createElement('input');
+                    albumInput.type = 'hidden';
+                    albumInput.name = 'albumName';
+                    albumInput.value = currentAlbumName;
+                    form.appendChild(albumInput);
+
+                    const newAlbumInput = document.createElement('input');
+                    newAlbumInput.type = 'hidden';
+                    newAlbumInput.name = 'newAlbumName';
+                    newAlbumInput.value = trimmed;
+                    form.appendChild(newAlbumInput);
+
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (token) {
+                        form.appendChild(token.cloneNode(true));
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                });
             });
         })();
     </script>
