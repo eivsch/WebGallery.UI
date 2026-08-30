@@ -1,4 +1,18 @@
-﻿function handleSearchFormSubmit(event) {
+﻿const BYTES_PER_MB = 1024 * 1024;
+
+function megabytesToBytes(megabytes) {
+    const parsed = parseFloat(megabytes);
+    if (Number.isNaN(parsed)) return null;
+    return Math.round(parsed * BYTES_PER_MB);
+}
+
+function bytesToMegabytes(bytes) {
+    const parsed = parseFloat(bytes);
+    if (Number.isNaN(parsed)) return '';
+    return parsed / BYTES_PER_MB;
+}
+
+function handleSearchFormSubmit(event) {
     event.preventDefault();
 
     const albumsSelect = document.getElementById('albumsInput');
@@ -9,6 +23,8 @@
     const fileExtensions = document.getElementById('fileExtensionsInput').value;
     const mediaNameContains = document.getElementById('mediaNameContainsInput').value;
     const maxSizeInput = document.getElementById('maxSizeInput');
+    const minFileSizeInput = document.getElementById('minFileSizeInput');
+    const maxFileSizeInput = document.getElementById('maxFileSizeInput');
     const allTagsMustMatch = document.getElementById('allTagsMustMatch').checked;
     const shuffle = document.getElementById('shuffle').checked;
     const createdAfter = document.getElementById('createdAfterInput').value;
@@ -22,6 +38,8 @@
     if (createdBefore) queryParams.append('createdBefore', createdBefore);
     if (mediaNameContains) queryParams.append('mediaNameContains', mediaNameContains);
     if (maxSizeInput && maxSizeInput.value) queryParams.append('maxSize', maxSizeInput.value);
+    if (minFileSizeInput && minFileSizeInput.value) queryParams.append('minFileSize', megabytesToBytes(minFileSizeInput.value));
+    if (maxFileSizeInput && maxFileSizeInput.value) queryParams.append('maxFileSize', megabytesToBytes(maxFileSizeInput.value));
     if (allTagsMustMatch) queryParams.append('allTagsMustMatch', 'true');
     if (shuffle) queryParams.append('shuffle', 'true');
 
@@ -263,6 +281,8 @@ document.addEventListener('DOMContentLoaded', function () {
             setTagsFromCsv(selected.getAttribute('data-tags') || '');
             document.getElementById('fileExtensionsInput').value = selected.getAttribute('data-fileextensions') || '';
             document.getElementById('mediaNameContainsInput').value = selected.getAttribute('data-medianamecontains') || '';
+            document.getElementById('minFileSizeInput').value = bytesToMegabytes(selected.getAttribute('data-minfilesize'));
+            document.getElementById('maxFileSizeInput').value = bytesToMegabytes(selected.getAttribute('data-maxfilesize'));
             if (maxSizeInput) {
                 maxSizeInput.value = selected.getAttribute('data-maxsize') || '200';
                 normalizeMaxSizeInput();
@@ -333,6 +353,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 AllTagsMustMatch: document.getElementById('allTagsMustMatch').checked,
                 SearchName: searchName,
                 MaxSize: maxSizeInput && maxSizeInput.value ? parseInt(maxSizeInput.value, 10) : null,
+                MinFileSize: document.getElementById('minFileSizeInput').value ? megabytesToBytes(document.getElementById('minFileSizeInput').value) : null,
+                MaxFileSize: document.getElementById('maxFileSizeInput').value ? megabytesToBytes(document.getElementById('maxFileSizeInput').value) : null,
                 CreatedAfter: document.getElementById('createdAfterInput').value || null,
                 CreatedBefore: document.getElementById('createdBeforeInput').value || null
             };

@@ -1,11 +1,6 @@
-- Videos doesn't support .avi
 - Performance improvement: The stats gathering on the homepage is very inefficient. Consider adding API endpoints for better efficiency.
 - UX improvement: The uploads page should let the user know what the max size for uploads is
-- UX improvement: On the Bio page, the keyboard arrow navigation on desktop conflicts whenever a video is displayed. Arrows < > are used both for fast forwarding/reversing within the video and for navigating to the next/previous item.
-- UX improvement: Mobile/table navigation. The side navigation bar is not displayed on mobile/tablet devices. Makes many of the sub-sites difficult to reach.
-- UX improvement: Mobile/table navigation. The login box is too narrow on mobile/tablet devices.
 - UX improvement: Admin page. Truncate filename if too long, i.e. if the actions are not properly displayed.
-- New functionality: On the bio page, if the image is a video image, a link back to the video at the timestamp/frame of the video image should be provided.
-- New functionality: Add file size as a search parameter on the search/customizer page.
+- New functionality: On the bio page, if the image is a screencap, a link back to the video at the timestamp/frame of the video image should be provided.
 - New functionality: Improve structure and navigation overall. Should add something like 'collections' for grouping items? Would be similar to tags, but semantically different and use more efficient storage (API).
 - See todo's in Admin controller (rename album, rebuild album tags)

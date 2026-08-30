@@ -3,13 +3,17 @@
 @model List<AlbumMetaDTO>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-<div class="container mt-5">
+<main class="main-content">
+<div class="container-fluid mt-5 admin-page-shell">
     <h2 class="mb-4">Admin: Album Management</h2>
 
     <div id="operationMessage" class="mt-2" style="display:none"></div>
 
-    <div class="mb-3">
-        <button id="mergeSelectedBtn" type="button" class="btn btn-primary" disabled>Merge Selected</button>
+    <div class="btn-toolbar mb-3" role="toolbar">
+        <div class="btn-group" role="group">
+            <button id="mergeSelectedBtn" type="button" class="btn btn-primary" disabled>◐ Merge Selected</button>
+            <a href="/uploads" class="btn btn-info">📤 Upload</a>
+        </div>
     </div>
 
     @if (Model == null || !Model.Any())
@@ -40,10 +44,11 @@
                     <td class="align-middle">@album.Created.ToString("yyyy-MM-dd")</td>
                     <td class="align-middle">@album.TotalCount</td>
                     <td class="align-middle">@album.TotalLikes</td>
-                    <td class="align-middle">
+                    <td class="align-middle admin-album-table__actions">
+                        <button type="button" class="btn btn-outline-warning btn-sm rename-album-btn me-1" data-album-name="@album.AlbumName">✏ Rename</button>
                         <form asp-action="Delete" asp-controller="Admin" method="post" class="d-inline-block">
                             <input type="hidden" name="albumName" value="@album.AlbumName" />
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); return confirm('Are you sure you want to delete the album @Html.Raw(JavaScriptEncoder.Default.Encode(album.AlbumName))?');"> X </button>
+                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); return confirm('Are you sure you want to delete the album @Html.Raw(JavaScriptEncoder.Default.Encode(album.AlbumName))?');">🗑 Delete</button>
                             @Html.AntiForgeryToken()
                         </form>
                     </td>
@@ -52,10 +57,10 @@
             </tbody>
         </table>
     }
-</div>
+    </div>
 
-<!-- Merge Modal -->
-<div class="modal fade" id="mergeModal" tabindex="-1" aria-labelledby="mergeModalLabel" aria-hidden="true">
+    <!-- Merge Modal -->
+    <div class="modal fade" id="mergeModal" tabindex="-1" aria-labelledby="mergeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="mergeForm" asp-action="Merge" asp-controller="Admin" method="post">
@@ -101,6 +106,7 @@
     </div>
   </div>
 </div>
+</main>
 
 @section Scripts {
     <script>
@@ -248,6 +254,51 @@
                 btn.addEventListener('click', function (e) {
                     const album = btn.getAttribute('data-album-name');
                     openMergeModal([album]);
+                });
+            });
+
+            document.querySelectorAll('.rename-album-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const currentAlbumName = button.getAttribute('data-album-name');
+                    const newAlbumName = window.prompt('Enter a new album name for: ' + currentAlbumName, currentAlbumName);
+                    if (newAlbumName === null) {
+                        return;
+                    }
+
+                    const trimmed = newAlbumName.trim();
+                    if (!trimmed) {
+                        window.alert('Album name cannot be empty.');
+                        return;
+                    }
+
+                    if (trimmed.toLowerCase() === currentAlbumName.toLowerCase()) {
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/Admin/rename';
+
+                    const albumInput = document.createElement('input');
+                    albumInput.type = 'hidden';
+                    albumInput.name = 'albumName';
+                    albumInput.value = currentAlbumName;
+                    form.appendChild(albumInput);
+
+                    const newAlbumInput = document.createElement('input');
+                    newAlbumInput.type = 'hidden';
+                    newAlbumInput.name = 'newAlbumName';
+                    newAlbumInput.value = trimmed;
+                    form.appendChild(newAlbumInput);
+
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (token) {
+                        const clonedToken = token.cloneNode(true);
+                        form.appendChild(clonedToken);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
                 });
             });
 

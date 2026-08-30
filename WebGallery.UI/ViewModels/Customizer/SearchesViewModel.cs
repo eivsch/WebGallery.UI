@@ -30,6 +30,8 @@ namespace WebGallery.UI.ViewModels.Customizer
         public string FileExtensions { get; set; }
         public string MediaNameContains { get; set; }
         public int? MaxSize { get; set; }
+        public long? MinFileSize { get; set; }
+        public long? MaxFileSize { get; set; }
         public bool? AllTagsMustMatch { get; set; }
         public string SearchName { get; set; }
         public string CreatedAfter { get; set; }

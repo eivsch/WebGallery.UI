@@ -70,7 +70,7 @@ namespace WebGallery.UI.Controllers
         {
             ViewBag.Current = "Bio";
 
-            List<SearchHitDTO> result = await _minimalApiProxy.GetSearch(_username, null, null, null, id, 1, false);
+            List<SearchHitDTO> result = await _minimalApiProxy.GetSearch(username: _username, albums: null, tags: null, fileExtension: null, mediaNameContains: id, maxResults: 1, allTagsMustMatch: false);
             if (result.Count == 0) return NoContent();
             SearchHitDTO searchHit = result[0];
 

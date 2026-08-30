@@ -49,7 +49,7 @@ namespace WebGallery.UI.Controllers
                 tags: null,
                 fileExtension: fileExtensions,
                 mediaNameContains: null,
-                maxSize: SearchBatchLimit,
+                maxResults: SearchBatchLimit,
                 allTagsMustMatch: false);
 
             if (results == null || results.Count == 0)
@@ -69,7 +69,7 @@ namespace WebGallery.UI.Controllers
                 tags: "banner image",
                 fileExtension: "jpg,jpeg,png,gif,webp,bmp",
                 mediaNameContains: null,
-                maxSize: 1000,
+                maxResults: 1000,
                 allTagsMustMatch: true);
 
             if (hits == null || hits.Count == 0)
@@ -316,7 +316,7 @@ namespace WebGallery.UI.Controllers
                     tags: null,
                     fileExtension: fileExtension,
                     mediaNameContains: null,
-                    maxSize: SearchBatchLimit,
+                    maxResults: SearchBatchLimit,
                     allTagsMustMatch: false,
                     hitsToSkip: currentOffset);
 
@@ -352,7 +352,7 @@ namespace WebGallery.UI.Controllers
                     tags: null,
                     fileExtension: fileExtension,
                     mediaNameContains: null,
-                    maxSize: SearchBatchLimit,
+                    maxResults: SearchBatchLimit,
                     allTagsMustMatch: false,
                     createdAfter: createdAfter);
 

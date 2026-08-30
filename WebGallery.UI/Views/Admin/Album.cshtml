@@ -13,9 +13,9 @@
         }
     }
 }
-<div class="container mt-5">
+<main class="main-content">
+<div class="container-fluid mt-5 admin-page-shell">
     <h2 class="mb-4">Admin: '@albumName' Contents</h2>
-    <a href="/admin" class="btn btn-secondary mb-3">Back to album list</a>
 
     @if (string.IsNullOrWhiteSpace(adminMessage) == false)
     {
@@ -27,13 +27,34 @@
         <div class="alert alert-danger">@adminError</div>
     }
 
-    <div class="row">
-        @* TODO: create a better UI for this. Use proper buttons instead of anchor tags and maybe some visual progress indicator or spinner.*@
-        <div class="col-6">
-            <a href="/admin/albums/@albumName/rebuild-index?type=name" class="btn btn-link mb-3" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items in alphabetical order.');">Rebuild on name</a>
-            <a href="/admin/albums/@albumName/rebuild-index?type=date" class="btn btn-link mb-3" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items according to the date they were added.');">Rebuild on date</a>
-            <a href="/albums/@albumName" class="btn btn-link mb-3">View album</a>
-            <a href="/uploads?albumName=@albumName" class="btn btn-info mb-3">Add items</a>
+    <!-- Primary Action Buttons -->
+    <div class="btn-toolbar mb-3 admin-album-toolbar" role="toolbar">
+        <div class="btn-group me-2" role="group">
+            <a href="/admin" class="btn btn-outline-secondary">← Back</a>
+            <a href="/uploads?albumName=@albumName" class="btn btn-success">+ Add items</a>
+            <a href="/albums/@albumName" class="btn btn-primary">👁 View album</a>
+        </div>
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#advancedOptions" aria-expanded="false" aria-controls="advancedOptions">
+                ⚙ Advanced
+            </button>
+        </div>
+    </div>
+
+    <!-- Advanced Options (Collapsed) -->
+    <div class="collapse mb-3" id="advancedOptions">
+        <div class="card card-body bg-dark border-secondary">
+            <div class="btn-group-vertical w-100" role="group">
+                <button type="button" class="btn btn-outline-warning text-start rename-album-btn" data-album-name="@albumName">
+                    ✏ Rename album
+                </button>
+                <a href="/admin/albums/@albumName/rebuild-index?type=name" class="btn btn-outline-info text-start" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items in alphabetical order.');">
+                    ↻ Rebuild on name
+                </a>
+                <a href="/admin/albums/@albumName/rebuild-index?type=date" class="btn btn-outline-info text-start" onclick="event.stopPropagation(); return confirm('Are you sure you want to rebuild the index? This will change the order of the items according to the date they were added.');">
+                    ↻ Rebuild on date
+                </a>
+            </div>
         </div>
     </div>
     @if (Model.Items == null || !Model.Items.Any())
@@ -42,9 +63,11 @@
     }
     else
     {
-        <div class="mb-3">
-            <button id="moveSelectedBtn" type="button" class="btn btn-warning me-2" disabled>Move Selected</button>
-            <button id="deleteSelectedBtn" type="button" class="btn btn-danger" disabled>Delete Selected</button>
+        <div class="mb-3 admin-bulk-actions" id="bulkActionsContainer" style="display: none;">
+            <div class="btn-group" role="group">
+                <button id="moveSelectedBtn" type="button" class="btn btn-outline-warning" disabled>↔ Move Selected</button>
+                <button id="deleteSelectedBtn" type="button" class="btn btn-outline-danger" disabled>🗑 Delete Selected</button>
+            </div>
 
             <form id="bulkDeleteForm" asp-action="DeleteFiles" asp-controller="Admin" asp-route-albumName="@albumName" method="post" class="d-none">
                 @Html.AntiForgeryToken()
@@ -82,17 +105,23 @@
                         <td>N/A</td>
                     }
                     <td>@file.Created.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                    <td>
+                    <td class="admin-album-table__actions">
                         <form asp-action="DeleteFile" asp-controller="Admin" asp-route-albumName="@albumName" method="post" class="d-inline-block" onsubmit="return confirm('Delete this file?');">
                             <input type="hidden" name="fileName" value="@file.Name" />
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            <button type="submit" class="btn btn-outline-danger btn-sm me-1">🗑 Delete</button>
                             @Html.AntiForgeryToken()
                         </form>
                         <button type="button"
-                                class="btn btn-warning btn-sm ms-2 move-file-btn"
+                                class="btn btn-outline-warning btn-sm me-1 rename-file-btn"
                                 data-file-name="@file.Name"
                                 data-media-locator="@file.Id">
-                            Move
+                            ✏ Rename
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-info btn-sm move-file-btn"
+                                data-file-name="@file.Name"
+                                data-media-locator="@file.Id">
+                            ↔ Move
                         </button>
                     </td>
                 </tr>
@@ -101,6 +130,7 @@
         </table>
     }
 </div>
+</main>
 
 <div class="modal fade" id="moveFileModal" tabindex="-1" aria-labelledby="moveFileModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -137,6 +167,7 @@
         (function () {
             const moveModalEl = document.getElementById('moveFileModal');
             const moveButtons = document.querySelectorAll('.move-file-btn');
+            const renameButtons = document.querySelectorAll('.rename-file-btn');
             const fileCheckboxes = document.querySelectorAll('.file-checkbox');
             const moveSelectedBtn = document.getElementById('moveSelectedBtn');
             const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
@@ -166,8 +197,17 @@
 
             function updateBulkButtonsState() {
                 const selectedCount = getSelectedFiles().length;
-                moveSelectedBtn.disabled = selectedCount === 0;
-                deleteSelectedBtn.disabled = selectedCount === 0;
+                const bulkActionsContainer = document.getElementById('bulkActionsContainer');
+                
+                if (selectedCount > 0) {
+                    bulkActionsContainer.style.display = 'block';
+                    moveSelectedBtn.disabled = false;
+                    deleteSelectedBtn.disabled = false;
+                } else {
+                    bulkActionsContainer.style.display = 'none';
+                    moveSelectedBtn.disabled = true;
+                    deleteSelectedBtn.disabled = true;
+                }
             }
 
             function loadTargetAlbumOptions() {
@@ -227,6 +267,57 @@
                 });
             });
 
+            renameButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const fileName = button.getAttribute('data-file-name') || '';
+                    const mediaLocator = button.getAttribute('data-media-locator') || fileName;
+                    const newFileName = window.prompt('Enter a new file name for: ' + fileName, fileName);
+                    if (newFileName === null) {
+                        return;
+                    }
+
+                    const trimmed = newFileName.trim();
+                    if (!trimmed) {
+                        window.alert('File name cannot be empty.');
+                        return;
+                    }
+
+                    if (trimmed.toLowerCase() === fileName.toLowerCase()) {
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/Admin/albums/' + encodeURIComponent(currentAlbum) + '/rename-file';
+
+                    const fileNameInput = document.createElement('input');
+                    fileNameInput.type = 'hidden';
+                    fileNameInput.name = 'fileName';
+                    fileNameInput.value = fileName;
+                    form.appendChild(fileNameInput);
+
+                    const mediaLocatorInput = document.createElement('input');
+                    mediaLocatorInput.type = 'hidden';
+                    mediaLocatorInput.name = 'mediaLocator';
+                    mediaLocatorInput.value = mediaLocator;
+                    form.appendChild(mediaLocatorInput);
+
+                    const newFileNameInput = document.createElement('input');
+                    newFileNameInput.type = 'hidden';
+                    newFileNameInput.name = 'newFileName';
+                    newFileNameInput.value = trimmed;
+                    form.appendChild(newFileNameInput);
+
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (token) {
+                        form.appendChild(token.cloneNode(true));
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            });
+
             if (moveSelectedBtn) {
                 moveSelectedBtn.addEventListener('click', () => {
                     const selectedFiles = getSelectedFiles();
@@ -282,6 +373,50 @@
                     alert('Target album must be different from source album.');
                     return;
                 }
+            });
+
+            document.querySelectorAll('.rename-album-btn').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const currentAlbumName = button.getAttribute('data-album-name');
+                    const newAlbumName = window.prompt('Enter a new album name for: ' + currentAlbumName, currentAlbumName);
+                    if (newAlbumName === null) {
+                        return;
+                    }
+
+                    const trimmed = newAlbumName.trim();
+                    if (!trimmed) {
+                        window.alert('Album name cannot be empty.');
+                        return;
+                    }
+
+                    if (trimmed.toLowerCase() === currentAlbumName.toLowerCase()) {
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/Admin/rename';
+
+                    const albumInput = document.createElement('input');
+                    albumInput.type = 'hidden';
+                    albumInput.name = 'albumName';
+                    albumInput.value = currentAlbumName;
+                    form.appendChild(albumInput);
+
+                    const newAlbumInput = document.createElement('input');
+                    newAlbumInput.type = 'hidden';
+                    newAlbumInput.name = 'newAlbumName';
+                    newAlbumInput.value = trimmed;
+                    form.appendChild(newAlbumInput);
+
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (token) {
+                        form.appendChild(token.cloneNode(true));
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                });
             });
         })();
     </script>

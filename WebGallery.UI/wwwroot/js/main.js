@@ -14,6 +14,8 @@ $.fancybox.defaults.buttons = [
 	"close"
 ],
 
+$.fancybox.defaults.video.autoStart = false;
+
 jQuery(document).ready(function($) {
 
 	"use strict";

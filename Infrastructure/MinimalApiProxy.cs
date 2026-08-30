@@ -234,7 +234,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxSize, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null)
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxResults, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null, long? minFileSize = null, long? maxFileSize = null)
     {
         string uri = $"users/{username}/search";
         Dictionary<string, string> paramss = [];
@@ -246,8 +246,12 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             paramss.Add("fileExtensions", fileExtension);
         if (mediaNameContains is not null)
             paramss.Add("mediaNameContains", mediaNameContains);
-        if (maxSize.HasValue)
-            paramss.Add("maxSize", maxSize.ToString());
+        if (maxResults.HasValue)
+            paramss.Add("maxResults", maxResults.ToString());
+        if (minFileSize.HasValue)
+            paramss.Add("minFileSize", minFileSize.Value.ToString());
+        if (maxFileSize.HasValue)
+            paramss.Add("maxFileSize", maxFileSize.Value.ToString());
         if (hitsToSkip.HasValue)
             paramss.Add("hitsToSkip", hitsToSkip.Value.ToString());
         if (createdAfter is not null)
@@ -345,6 +349,54 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             throw new Exception($"The API returned a {response.StatusCode} status code.");
         }
     }
+
+    public async Task<bool> AlbumExists(string username, string albumName)
+    {
+        if (string.IsNullOrWhiteSpace(albumName))
+        {
+            return false;
+        }
+
+        var hits = await GetSearch(username, albumName, null, null, null, 1, false, 0, null, null);
+        return hits is { Count: > 0 };
+    }
+
+    public async Task RenameAlbum(string username, string albumName, string newAlbumName)
+    {
+        if (string.IsNullOrWhiteSpace(albumName)) throw new ArgumentException("albumName is required", nameof(albumName));
+        if (string.IsNullOrWhiteSpace(newAlbumName)) throw new ArgumentException("newAlbumName is required", nameof(newAlbumName));
+
+        var body = new
+        {
+            NewAlbumName = newAlbumName,
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PostAsync($"users/{username}/albums/{albumName}/rename", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task RenameMedia(string username, string albumName, string mediaLocator, string newMediaName)
+    {
+        if (string.IsNullOrWhiteSpace(albumName)) throw new ArgumentException("albumName is required", nameof(albumName));
+        if (string.IsNullOrWhiteSpace(mediaLocator)) throw new ArgumentException("mediaLocator is required", nameof(mediaLocator));
+        if (string.IsNullOrWhiteSpace(newMediaName)) throw new ArgumentException("newMediaName is required", nameof(newMediaName));
+
+        var body = new
+        {
+            NewMediaName = newMediaName,
+        };
+
+        var jsonContent = new JsonContent(body);
+        var response = await _client.PatchAsync($"users/{username}/albums/{albumName}/{mediaLocator}/rename", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
 }
 
 public record CredentialsDTO
@@ -415,6 +467,8 @@ public record SavedSearchDTO
     public string FileExtensions { get; set; }
     public string MediaNameContains { get; set; }
     public int? MaxSize { get; set; }
+    public long? MinFileSize { get; set; }
+    public long? MaxFileSize { get; set; }
     public bool? AllTagsMustMatch { get; set; }
     public string CreatedAfter { get; set; }
     public string CreatedBefore { get; set; }
