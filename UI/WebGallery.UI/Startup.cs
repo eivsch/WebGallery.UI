@@ -60,9 +60,6 @@ namespace WebGallery.UI
             services.AddTransient<Infrastructure.FileServer.IFileServerProxy, Infrastructure.FileServer.FileServerProxy>();
             services.AddTransient<Infrastructure.MinimalApi.MinimalApiProxy>();
             services.AddTransient<Infrastructure.Common.UsernameResolver>();
-
-            if (!IsDevelopmentEnv)
-                services.AddApplicationInsightsTelemetry();     // Should automatically get the key from configuration
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
