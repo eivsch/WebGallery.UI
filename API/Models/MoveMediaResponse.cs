@@ -1,0 +1,1 @@
+record MoveMediaResponse(bool Success, string? ErrorMessage);
