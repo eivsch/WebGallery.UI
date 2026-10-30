@@ -29,6 +29,7 @@
         <table class="table table-dark table-sm align-middle">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Video</th>
                     <th>Progress</th>
                     <th>Plays</th>
@@ -42,8 +43,10 @@
                 string href = string.IsNullOrEmpty(item.MediaId)
                     ? "/Bio/id/" + System.Uri.EscapeDataString(item.MediaName)
                     : "/Bio/open/" + System.Uri.EscapeDataString(item.Album) + "/" + System.Uri.EscapeDataString(item.MediaId);
+                string thumbsUri = "/files/image/" + WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.Album + "/" + item.MediaName);
                 bool resumable = !item.Watched && item.PositionSeconds > 1;
-                <tr>
+                <tr class="history-row" data-utc="@item.LastPlayedUtc.ToString("O")">
+                    <td style="width:120px;"><a href="@href"><img src="@thumbsUri" alt="" loading="lazy" style="width:112px;height:63px;object-fit:cover;border-radius:4px;background:#222;" onerror="this.style.visibility='hidden'"></a></td>
                     <td><a class="regular-text-link text-white" href="@href">@item.MediaName</a></td>
                     <td class="text-nowrap">
                         @if (resumable)
@@ -81,18 +84,37 @@
 
 @section Scripts {
 <script>
-    document.querySelectorAll('time.history-time').forEach(function (el) {
-        var d = new Date(el.getAttribute('datetime'));
+    function relTime(d) {
+        var s = Math.max(0, Math.round((Date.now() - d.getTime()) / 1000));
+        function u(n, w) { return n + ' ' + w + (n === 1 ? '' : 's') + ' ago'; }
+        if (s < 60) return 'just now';
+        if (s < 3600) return u(Math.floor(s / 60), 'minute');
+        if (s < 86400) return u(Math.floor(s / 3600), 'hour');
+        if (s < 86400 * 30) return u(Math.floor(s / 86400), 'day');
+        if (s < 86400 * 365) return u(Math.floor(s / (86400 * 30)), 'month');
+        return u(Math.floor(s / (86400 * 365)), 'year');
+    }
+    function dayKey(d) { return d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate(); }
+    var now = new Date();
+    var todayKey = dayKey(now);
+    var yest = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    var lastKey = null;
+    document.querySelectorAll('tr.history-row').forEach(function (row) {
+        var d = new Date(row.getAttribute('data-utc'));
         if (isNaN(d)) return;
-        var s = Math.round((Date.now() - d.getTime()) / 1000);
-        var text;
-        if (s < 60) text = 'just now';
-        else if (s < 3600) text = Math.floor(s / 60) + ' min ago';
-        else if (s < 86400) text = Math.floor(s / 3600) + ' h ago';
-        else if (s < 86400 * 30) text = Math.floor(s / 86400) + ' d ago';
-        else text = d.toLocaleDateString();
-        el.title = d.toLocaleString();
-        el.textContent = text;
+        var t = row.querySelector('time.history-time');
+        t.title = d.toLocaleString();
+        t.textContent = relTime(d);
+        var k = dayKey(d);
+        var label = k === todayKey ? 'Today' : k === dayKey(yest) ? 'Yesterday' : 'Earlier';
+        if (label !== lastKey) {
+            lastKey = label;
+            var h = document.createElement('tr');
+            h.className = 'history-group';
+            h.innerHTML = '<th colspan="6" class="pt-3 text-uppercase small text-secondary"></th>';
+            h.firstChild.textContent = label;
+            row.parentNode.insertBefore(h, row);
+        }
     });
 </script>
 }
