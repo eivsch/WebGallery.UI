@@ -5,7 +5,9 @@ using MinimalGallery.API.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("https://0.0.0.0:5041", "http://0.0.0.0:5042");
+var httpsPort = Environment.GetEnvironmentVariable("WEBGALLERY_HTTPS_PORT") ?? "5041";
+var httpPort = Environment.GetEnvironmentVariable("WEBGALLERY_HTTP_PORT") ?? "5042";
+builder.WebHost.UseUrls($"https://0.0.0.0:{httpsPort}", $"http://0.0.0.0:{httpPort}");
 
 builder.Services.AddCors();
 
@@ -240,6 +242,72 @@ app.MapDelete("/users/{username}/saved-searches/{searchName}", (string username,
     user.SavedSearches.RemoveAll(s => s.SearchName == searchName);
     UserMetaHandler.WriteUser(user);
 
+    return Results.NoContent();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapPost("/users/{username}/watch-history", (string username, RecordPlayRequest r) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(r.Album) || string.IsNullOrWhiteSpace(r.MediaName)) return Results.BadRequest();
+
+    WatchHistoryHandler.RecordPlay(username, r.Album, r.MediaName, r.MediaId);
+
+    return Results.NoContent();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapGet("/users/{username}/watch-history", (string username, int from = 0, int size = 100) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    return Results.Ok(WatchHistoryHandler.GetHistory(username, from, size));
+})
+.Produces<List<WatchHistoryItem>>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapGet("/users/{username}/watch-history/entry", (string username, string album, string mediaName) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    WatchHistoryItem? entry = WatchHistoryHandler.GetEntry(username, album, mediaName);
+    return entry == null ? Results.NotFound() : Results.Ok(entry);
+})
+.Produces<WatchHistoryItem>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapPut("/users/{username}/watch-history/position", (string username, SavePositionRequest r) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(r.Album) || string.IsNullOrWhiteSpace(r.MediaName)
+        || !double.IsFinite(r.PositionSeconds) || r.PositionSeconds < 0
+        || (r.DurationSeconds is double d && (!double.IsFinite(d) || d < 0))) return Results.BadRequest();
+
+    return WatchHistoryHandler.SavePosition(username, r.Album, r.MediaName, r.PositionSeconds, r.DurationSeconds)
+        ? Results.NoContent()
+        : Results.NotFound();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapDelete("/users/{username}/watch-history/entry", (string username, string album, string mediaName) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    return WatchHistoryHandler.Remove(username, album, mediaName) ? Results.NoContent() : Results.NotFound();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapDelete("/users/{username}/watch-history", (string username) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    WatchHistoryHandler.Clear(username);
     return Results.NoContent();
 })
 .Produces(StatusCodes.Status204NoContent)

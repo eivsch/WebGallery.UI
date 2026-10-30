@@ -1,0 +1,124 @@
+@using Infrastructure.MinimalApi
+@model List<WatchHistoryItemDTO>
+@functions {
+    static string FormatTime(double seconds)
+    {
+        var t = System.TimeSpan.FromSeconds(System.Math.Max(0, seconds));
+        return t.TotalHours >= 1 ? $"{(int)t.TotalHours}:{t.Minutes:00}:{t.Seconds:00}" : $"{t.Minutes}:{t.Seconds:00}";
+    }
+}
+
+<main class="main-content">
+<div class="container-fluid mt-5 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Watch history</h2>
+        @if (Model != null && Model.Count > 0)
+        {
+            <form method="post" asp-controller="History" asp-action="Clear" onsubmit="return confirm('Clear all watch history? This cannot be undone.');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Clear all</button>
+            </form>
+        }
+    </div>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="alert alert-info">No videos have been played yet.</div>
+    }
+    else
+    {
+        <table class="table table-dark table-sm align-middle">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Video</th>
+                    <th>Progress</th>
+                    <th>Plays</th>
+                    <th>Last played</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                string href = string.IsNullOrEmpty(item.MediaId)
+                    ? "/Bio/open?album=" + System.Uri.EscapeDataString(item.Album) + "&mediaName=" + System.Uri.EscapeDataString(item.MediaName)
+                    : "/Bio/open/" + System.Uri.EscapeDataString(item.Album) + "/" + System.Uri.EscapeDataString(item.MediaId);
+                string thumbsUri = "/files/image/" + WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.Album + "/" + item.MediaName);
+                bool resumable = !item.Watched && item.PositionSeconds > 1;
+                <tr class="history-row" data-utc="@item.LastPlayedUtc.ToString("O")">
+                    <td style="width:120px;"><a href="@href"><img src="@thumbsUri" alt="" loading="lazy" style="width:112px;height:63px;object-fit:cover;border-radius:4px;background:#222;" onerror="this.style.visibility='hidden'"></a></td>
+                    <td><a class="regular-text-link text-white" href="@href">@item.MediaName</a></td>
+                    <td class="text-nowrap">
+                        @if (resumable)
+                        {
+                            <span class="badge bg-primary">Continue watching</span>
+                            <span class="ms-1">@FormatTime(item.PositionSeconds)@(item.DurationSeconds > 0 ? " / " + FormatTime(item.DurationSeconds.Value) : "")</span>
+                            @if (item.DurationSeconds > 0)
+                            {
+                                <div class="progress mt-1" style="height:4px;">
+                                    <div class="progress-bar" style="width:@((int)System.Math.Min(100, item.PositionSeconds / item.DurationSeconds.Value * 100))%"></div>
+                                </div>
+                            }
+                        }
+                        else if (item.Watched)
+                        {
+                            <span class="badge bg-success">Watched</span>
+                        }
+                    </td>
+                    <td>@item.PlayCount</td>
+                    <td class="text-nowrap"><time class="history-time" datetime="@item.LastPlayedUtc.ToString("O")">@item.LastPlayedUtc.ToString("yyyy-MM-dd HH:mm") UTC</time></td>
+                    <td class="text-nowrap">
+                        <form method="post" asp-controller="History" asp-action="Remove" class="d-inline">
+                            <input type="hidden" name="album" value="@item.Album" />
+                            <input type="hidden" name="mediaName" value="@item.MediaName" />
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        @if (ViewBag.HasMore == true)
+        {
+            <div class="text-center my-3"><a class="btn btn-outline-secondary" href="/History?size=@ViewBag.NextSize">Load more</a></div>
+        }
+    }
+</div>
+</main>
+
+@section Scripts {
+<script>
+    function relTime(d) {
+        var s = Math.max(0, Math.round((Date.now() - d.getTime()) / 1000));
+        function u(n, w) { return n + ' ' + w + (n === 1 ? '' : 's') + ' ago'; }
+        if (s < 60) return 'just now';
+        if (s < 3600) return u(Math.floor(s / 60), 'minute');
+        if (s < 86400) return u(Math.floor(s / 3600), 'hour');
+        if (s < 86400 * 30) return u(Math.floor(s / 86400), 'day');
+        if (s < 86400 * 365) return u(Math.floor(s / (86400 * 30)), 'month');
+        return u(Math.floor(s / (86400 * 365)), 'year');
+    }
+    function dayKey(d) { return d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate(); }
+    var now = new Date();
+    var todayKey = dayKey(now);
+    var yest = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    var lastKey = null;
+    document.querySelectorAll('tr.history-row').forEach(function (row) {
+        var d = new Date(row.getAttribute('data-utc'));
+        if (isNaN(d)) return;
+        var t = row.querySelector('time.history-time');
+        t.title = d.toLocaleString();
+        t.textContent = relTime(d);
+        var k = dayKey(d);
+        var label = k === todayKey ? 'Today' : k === dayKey(yest) ? 'Yesterday' : 'Earlier';
+        if (label !== lastKey) {
+            lastKey = label;
+            var h = document.createElement('tr');
+            h.className = 'history-group';
+            h.innerHTML = '<th colspan="6" class="pt-3 text-uppercase small text-secondary"></th>';
+            h.firstChild.textContent = label;
+            row.parentNode.insertBefore(h, row);
+        }
+    });
+</script>
+}

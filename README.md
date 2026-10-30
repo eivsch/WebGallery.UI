@@ -45,6 +45,20 @@ Publish each project into `FileServer`, `MinimalGallery.API` and `UI` subfolders
 
 This opens one PowerShell window per service.
 
+## Side-by-side dev mode (manual checks)
+
+Run the current checkout next to the live app without touching it:
+
+```powershell
+.\Start-WebGallery-Dev.ps1            # build + start on alternate ports
+.\Start-WebGallery-Dev.ps1 -Refresh   # re-create the dev data copy from live data first
+.\Start-WebGallery-Dev.ps1 -Stop      # stop only the dev processes it started
+```
+
+- Ports: UI `5150`/`5151`, API `5142`/`5141`, FileServer `5132`/`5131` (override with `-UiHttpPort -UiPort -ApiPort -FileServerPort`). Services read `WEBGALLERY_HTTP_PORT` / `WEBGALLERY_HTTPS_PORT`; unset, they keep the standard ports.
+- Data: the live data folder (from the live API `appsettings.json`, or `-LiveDataPath`) is mirrored to `<LiveData>-Dev` (`-DevDataPath`): index files (`*.dat` etc.) are copied, media are NTFS hard links (no extra disk space, same drive required). Re-copied only with `-Refresh`.
+- The script refuses to run on live ports or if the dev data path overlaps the live data or the repo. PIDs, logs and state live beside the dev data folder.
+
 ## API overview
 
 Under `/users/{username}`: user create/delete, `albums` (list, create, rename, merge, delete, rebuild index/tags), media (add, get, delete, rename, move, likes, tags), `search`, `saved-searches`, `ad-hoc-jobs/{jobName}`. See `API/Program.cs` or Swagger.

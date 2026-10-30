@@ -176,6 +176,85 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         else return false;
     }
 
+    public async Task PostWatchHistory(string username, string album, string mediaName, string mediaId)
+    {
+        var jsonContent = new JsonContent(new { Album = album, MediaName = mediaName, MediaId = mediaId });
+        var response = await _client.PostAsync($"users/{username}/watch-history", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task<List<WatchHistoryItemDTO>> GetWatchHistory(string username, int from = 0, int size = 100)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"users/{username}/watch-history?from={from}&size={size}");
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+
+        string json = await response.Content.ReadAsStringAsync();
+
+        return JsonSerializer.Deserialize<List<WatchHistoryItemDTO>>(json, _jsonOpts) ?? [];
+    }
+
+    public async Task<WatchHistoryItemDTO> GetWatchHistoryEntry(string username, string album, string mediaName)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"users/{username}/watch-history/entry?album={Uri.EscapeDataString(album)}&mediaName={Uri.EscapeDataString(mediaName)}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+
+        string json = await response.Content.ReadAsStringAsync();
+
+        return JsonSerializer.Deserialize<WatchHistoryItemDTO>(json, _jsonOpts);
+    }
+
+    public async Task PutWatchPosition(string username, string album, string mediaName, double positionSeconds, double? durationSeconds)
+    {
+        var jsonContent = new JsonContent(new { Album = album, MediaName = mediaName, PositionSeconds = positionSeconds, DurationSeconds = durationSeconds });
+        var response = await _client.PutAsync($"users/{username}/watch-history/position", jsonContent);
+        if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task DeleteWatchHistoryEntry(string username, string album, string mediaName)
+    {
+        var response = await _client.DeleteAsync($"users/{username}/watch-history/entry?album={Uri.EscapeDataString(album)}&mediaName={Uri.EscapeDataString(mediaName)}");
+        if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task ClearWatchHistory(string username)
+    {
+        var response = await _client.DeleteAsync($"users/{username}/watch-history");
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task<MediaDTO> GetMedia(string username, string albumName, string mediaLocator)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"users/{username}/albums/{albumName}/{mediaLocator}");
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+
+        string json = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(json) || json == "null") return null;
+
+        return JsonSerializer.Deserialize<MediaDTO>(json, _jsonOpts);
+    }
+
     public async Task PatchAddLike(string username, string album, string mediaLocator)
     {
         HttpResponseMessage response = await _client.PatchAsync($"users/{username}/albums/{album}/{mediaLocator}/likes", null);
@@ -403,6 +482,18 @@ public record CredentialsDTO
 {
     public string Username {get;set;}
     public string Password {get;set;}
+}
+
+public record WatchHistoryItemDTO
+{
+    public string Album { get; set; }
+    public string MediaName { get; set; }
+    public string MediaId { get; set; }
+    public DateTime LastPlayedUtc { get; set; }
+    public int PlayCount { get; set; }
+    public double PositionSeconds { get; set; }
+    public double? DurationSeconds { get; set; }
+    public bool Watched { get; set; }
 }
 
 public record AlbumMetaDTO

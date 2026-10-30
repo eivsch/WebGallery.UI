@@ -162,6 +162,76 @@ namespace WebGallery.UI.Controllers
             return View("Deleted", new BioPictureViewModel { AlbumMediaIndex = 0 });
         }
 
+        [HttpPost("played")]
+        public async Task<IActionResult> RecordPlayed([FromBody] PlayedRequest request)
+        {
+            bool isMp4 = request?.MediaName != null && request.MediaName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase);
+            if (!isMp4 || string.IsNullOrWhiteSpace(request.Album)) return BadRequest();
+
+            await _minimalApiProxy.PostWatchHistory(_username, request.Album, request.MediaName, request.MediaId);
+            return NoContent();
+        }
+
+        [HttpGet("resume")]
+        public async Task<IActionResult> Resume(string album, string mediaName)
+        {
+            WatchHistoryItemDTO entry = await _minimalApiProxy.GetWatchHistoryEntry(_username, album, mediaName);
+            double position = entry == null || entry.Watched ? 0 : entry.PositionSeconds;
+
+            return Json(new { positionSeconds = position });
+        }
+
+        [HttpPost("position")]
+        public async Task<IActionResult> SavePosition([FromBody] PositionRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Album) || string.IsNullOrWhiteSpace(request.MediaName)
+                || !double.IsFinite(request.PositionSeconds) || request.PositionSeconds < 0) return BadRequest();
+
+            double? duration = request.DurationSeconds is double d && double.IsFinite(d) && d > 0 ? d : null;
+            await _minimalApiProxy.PutWatchPosition(_username, request.Album, request.MediaName, request.PositionSeconds, duration);
+            return NoContent();
+        }
+
+        public class PositionRequest
+        {
+            public string Album { get; set; }
+            public string MediaName { get; set; }
+            public double PositionSeconds { get; set; }
+            public double? DurationSeconds { get; set; }
+        }
+
+        // Exact lookup by media id; avoids the ambiguity of name-contains search.
+        [HttpGet("open/{album}/{mediaId}")]
+        public async Task<IActionResult> Open(string album, string mediaId)
+        {
+            MediaDTO media = await _minimalApiProxy.GetMedia(_username, album, mediaId);
+            if (media?.Index == null) return NotFound();
+
+            return Redirect($"/Bio/{Uri.EscapeDataString(album)}/{media.Index.Value}");
+        }
+
+        // Fallback for history entries without a media id: exact name match within the album.
+        [HttpGet("open")]
+        public async Task<IActionResult> OpenByName(string album, string mediaName)
+        {
+            if (string.IsNullOrWhiteSpace(album) || string.IsNullOrWhiteSpace(mediaName)) return BadRequest();
+
+            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(username: _username, albums: album, tags: null, fileExtension: null, mediaNameContains: mediaName, maxResults: 100, allTagsMustMatch: false);
+            SearchHitDTO hit = hits?.FirstOrDefault(h =>
+                string.Equals(h.AlbumName, album, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(h.MediaItem?.Name, mediaName, StringComparison.OrdinalIgnoreCase));
+            if (hit == null) return NotFound();
+
+            return Redirect($"/Bio/{Uri.EscapeDataString(hit.AlbumName)}/{hit.MediaAlbumIndex}");
+        }
+
+        public class PlayedRequest
+        {
+            public string Album { get; set; }
+            public string MediaName { get; set; }
+            public string MediaId { get; set; }
+        }
+
         [HttpPost("SetVideoThumbnail")]
         public async Task<IActionResult> SetVideoThumbnail([FromBody] SetVideoThumbnailRequest request)
         {

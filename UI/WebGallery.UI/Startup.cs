@@ -32,7 +32,7 @@ namespace WebGallery.UI
             // Authentication
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
             {
-                options.Cookie.Name = "WebGallery.Cookies";
+                options.Cookie.Name = Configuration.GetValue("Authentication:CookieName", "WebGallery.Cookies");
                 options.LoginPath = "/Login";
                 options.AccessDeniedPath = "/accessdenied";
                 options.ExpireTimeSpan = TimeSpan.FromSeconds(3600);

@@ -1,4 +1,4 @@
-﻿function tagExists(tag) {
+function tagExists(tag) {
     var normalised = tag.replace(/^#/, '');
     return $('#bioPictureTags').children('[data-tag-name="' + normalised + '"]').length > 0;
 }
@@ -430,12 +430,113 @@ function parseGeneratedImageTimestamp(fileName) {
     return totalSeconds;
 }
 
+// The video element is replaced when switching items via ajax, so listen on the document (play does not bubble, so use capture).
+document.addEventListener('play', function (e) {
+    var video = e.target;
+    if (!video || video.tagName !== 'VIDEO' || !video.classList.contains('bio-img')) return;
+
+    var album = (document.getElementById('album-id-placeholder') || {}).textContent;
+    var nameEl = document.querySelector('#bioVideoWrapper > div');
+    var mediaName = nameEl ? nameEl.textContent.trim() : '';
+    if (!album || !mediaName) return;
+
+    var mediaId = ((document.getElementById('image-id-placeholder') || {}).textContent || '').trim();
+
+    // Set up once per loaded video element, not on every resume after pause.
+    if (video.dataset.playRecorded === 'true' || video.dataset.playSetup === 'true') return;
+    video.dataset.playSetup = 'true';
+    video.dataset.album = album.trim();
+    video.dataset.mediaName = mediaName;
+    video.dataset.mediaId = mediaId;
+    video.dataset.playedSeconds = '0';
+    video.dataset.lastTime = String(video.currentTime);
+
+    // Resume from the saved position; position saving starts once this has resolved so 0 never overwrites it.
+    fetch('/Bio/resume?album=' + encodeURIComponent(album.trim()) + '&mediaName=' + encodeURIComponent(mediaName))
+        .then(function (r) { return r.json(); }).then(function (data) {
+            var pos = data && data.positionSeconds;
+            if (pos > 1 && video.currentTime < pos) video.currentTime = pos;
+        }).catch(function () { }).then(function () {
+            video.dataset.lastTime = String(video.currentTime);
+            video.dataset.savePositions = 'true';
+        });
+}, true);
+
+// Count real playback time and record the play once ~5s have been watched.
+function trackPlayback(video) {
+    if (video.dataset.playRecorded === 'true' || video.dataset.playedPending === 'true') return;
+    if (video.dataset.playSetup !== 'true') return;
+    var cur = video.currentTime;
+    var last = Number(video.dataset.lastTime);
+    var delta = cur - last;
+    video.dataset.lastTime = String(cur);
+    if (video.paused || delta <= 0 || delta > 2) return; // ignore seeks
+    var played = (Number(video.dataset.playedSeconds) || 0) + delta;
+    video.dataset.playedSeconds = String(played);
+    if (played < 5) return;
+
+    video.dataset.playedPending = 'true';
+    fetch('/Bio/played', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+            album: video.dataset.album,
+            mediaName: video.dataset.mediaName,
+            mediaId: video.dataset.mediaId
+        })
+    }).then(function (r) {
+        if (r.ok) video.dataset.playRecorded = 'true';
+    }).catch(function () { }).then(function () {
+        video.dataset.playedPending = 'false';
+        saveVideoPosition(video);
+    });
+}
+
+function saveVideoPosition(video) {
+    if (!video || video.dataset.savePositions !== 'true') return;
+    if (video.dataset.playedPending === 'true') return; // the play entry must exist before positions are saved
+    if (!isFinite(video.duration) || video.duration <= 0) return;
+
+    video.dataset.lastSave = Date.now();
+    fetch('/Bio/position', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+            album: video.dataset.album,
+            mediaName: video.dataset.mediaName,
+            positionSeconds: video.currentTime,
+            durationSeconds: video.duration
+        })
+    }).catch(function () { });
+}
+
+function isBioVideo(e) {
+    return e.target && e.target.tagName === 'VIDEO' && e.target.classList.contains('bio-img');
+}
+
+// Throttled saves while playing, plus saves on pause/end and when leaving the page.
+document.addEventListener('timeupdate', function (e) {
+    if (!isBioVideo(e)) return;
+    trackPlayback(e.target);
+    if (Date.now() - (Number(e.target.dataset.lastSave) || 0) >= 5000) saveVideoPosition(e.target);
+}, true);
+document.addEventListener('pause', function (e) { if (isBioVideo(e)) saveVideoPosition(e.target); }, true);
+document.addEventListener('ended', function (e) { if (isBioVideo(e)) saveVideoPosition(e.target); }, true);
+window.addEventListener('pagehide', function () { saveVideoPosition(document.querySelector('video.bio-img')); });
+document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') saveVideoPosition(document.querySelector('video.bio-img'));
+});
+
 // Initialize the video thumbnail button on page load
 document.addEventListener('DOMContentLoaded', function() {
     setupVideoThumbnailButton();
 });
 
 function showBioLoading() {
+    // The video element is about to be replaced; keep its position.
+    saveVideoPosition(document.querySelector('video.bio-img'));
     var el = document.getElementById('bio-loading');
     if (el) el.style.display = 'block';
 }
