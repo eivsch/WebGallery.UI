@@ -157,7 +157,7 @@ if (-not (Test-Path -LiteralPath $devData)) {
 $ffmpeg = Join-Path $LiveRootPath 'ffmpeg\ffmpeg.exe'
 $services = @(
     @{ Name = 'FileServer'; Project = 'FileServer\WebGallery.FileServer.csproj'; Https = $FileServerPort; Http = $FileServerPort + 1
-       Env = @{ ConnectionStrings__FileSystemRoot = $devData; FfmpegPath = $(if (Test-Path $ffmpeg) { $ffmpeg } else { 'ffmpeg' }) } },
+       Env = @{ ConnectionStrings__FileSystemRoot = $devData; FfmpegPath = $(if (Test-Path $ffmpeg) { $ffmpeg } else { (Get-Command ffmpeg -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source }) } },
     @{ Name = 'API'; Project = 'API\MinimalGallery.API.csproj'; Https = $ApiPort; Http = $ApiPort + 1
        Env = @{ IndexFilesStoragePath = $devData } },
     @{ Name = 'UI'; Project = 'UI\WebGallery.UI\WebGallery.UI.csproj'; Https = $UiPort; Http = $UiHttpPort
