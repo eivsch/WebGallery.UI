@@ -62,15 +62,21 @@
 
     <div class="row g-3 justify-content-center mb-5 mx-2">
         <div class="col-6 col-md-2">
-            <a href="/single" class="shortcut-card">
+            <a href="/single/search?fileExtensions=jpg,jpeg,webp,png&shuffle=true" class="shortcut-card">
                 <span class="shortcut-card__icon">🎲</span>
                 <span class="shortcut-card__label">Random images</span>
             </a>
         </div>
         <div class="col-6 col-md-2">
-            <a href="/home/random-bio?fileExtensions=mp4,avi,mov,mkv,flv,wmv,webm,m4v" class="shortcut-card">
+            <a href="/home/random-bio?fileExtensions=mp4&minFileSize=104857600" class="shortcut-card">
                 <span class="shortcut-card__icon">🎲</span>
-                <span class="shortcut-card__label">Random video</span>
+                <span class="shortcut-card__label">Random video (long)</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="/home/random-bio?fileExtensions=mp4&maxFileSize=104857599" class="shortcut-card">
+                <span class="shortcut-card__icon">🎲</span>
+                <span class="shortcut-card__label">Random video (short)</span>
             </a>
         </div>
         <div class="col-6 col-md-2">
@@ -86,17 +92,11 @@
             </a>
         </div>
         <div class="col-6 col-md-2">
-            <a href="/single/search?tags=unwatched&fileExtensions=mp4,avi,mov,mkv,flv,wmv,webm,m4v" class="shortcut-card">
-                <span class="shortcut-card__icon">👁</span>
-                <span class="shortcut-card__label">Unwatched videos</span>
-            </a>
-        </div>
-        <div class="col-6 col-md-2">
-            <a href="/single/search?tags=unwatched" class="shortcut-card">
-                <span class="shortcut-card__icon">👁</span>
-                <span class="shortcut-card__label">Unwatched (all)</span>
-            </a>
-        </div>
+            <a href="/single/search?tags=unwatched&fileExtensions=mp4" class="shortcut-card">
+                            <span class="shortcut-card__icon">👁</span>
+                            <span class="shortcut-card__label">Unwatched videos</span>
+                        </a>
+                    </div>
         <div class="col-6 col-md-2">
             <a href="/single/search?createdAfter=@DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd")" class="shortcut-card">
                 <span class="shortcut-card__icon">🕐</span>
@@ -110,11 +110,16 @@
             </a>
         </div>
         <div class="col-6 col-md-2">
-            <a href="/single/search?createdAfter=@DateTime.UtcNow.AddDays(-7).ToString("yyyy-MM-dd")&fileExtensions=mp4,avi,mov,mkv,flv,wmv,webm,m4v" class="shortcut-card">
-                <span class="shortcut-card__icon">🕐</span>
+            <a href="/single/search?createdAfter=@DateTime.UtcNow.AddDays(-7).ToString(            "yyyy-MM-dd")&fileExtensions=mp4" class="shortcut-card">                <span class="shortcut-card__icon">🕐</span>
                 <span class="shortcut-card__label">Added videos last 7 days</span>
             </a>
         </div>
+                    <div class="col-6 col-md-2">
+                        <a href="/single/search?createdAfter=@DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-dd")&fileExtensions=mp4" class="shortcut-card">
+                            <span class="shortcut-card__icon">🕐</span>
+                            <span class="shortcut-card__label">Added videos last 30 days</span>
+                        </a>
+                    </div>
     </div>
 
     <div class="row pt-4 mb-5 text-center">

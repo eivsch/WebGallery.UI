@@ -41,7 +41,7 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("home/random-bio")]
-        public async Task<IActionResult> RandomBio(string fileExtensions)
+        public async Task<IActionResult>         RandomBio(string fileExtensions, long? minFileSize = null, long? maxFileSize = null)
         {
             List<SearchHitDTO> results = await _minimalApiProxy.GetSearch(
                 _username,
@@ -50,7 +50,9 @@ namespace WebGallery.UI.Controllers
                 fileExtension: fileExtensions,
                 mediaNameContains: null,
                 maxResults: SearchBatchLimit,
-                allTagsMustMatch: false);
+                        allTagsMustMatch: false,
+                        minFileSize: minFileSize,
+                        maxFileSize: maxFileSize);
 
             if (results == null || results.Count == 0)
                 return RedirectToAction("Index");
