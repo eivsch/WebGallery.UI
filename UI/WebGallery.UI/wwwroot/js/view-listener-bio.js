@@ -430,6 +430,27 @@ function parseGeneratedImageTimestamp(fileName) {
     return totalSeconds;
 }
 
+// The video element is replaced when switching items via ajax, so listen on the document (play does not bubble, so use capture).
+document.addEventListener('play', function (e) {
+    var video = e.target;
+    if (!video || video.tagName !== 'VIDEO' || !video.classList.contains('bio-img')) return;
+
+    var album = (document.getElementById('album-id-placeholder') || {}).textContent;
+    var nameEl = document.querySelector('#bioVideoWrapper > div');
+    var mediaName = nameEl ? nameEl.textContent.trim() : '';
+    if (!album || !mediaName) return;
+
+    // Only record once per loaded video element, not on every resume after pause.
+    if (video.dataset.playRecorded === 'true') return;
+    video.dataset.playRecorded = 'true';
+
+    fetch('/Bio/played', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ album: album.trim(), mediaName: mediaName })
+    }).catch(function () { video.dataset.playRecorded = 'false'; });
+}, true);
+
 // Initialize the video thumbnail button on page load
 document.addEventListener('DOMContentLoaded', function() {
     setupVideoThumbnailButton();

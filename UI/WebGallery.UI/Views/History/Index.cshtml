@@ -1,0 +1,24 @@
+@using Infrastructure.MinimalApi
+@model List<WatchHistoryItemDTO>
+
+<main class="main-content">
+<div class="container-fluid mt-5">
+    <h2 class="mb-4">Watch history</h2>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="alert alert-info">No videos have been played yet.</div>
+    }
+    else
+    {
+        <ul class="list-unstyled">
+            @foreach (var item in Model)
+            {
+                <li class="mb-2">
+                    <a class="regular-text-link" href="/Bio/id/@System.Uri.EscapeDataString(item.MediaName)">@item.MediaName</a>
+                </li>
+            }
+        </ul>
+    }
+</div>
+</main>

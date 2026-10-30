@@ -176,6 +176,29 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         else return false;
     }
 
+    public async Task PostWatchHistory(string username, string album, string mediaName)
+    {
+        var jsonContent = new JsonContent(new { Album = album, MediaName = mediaName });
+        var response = await _client.PostAsync($"users/{username}/watch-history", jsonContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+    }
+
+    public async Task<List<WatchHistoryItemDTO>> GetWatchHistory(string username, int from = 0, int size = 100)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"users/{username}/watch-history?from={from}&size={size}");
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+
+        string json = await response.Content.ReadAsStringAsync();
+
+        return JsonSerializer.Deserialize<List<WatchHistoryItemDTO>>(json, _jsonOpts) ?? [];
+    }
+
     public async Task PatchAddLike(string username, string album, string mediaLocator)
     {
         HttpResponseMessage response = await _client.PatchAsync($"users/{username}/albums/{album}/{mediaLocator}/likes", null);
@@ -403,6 +426,13 @@ public record CredentialsDTO
 {
     public string Username {get;set;}
     public string Password {get;set;}
+}
+
+public record WatchHistoryItemDTO
+{
+    public string Album { get; set; }
+    public string MediaName { get; set; }
+    public DateTime LastPlayedUtc { get; set; }
 }
 
 public record AlbumMetaDTO

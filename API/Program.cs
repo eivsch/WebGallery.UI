@@ -245,6 +245,28 @@ app.MapDelete("/users/{username}/saved-searches/{searchName}", (string username,
 .Produces(StatusCodes.Status204NoContent)
 .Produces(StatusCodes.Status404NotFound);
 
+app.MapPost("/users/{username}/watch-history", (string username, RecordPlayRequest r) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(r.Album) || string.IsNullOrWhiteSpace(r.MediaName)) return Results.BadRequest();
+
+    WatchHistoryHandler.RecordPlay(username, r.Album, r.MediaName);
+
+    return Results.NoContent();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapGet("/users/{username}/watch-history", (string username, int from = 0, int size = 100) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    return Results.Ok(WatchHistoryHandler.GetHistory(username, from, size));
+})
+.Produces<List<WatchHistoryItem>>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound);
+
 app.MapPatch("users/{username}/merge-albums", (string username, MergeAlbumsRequest r) =>
 {
     UserAlbumMeta result = RequestHelper.MergeAlbums(username, r.AlbumNamesSource, r.AlbumNameTarget);

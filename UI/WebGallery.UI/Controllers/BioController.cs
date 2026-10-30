@@ -162,6 +162,22 @@ namespace WebGallery.UI.Controllers
             return View("Deleted", new BioPictureViewModel { AlbumMediaIndex = 0 });
         }
 
+        [HttpPost("played")]
+        public async Task<IActionResult> RecordPlayed([FromBody] PlayedRequest request)
+        {
+            bool isMp4 = request?.MediaName != null && request.MediaName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase);
+            if (!isMp4 || string.IsNullOrWhiteSpace(request.Album)) return BadRequest();
+
+            await _minimalApiProxy.PostWatchHistory(_username, request.Album, request.MediaName);
+            return NoContent();
+        }
+
+        public class PlayedRequest
+        {
+            public string Album { get; set; }
+            public string MediaName { get; set; }
+        }
+
         [HttpPost("SetVideoThumbnail")]
         public async Task<IActionResult> SetVideoThumbnail([FromBody] SetVideoThumbnailRequest request)
         {
