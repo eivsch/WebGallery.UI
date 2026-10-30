@@ -101,7 +101,7 @@ foreach ($port in $ports) {
 
 # --- Dev data ----------------------------------------------------------------
 $marker = Join-Path $devData '.webgallery-dev-data'
-$indexExt = '.dat', '.json', '.txt', '.csv', '.xml', '.db', '.sqlite'
+$indexExt = '.dat', '.json', '.txt', '.csv', '.xml', '.db', '.sqlite', '.jpg'
 
 if ((Test-Path -LiteralPath $devData) -and $Refresh) {
     if (-not (Test-Path -LiteralPath $marker)) { throw "'$devData' exists but was not created by this script; refusing to delete it." }
