@@ -27,5 +27,21 @@ namespace WebGallery.UI.Controllers
 
             return View(items);
         }
+
+        [HttpPost("remove")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Remove(string album, string mediaName)
+        {
+            await _minimalApiProxy.DeleteWatchHistoryEntry(_username, album, mediaName);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost("clear")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Clear()
+        {
+            await _minimalApiProxy.ClearWatchHistory(_username);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

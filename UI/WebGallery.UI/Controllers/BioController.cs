@@ -172,6 +172,34 @@ namespace WebGallery.UI.Controllers
             return NoContent();
         }
 
+        [HttpGet("resume")]
+        public async Task<IActionResult> Resume(string album, string mediaName)
+        {
+            WatchHistoryItemDTO entry = await _minimalApiProxy.GetWatchHistoryEntry(_username, album, mediaName);
+            double position = entry == null || entry.Watched ? 0 : entry.PositionSeconds;
+
+            return Json(new { positionSeconds = position });
+        }
+
+        [HttpPost("position")]
+        public async Task<IActionResult> SavePosition([FromBody] PositionRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Album) || string.IsNullOrWhiteSpace(request.MediaName)
+                || !double.IsFinite(request.PositionSeconds) || request.PositionSeconds < 0) return BadRequest();
+
+            double? duration = request.DurationSeconds is double d && double.IsFinite(d) && d > 0 ? d : null;
+            await _minimalApiProxy.PutWatchPosition(_username, request.Album, request.MediaName, request.PositionSeconds, duration);
+            return NoContent();
+        }
+
+        public class PositionRequest
+        {
+            public string Album { get; set; }
+            public string MediaName { get; set; }
+            public double PositionSeconds { get; set; }
+            public double? DurationSeconds { get; set; }
+        }
+
         // Exact lookup by media id; avoids the ambiguity of name-contains search.
         [HttpGet("open/{album}/{mediaId}")]
         public async Task<IActionResult> Open(string album, string mediaId)

@@ -267,6 +267,50 @@ app.MapGet("/users/{username}/watch-history", (string username, int from = 0, in
 .Produces<List<WatchHistoryItem>>(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status404NotFound);
 
+app.MapGet("/users/{username}/watch-history/entry", (string username, string album, string mediaName) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    WatchHistoryItem? entry = WatchHistoryHandler.GetEntry(username, album, mediaName);
+    return entry == null ? Results.NotFound() : Results.Ok(entry);
+})
+.Produces<WatchHistoryItem>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapPut("/users/{username}/watch-history/position", (string username, SavePositionRequest r) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+    if (string.IsNullOrWhiteSpace(r.Album) || string.IsNullOrWhiteSpace(r.MediaName)
+        || !double.IsFinite(r.PositionSeconds) || r.PositionSeconds < 0
+        || (r.DurationSeconds is double d && (!double.IsFinite(d) || d < 0))) return Results.BadRequest();
+
+    return WatchHistoryHandler.SavePosition(username, r.Album, r.MediaName, r.PositionSeconds, r.DurationSeconds)
+        ? Results.NoContent()
+        : Results.NotFound();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapDelete("/users/{username}/watch-history/entry", (string username, string album, string mediaName) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    return WatchHistoryHandler.Remove(username, album, mediaName) ? Results.NoContent() : Results.NotFound();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapDelete("/users/{username}/watch-history", (string username) =>
+{
+    if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
+
+    WatchHistoryHandler.Clear(username);
+    return Results.NoContent();
+})
+.Produces(StatusCodes.Status204NoContent)
+.Produces(StatusCodes.Status404NotFound);
+
 app.MapPatch("users/{username}/merge-albums", (string username, MergeAlbumsRequest r) =>
 {
     UserAlbumMeta result = RequestHelper.MergeAlbums(username, r.AlbumNamesSource, r.AlbumNameTarget);

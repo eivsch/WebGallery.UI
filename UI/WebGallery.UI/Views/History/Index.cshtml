@@ -1,9 +1,24 @@
 @using Infrastructure.MinimalApi
 @model List<WatchHistoryItemDTO>
+@functions {
+    static string FormatTime(double seconds)
+    {
+        var t = System.TimeSpan.FromSeconds(System.Math.Max(0, seconds));
+        return t.TotalHours >= 1 ? $"{(int)t.TotalHours}:{t.Minutes:00}:{t.Seconds:00}" : $"{t.Minutes}:{t.Seconds:00}";
+    }
+}
 
 <main class="main-content">
 <div class="container-fluid mt-5 px-4">
-    <h2 class="mb-4">Watch history</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Watch history</h2>
+        @if (Model != null && Model.Count > 0)
+        {
+            <form method="post" asp-controller="History" asp-action="Clear" onsubmit="return confirm('Clear all watch history? This cannot be undone.');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Clear all</button>
+            </form>
+        }
+    </div>
 
     @if (Model == null || Model.Count == 0)
     {
@@ -11,17 +26,73 @@
     }
     else
     {
-        <ul class="list-unstyled">
+        <table class="table table-dark table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Video</th>
+                    <th>Progress</th>
+                    <th>Plays</th>
+                    <th>Last played</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
             @foreach (var item in Model)
             {
-                <li class="mb-2">
-                    @{ string href = string.IsNullOrEmpty(item.MediaId)
-                        ? "/Bio/id/" + System.Uri.EscapeDataString(item.MediaName)
-                        : "/Bio/open/" + System.Uri.EscapeDataString(item.Album) + "/" + System.Uri.EscapeDataString(item.MediaId); }
-                    <a class="regular-text-link text-white" href="@href">@item.MediaName</a>
-                </li>
+                string href = string.IsNullOrEmpty(item.MediaId)
+                    ? "/Bio/id/" + System.Uri.EscapeDataString(item.MediaName)
+                    : "/Bio/open/" + System.Uri.EscapeDataString(item.Album) + "/" + System.Uri.EscapeDataString(item.MediaId);
+                bool resumable = !item.Watched && item.PositionSeconds > 1;
+                <tr>
+                    <td><a class="regular-text-link text-white" href="@href">@item.MediaName</a></td>
+                    <td class="text-nowrap">
+                        @if (resumable)
+                        {
+                            <span class="badge bg-primary">Continue watching</span>
+                            <span class="ms-1">@FormatTime(item.PositionSeconds)@(item.DurationSeconds > 0 ? " / " + FormatTime(item.DurationSeconds.Value) : "")</span>
+                            @if (item.DurationSeconds > 0)
+                            {
+                                <div class="progress mt-1" style="height:4px;">
+                                    <div class="progress-bar" style="width:@((int)System.Math.Min(100, item.PositionSeconds / item.DurationSeconds.Value * 100))%"></div>
+                                </div>
+                            }
+                        }
+                        else if (item.Watched)
+                        {
+                            <span class="badge bg-success">Watched</span>
+                        }
+                    </td>
+                    <td>@item.PlayCount</td>
+                    <td class="text-nowrap"><time class="history-time" datetime="@item.LastPlayedUtc.ToString("O")">@item.LastPlayedUtc.ToString("yyyy-MM-dd HH:mm") UTC</time></td>
+                    <td class="text-nowrap">
+                        <form method="post" asp-controller="History" asp-action="Remove" class="d-inline">
+                            <input type="hidden" name="album" value="@item.Album" />
+                            <input type="hidden" name="mediaName" value="@item.MediaName" />
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
             }
-        </ul>
+            </tbody>
+        </table>
     }
 </div>
 </main>
+
+@section Scripts {
+<script>
+    document.querySelectorAll('time.history-time').forEach(function (el) {
+        var d = new Date(el.getAttribute('datetime'));
+        if (isNaN(d)) return;
+        var s = Math.round((Date.now() - d.getTime()) / 1000);
+        var text;
+        if (s < 60) text = 'just now';
+        else if (s < 3600) text = Math.floor(s / 60) + ' min ago';
+        else if (s < 86400) text = Math.floor(s / 3600) + ' h ago';
+        else if (s < 86400 * 30) text = Math.floor(s / 86400) + ' d ago';
+        else text = d.toLocaleDateString();
+        el.title = d.toLocaleString();
+        el.textContent = text;
+    });
+</script>
+}
