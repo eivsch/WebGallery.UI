@@ -440,6 +440,8 @@ document.addEventListener('play', function (e) {
     var mediaName = nameEl ? nameEl.textContent.trim() : '';
     if (!album || !mediaName) return;
 
+    var mediaId = ((document.getElementById('image-id-placeholder') || {}).textContent || '').trim();
+
     // Only record once per loaded video element, not on every resume after pause.
     if (video.dataset.playRecorded === 'true') return;
     video.dataset.playRecorded = 'true';
@@ -447,7 +449,7 @@ document.addEventListener('play', function (e) {
     fetch('/Bio/played', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ album: album.trim(), mediaName: mediaName })
+        body: JSON.stringify({ album: album.trim(), mediaName: mediaName, mediaId: mediaId })
     }).catch(function () { video.dataset.playRecorded = 'false'; });
 }, true);
 

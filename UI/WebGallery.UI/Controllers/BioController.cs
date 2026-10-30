@@ -168,14 +168,25 @@ namespace WebGallery.UI.Controllers
             bool isMp4 = request?.MediaName != null && request.MediaName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase);
             if (!isMp4 || string.IsNullOrWhiteSpace(request.Album)) return BadRequest();
 
-            await _minimalApiProxy.PostWatchHistory(_username, request.Album, request.MediaName);
+            await _minimalApiProxy.PostWatchHistory(_username, request.Album, request.MediaName, request.MediaId);
             return NoContent();
+        }
+
+        // Exact lookup by media id; avoids the ambiguity of name-contains search.
+        [HttpGet("open/{album}/{mediaId}")]
+        public async Task<IActionResult> Open(string album, string mediaId)
+        {
+            MediaDTO media = await _minimalApiProxy.GetMedia(_username, album, mediaId);
+            if (media?.Index == null) return NotFound();
+
+            return Redirect($"/Bio/{Uri.EscapeDataString(album)}/{media.Index.Value}");
         }
 
         public class PlayedRequest
         {
             public string Album { get; set; }
             public string MediaName { get; set; }
+            public string MediaId { get; set; }
         }
 
         [HttpPost("SetVideoThumbnail")]

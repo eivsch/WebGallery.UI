@@ -176,9 +176,9 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         else return false;
     }
 
-    public async Task PostWatchHistory(string username, string album, string mediaName)
+    public async Task PostWatchHistory(string username, string album, string mediaName, string mediaId)
     {
-        var jsonContent = new JsonContent(new { Album = album, MediaName = mediaName });
+        var jsonContent = new JsonContent(new { Album = album, MediaName = mediaName, MediaId = mediaId });
         var response = await _client.PostAsync($"users/{username}/watch-history", jsonContent);
         if (!response.IsSuccessStatusCode)
         {
@@ -197,6 +197,20 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         string json = await response.Content.ReadAsStringAsync();
 
         return JsonSerializer.Deserialize<List<WatchHistoryItemDTO>>(json, _jsonOpts) ?? [];
+    }
+
+    public async Task<MediaDTO> GetMedia(string username, string albumName, string mediaLocator)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"users/{username}/albums/{albumName}/{mediaLocator}");
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"The API returned a {response.StatusCode} status code.");
+        }
+
+        string json = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(json) || json == "null") return null;
+
+        return JsonSerializer.Deserialize<MediaDTO>(json, _jsonOpts);
     }
 
     public async Task PatchAddLike(string username, string album, string mediaLocator)
@@ -432,6 +446,7 @@ public record WatchHistoryItemDTO
 {
     public string Album { get; set; }
     public string MediaName { get; set; }
+    public string MediaId { get; set; }
     public DateTime LastPlayedUtc { get; set; }
 }
 

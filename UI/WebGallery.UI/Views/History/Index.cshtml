@@ -15,7 +15,10 @@
             @foreach (var item in Model)
             {
                 <li class="mb-2">
-                    <a class="regular-text-link text-white" href="/Bio/id/@System.Uri.EscapeDataString(item.MediaName)">@item.MediaName</a>
+                    @{ string href = string.IsNullOrEmpty(item.MediaId)
+                        ? "/Bio/id/" + System.Uri.EscapeDataString(item.MediaName)
+                        : "/Bio/open/" + System.Uri.EscapeDataString(item.Album) + "/" + System.Uri.EscapeDataString(item.MediaId); }
+                    <a class="regular-text-link text-white" href="@href">@item.MediaName</a>
                 </li>
             }
         </ul>

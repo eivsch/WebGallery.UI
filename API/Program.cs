@@ -250,7 +250,7 @@ app.MapPost("/users/{username}/watch-history", (string username, RecordPlayReque
     if (UserMetaHandler.GetUserMeta(username) == null) return Results.NotFound();
     if (string.IsNullOrWhiteSpace(r.Album) || string.IsNullOrWhiteSpace(r.MediaName)) return Results.BadRequest();
 
-    WatchHistoryHandler.RecordPlay(username, r.Album, r.MediaName);
+    WatchHistoryHandler.RecordPlay(username, r.Album, r.MediaName, r.MediaId);
 
     return Results.NoContent();
 })

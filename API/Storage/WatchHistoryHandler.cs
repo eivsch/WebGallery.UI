@@ -6,17 +6,20 @@ namespace MinimalGallery.API.Storage;
 // One SQLite file per user, stored in the user's own directory so it is removed together with the user.
 static class WatchHistoryHandler
 {
-    public static void RecordPlay(string username, string album, string mediaName, DateTime? playedAtUtc = null)
+    public static void RecordPlay(string username, string album, string mediaName, string? mediaId = null, DateTime? playedAtUtc = null)
     {
         using SqliteConnection connection = Open(username);
         using SqliteCommand cmd = connection.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO watch_history (album, media_name, last_played_utc)
-            VALUES ($album, $media, $played)
-            ON CONFLICT(album, media_name) DO UPDATE SET last_played_utc = excluded.last_played_utc;
+            INSERT INTO watch_history (album, media_name, media_id, last_played_utc)
+            VALUES ($album, $media, $id, $played)
+            ON CONFLICT(album, media_name) DO UPDATE SET
+                last_played_utc = excluded.last_played_utc,
+                media_id = COALESCE(excluded.media_id, media_id);
             """;
         cmd.Parameters.AddWithValue("$album", album);
         cmd.Parameters.AddWithValue("$media", mediaName);
+        cmd.Parameters.AddWithValue("$id", (object?)mediaId ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$played", (playedAtUtc ?? DateTime.UtcNow).ToUniversalTime().ToString("O"));
         cmd.ExecuteNonQuery();
     }
@@ -29,7 +32,7 @@ static class WatchHistoryHandler
         using SqliteConnection connection = Open(username);
         using SqliteCommand cmd = connection.CreateCommand();
         cmd.CommandText = """
-            SELECT album, media_name, last_played_utc FROM watch_history
+            SELECT album, media_name, last_played_utc, media_id FROM watch_history
             ORDER BY last_played_utc DESC, rowid DESC
             LIMIT $size OFFSET $from;
             """;
@@ -42,6 +45,7 @@ static class WatchHistoryHandler
             {
                 Album = reader.GetString(0),
                 MediaName = reader.GetString(1),
+                MediaId = reader.IsDBNull(3) ? null : reader.GetString(3),
                 LastPlayedUtc = DateTime.Parse(reader.GetString(2), null, System.Globalization.DateTimeStyles.RoundtripKind),
             });
         }
@@ -62,11 +66,20 @@ static class WatchHistoryHandler
             CREATE TABLE IF NOT EXISTS watch_history (
                 album TEXT NOT NULL,
                 media_name TEXT NOT NULL,
+                media_id TEXT NULL,
                 last_played_utc TEXT NOT NULL,
                 PRIMARY KEY (album, media_name)
             );
             """;
         cmd.ExecuteNonQuery();
+
+        // Databases created before media_id existed need the column added.
+        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('watch_history') WHERE name = 'media_id';";
+        if ((long)cmd.ExecuteScalar()! == 0)
+        {
+            cmd.CommandText = "ALTER TABLE watch_history ADD COLUMN media_id TEXT NULL;";
+            cmd.ExecuteNonQuery();
+        }
 
         return connection;
     }
