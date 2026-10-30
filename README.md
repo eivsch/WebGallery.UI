@@ -45,6 +45,20 @@ Publish each project into `FileServer`, `MinimalGallery.API` and `UI` subfolders
 
 This opens one PowerShell window per service.
 
+Stop only the live services (matched by install path; other dotnet processes and dev instances are untouched):
+
+```powershell
+.\Stop-WebGallery.ps1 [-RootPath C:\WebGallery]
+```
+
+Deploy a new version (publishes Release builds, stops services, backs up to `<RootPath>\_backup\<timestamp>`, copies the output while preserving `appsettings*.json`, certificates, logs and data/db files, then restarts):
+
+```powershell
+.\Deploy-WebGallery.ps1 [-RootPath C:\WebGallery] [-SkipBackup]
+```
+
+To roll back, run `Stop-WebGallery.ps1`, copy the service folders from the chosen `_backup\<timestamp>` over `<RootPath>`, then run `Start-WebGallery.ps1`.
+
 ## Side-by-side dev mode (manual checks)
 
 Run the current checkout next to the live app without touching it:
