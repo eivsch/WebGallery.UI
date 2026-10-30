@@ -1,0 +1,4 @@
+fastapi[standard]
+face_recognition
+scikit-learn
+pillow
