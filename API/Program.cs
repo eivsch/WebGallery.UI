@@ -5,7 +5,9 @@ using MinimalGallery.API.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("https://0.0.0.0:5041", "http://0.0.0.0:5042");
+var httpsPort = Environment.GetEnvironmentVariable("WEBGALLERY_HTTPS_PORT") ?? "5041";
+var httpPort = Environment.GetEnvironmentVariable("WEBGALLERY_HTTP_PORT") ?? "5042";
+builder.WebHost.UseUrls($"https://0.0.0.0:{httpsPort}", $"http://0.0.0.0:{httpPort}");
 
 builder.Services.AddCors();
 
