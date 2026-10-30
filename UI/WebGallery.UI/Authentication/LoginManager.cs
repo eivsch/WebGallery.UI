@@ -46,12 +46,7 @@ namespace WebGallery.UI.Authentication
         {
             await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            //_httpContextAccessor.HttpContext.Session.Clear();
-
-            foreach (var cookie in _httpContextAccessor.HttpContext.Request.Cookies)
-            {
-                _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookie.Key);
-            }
+            // SignOutAsync removes this instance's own auth cookie; other cookies on the host (e.g. another instance on localhost) are left alone.
         }
 
         private List<Claim> SetIdentityClaims(string userId)

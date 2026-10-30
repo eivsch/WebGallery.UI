@@ -459,10 +459,43 @@ document.addEventListener('play', function (e) {
         }).catch(function () { }).then(function () {
             video.dataset.lastTime = String(video.currentTime);
             video.dataset.savePositions = 'true';
-        });}, true);
+        });
+}, true);
+
+// Count real playback time and record the play once ~5s have been watched.
+function trackPlayback(video) {
+    if (video.dataset.playRecorded === 'true' || video.dataset.playedPending === 'true') return;
+    if (video.dataset.playSetup !== 'true') return;
+    var cur = video.currentTime;
+    var last = Number(video.dataset.lastTime);
+    var delta = cur - last;
+    video.dataset.lastTime = String(cur);
+    if (video.paused || delta <= 0 || delta > 2) return; // ignore seeks
+    var played = (Number(video.dataset.playedSeconds) || 0) + delta;
+    video.dataset.playedSeconds = String(played);
+    if (played < 5) return;
+
+    video.dataset.playedPending = 'true';
+    fetch('/Bio/played', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+            album: video.dataset.album,
+            mediaName: video.dataset.mediaName,
+            mediaId: video.dataset.mediaId
+        })
+    }).then(function (r) {
+        if (r.ok) video.dataset.playRecorded = 'true';
+    }).catch(function () { }).then(function () {
+        video.dataset.playedPending = 'false';
+        saveVideoPosition(video);
+    });
+}
 
 function saveVideoPosition(video) {
     if (!video || video.dataset.savePositions !== 'true') return;
+    if (video.dataset.playedPending === 'true') return; // the play entry must exist before positions are saved
     if (!isFinite(video.duration) || video.duration <= 0) return;
 
     video.dataset.lastSave = Date.now();
@@ -486,6 +519,7 @@ function isBioVideo(e) {
 // Throttled saves while playing, plus saves on pause/end and when leaving the page.
 document.addEventListener('timeupdate', function (e) {
     if (!isBioVideo(e)) return;
+    trackPlayback(e.target);
     if (Date.now() - (Number(e.target.dataset.lastSave) || 0) >= 5000) saveVideoPosition(e.target);
 }, true);
 document.addEventListener('pause', function (e) { if (isBioVideo(e)) saveVideoPosition(e.target); }, true);

@@ -210,6 +210,21 @@ namespace WebGallery.UI.Controllers
             return Redirect($"/Bio/{Uri.EscapeDataString(album)}/{media.Index.Value}");
         }
 
+        // Fallback for history entries without a media id: exact name match within the album.
+        [HttpGet("open")]
+        public async Task<IActionResult> OpenByName(string album, string mediaName)
+        {
+            if (string.IsNullOrWhiteSpace(album) || string.IsNullOrWhiteSpace(mediaName)) return BadRequest();
+
+            List<SearchHitDTO> hits = await _minimalApiProxy.GetSearch(username: _username, albums: album, tags: null, fileExtension: null, mediaNameContains: mediaName, maxResults: 100, allTagsMustMatch: false);
+            SearchHitDTO hit = hits?.FirstOrDefault(h =>
+                string.Equals(h.AlbumName, album, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(h.MediaItem?.Name, mediaName, StringComparison.OrdinalIgnoreCase));
+            if (hit == null) return NotFound();
+
+            return Redirect($"/Bio/{Uri.EscapeDataString(hit.AlbumName)}/{hit.MediaAlbumIndex}");
+        }
+
         public class PlayedRequest
         {
             public string Album { get; set; }

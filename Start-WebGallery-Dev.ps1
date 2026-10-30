@@ -151,6 +151,19 @@ if (-not (Test-Path -LiteralPath $devData)) {
 } else {
     if (-not (Test-Path -LiteralPath $marker)) { throw "'$devData' exists but was not created by this script; refusing to use it." }
     Write-Host "Using existing dev data '$devData' (use -Refresh to re-create)."
+    # Older dev copies hard-linked .jpg files to live; replace those with real copies so dev writes can't touch live images.
+    $fixed = 0
+    foreach ($f in Get-ChildItem -LiteralPath $devData -Recurse -File -Force -Filter *.jpg) {
+        $linkCount = (& fsutil hardlink list $f.FullName 2>$null | Measure-Object).Count
+        if ($linkCount -gt 1) {
+            $tmp = $f.FullName + '.devcopy'
+            [IO.File]::Copy($f.FullName, $tmp, $true)  # reads content, creates an independent file
+            Remove-Item -LiteralPath $f.FullName -Force
+            Move-Item -LiteralPath $tmp -Destination $f.FullName
+            $fixed++
+        }
+    }
+    if ($fixed) { Write-Host "Replaced $fixed hard-linked JPEG(s) with independent copies." }
 }
 
 # --- Build ---------------------------------------------------------------------
@@ -161,7 +174,7 @@ $services = @(
     @{ Name = 'API'; Project = 'API\MinimalGallery.API.csproj'; Https = $ApiPort; Http = $ApiPort + 1
        Env = @{ IndexFilesStoragePath = $devData } },
     @{ Name = 'UI'; Project = 'UI\WebGallery.UI\WebGallery.UI.csproj'; Https = $UiPort; Http = $UiHttpPort
-       Env = @{ ConnectionStrings__ApiEndpoint = "https://localhost:$ApiPort"; ConnectionStrings__FileServerUrl = "https://localhost:$FileServerPort" } }
+       Env = @{ Authentication__CookieName = 'WebGallery.Dev.Cookies'; ConnectionStrings__ApiEndpoint = "https://localhost:$ApiPort"; ConnectionStrings__FileServerUrl = "https://localhost:$FileServerPort" } }
 )
 
 foreach ($s in $services) {

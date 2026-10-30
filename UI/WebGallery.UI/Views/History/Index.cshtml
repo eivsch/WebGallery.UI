@@ -41,7 +41,7 @@
             @foreach (var item in Model)
             {
                 string href = string.IsNullOrEmpty(item.MediaId)
-                    ? "/Bio/id/" + System.Uri.EscapeDataString(item.MediaName)
+                    ? "/Bio/open?album=" + System.Uri.EscapeDataString(item.Album) + "&mediaName=" + System.Uri.EscapeDataString(item.MediaName)
                     : "/Bio/open/" + System.Uri.EscapeDataString(item.Album) + "/" + System.Uri.EscapeDataString(item.MediaId);
                 string thumbsUri = "/files/image/" + WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.Album + "/" + item.MediaName);
                 bool resumable = !item.Watched && item.PositionSeconds > 1;
