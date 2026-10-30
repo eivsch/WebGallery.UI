@@ -1,4 +1,4 @@
-﻿function tagExists(tag) {
+function tagExists(tag) {
     var normalised = tag.replace(/^#/, '');
     return $('#bioPictureTags').children('[data-tag-name="' + normalised + '"]').length > 0;
 }
@@ -442,29 +442,24 @@ document.addEventListener('play', function (e) {
 
     var mediaId = ((document.getElementById('image-id-placeholder') || {}).textContent || '').trim();
 
-    // Only record once per loaded video element, not on every resume after pause.
-    if (video.dataset.playRecorded === 'true') return;
-    video.dataset.playRecorded = 'true';
+    // Set up once per loaded video element, not on every resume after pause.
+    if (video.dataset.playRecorded === 'true' || video.dataset.playSetup === 'true') return;
+    video.dataset.playSetup = 'true';
     video.dataset.album = album.trim();
     video.dataset.mediaName = mediaName;
-
-    var played = fetch('/Bio/played', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ album: album.trim(), mediaName: mediaName, mediaId: mediaId })
-    });
-    played.catch(function () { video.dataset.playRecorded = 'false'; });
+    video.dataset.mediaId = mediaId;
+    video.dataset.playedSeconds = '0';
+    video.dataset.lastTime = String(video.currentTime);
 
     // Resume from the saved position; position saving starts once this has resolved so 0 never overwrites it.
-    played.then(function () {
-        return fetch('/Bio/resume?album=' + encodeURIComponent(album.trim()) + '&mediaName=' + encodeURIComponent(mediaName));
-    }).then(function (r) { return r.json(); }).then(function (data) {
-        var pos = data && data.positionSeconds;
-        if (pos > 1 && video.currentTime < pos) video.currentTime = pos;
-    }).catch(function () { }).then(function () {
-        video.dataset.savePositions = 'true';
-    });
-}, true);
+    fetch('/Bio/resume?album=' + encodeURIComponent(album.trim()) + '&mediaName=' + encodeURIComponent(mediaName))
+        .then(function (r) { return r.json(); }).then(function (data) {
+            var pos = data && data.positionSeconds;
+            if (pos > 1 && video.currentTime < pos) video.currentTime = pos;
+        }).catch(function () { }).then(function () {
+            video.dataset.lastTime = String(video.currentTime);
+            video.dataset.savePositions = 'true';
+        });}, true);
 
 function saveVideoPosition(video) {
     if (!video || video.dataset.savePositions !== 'true') return;

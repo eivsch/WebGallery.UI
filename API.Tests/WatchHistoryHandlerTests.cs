@@ -22,6 +22,19 @@ public class WatchHistoryHandlerTests : IDisposable
     }
 
     [Fact]
+    public void Retention_keeps_only_most_recent_entries()
+    {
+        DateTime t = new(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        for (int i = 0; i < WatchHistoryHandler.MaxEntries + 5; i++)
+            WatchHistoryHandler.RecordPlay("alice", "a1", $"v{i}.mp4", playedAtUtc: t.AddMinutes(i));
+
+        var all = WatchHistoryHandler.GetHistory("alice", 0, 1000);
+        Assert.Equal(WatchHistoryHandler.MaxEntries, all.Count);
+        Assert.Equal($"v{WatchHistoryHandler.MaxEntries + 4}.mp4", all[0].MediaName);
+        Assert.DoesNotContain(all, x => x.MediaName == "v0.mp4");
+    }
+
+    [Fact]
     public void Lists_newest_first()
     {
         DateTime t = new(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);

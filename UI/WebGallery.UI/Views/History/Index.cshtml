@@ -78,6 +78,10 @@
             }
             </tbody>
         </table>
+        @if (ViewBag.HasMore == true)
+        {
+            <div class="text-center my-3"><a class="btn btn-outline-secondary" href="/History?size=@ViewBag.NextSize">Load more</a></div>
+        }
     }
 </div>
 </main>

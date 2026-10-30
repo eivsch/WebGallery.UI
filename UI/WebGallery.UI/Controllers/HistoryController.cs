@@ -20,10 +20,16 @@ namespace WebGallery.UI.Controllers
             _username = usernameResolver.Username;
         }
 
-        public async Task<IActionResult> Index()
+        private const int PageSize = 50;
+
+        public async Task<IActionResult> Index(int size = PageSize)
         {
             ViewBag.Current = "History";
-            List<WatchHistoryItemDTO> items = await _minimalApiProxy.GetWatchHistory(_username);
+            size = System.Math.Clamp(size, PageSize, 500);
+            List<WatchHistoryItemDTO> items = await _minimalApiProxy.GetWatchHistory(_username, 0, size + 1);
+            ViewBag.HasMore = items.Count > size && size < 500;
+            ViewBag.NextSize = size + PageSize;
+            if (items.Count > size) items = items.GetRange(0, size);
 
             return View(items);
         }
