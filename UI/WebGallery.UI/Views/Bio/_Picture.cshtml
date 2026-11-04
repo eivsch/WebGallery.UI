@@ -21,10 +21,16 @@
     string thumbsUri = $"/files/image/{WebGallery.UI.Helpers.Utils.GetThumbsBase64(Model.AppPath)}";
     <div class="bio-video-wrapper" id="bioVideoWrapper">
         <div>@Model.Name</div>
-        <video class="bio-img" controls preload="none" poster="@thumbsUri" style="width:100%;height:auto;">
-            <source src="@videoUri" type="video/mp4" />
-            Your browser does not support the video tag.
-        </video>
+        <div class="bio-video-stage">
+            <video class="bio-img" controls preload="none" poster="@thumbsUri" style="width:100%;height:auto;">
+                <source src="@videoUri" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            <span id="videoImageStatus" class="bio-video-status" role="status" aria-live="polite" aria-atomic="true" hidden>
+                <i data-status-icon aria-hidden="true"></i>
+                <span data-status-text></span>
+            </span>
+        </div>
         <button id="videoEnlargeToggle" type="button" class="btn btn-dark btn-sm bio-video-enlarge-btn" aria-label="Toggle theater mode" title="Shortcut: T">
             <i class="fas fa-expand-alt"></i> Theater mode <span class="bio-key-hint">T</span>
         </button>
@@ -39,6 +45,10 @@ else
     </a>
 }
 </figure>
+
+<button type="button" class="btn btn-dark btn-sm" data-bio-like data-album="@Model.Album" data-media-id="@Model.Id">
+    Like
+</button>
 
 <div data-aos="fade-left" data-aos-duration="1000">
     <ul class="tag-list" id="bioPictureTags">
