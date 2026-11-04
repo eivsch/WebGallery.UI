@@ -144,6 +144,31 @@
     position: relative;
 }
 
+.bio-video-stage {
+    position: relative;
+}
+
+.bio-video-stage video {
+    display: block;
+}
+
+.bio-video-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+.bio-video-status [data-status-icon] {
+    margin-right: 5px;
+}
+
 .bio-video-enlarge-btn {
     margin-top: 8px;
 }

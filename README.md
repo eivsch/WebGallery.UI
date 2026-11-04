@@ -10,6 +10,11 @@ A self-hosted web gallery for organising and browsing media in per-user albums. 
 
 The UI talks to the API for metadata and to the FileServer for files.
 
+When viewing an image in the album or single-image gallery, press **L** to use the Like button.
+On the Bio page, use **Like** below the image or video, or in the image viewer toolbar.
+Taking a video screencap shows a small progress indicator in the video's top-right corner,
+including in theater mode, followed by a brief success or failure message.
+
 ## Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)

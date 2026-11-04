@@ -10,6 +10,8 @@
     <pre id="results">Running...</pre>
     <div id="fixture"></div>
     <script src="../WebGallery.UI/wwwroot/lib/jquery/dist/jquery.min.js"></script>
+    <script src="../WebGallery.UI/wwwroot/lib/fancybox/jquery.fancybox.min.js"></script>
+    <script src="../WebGallery.UI/wwwroot/js/media-likes.js"></script>
     <script src="../WebGallery.UI/wwwroot/js/view-listener-bio.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', async function () {
@@ -33,7 +35,13 @@
             function fixture(start, readyState = 0, duration = 120, failSeek = false) {
                 document.getElementById('fixture').innerHTML =
                     '<div id="album-id-placeholder">trip</div><div id="image-id-placeholder">clip-id</div>' +
-                    '<div id="bioVideoWrapper"><div>clip.mp4</div><video class="bio-img" controls preload="none"></video></div>' +
+                    '<div id="bioVideoWrapper"><div>clip.mp4</div><div class="bio-video-stage">' +
+                    '<video class="bio-img" controls preload="none"></video>' +
+                    '<span id="videoImageStatus" class="bio-video-status" role="status" hidden>' +
+                    '<i data-status-icon></i><span data-status-text></span></span></div>' +
+                    '<button id="videoEnlargeToggle">Theater mode</button></div>' +
+                    '<button id="generateVideoImage" data-app-path-b64="dHJpcC9jbGlwLm1wNA==">Generate image</button>' +
+                    '<button data-bio-like data-album="trip" data-media-id="clip-id">Like</button>' +
                     '<p id="videoStartError" role="status" hidden></p>';
                 const video = document.querySelector('video');
                 if (start !== null) video.setAttribute('data-start-position', start);
@@ -120,6 +128,66 @@
                 for (const name of ['clip_006000.000.jpg', 'clip_000060.000.jpg', 'clip_00x000.000.jpg',
                     'clip_000000.0x0.jpg', 'clip_000001.000.jpg\n', 'clip_000001.000.png']) {
                     assert(parseGeneratedImageTimestamp(name) === null, 'Accepted malformed name: ' + name);
+                }
+            });
+            await check('Theater-mode screencap indicator coexists with paused timestamp seeking', async function () {
+                const f = fixture('62.345', 1);
+                setupVideoThumbnailButton();
+                document.getElementById('videoEnlargeToggle').click();
+                assert(document.body.classList.contains('theater-mode'), 'Theater mode did not activate');
+                const originalFetch = window.fetch;
+                let finish;
+                window.fetch = () => new Promise(resolve => { finish = resolve; });
+                try {
+                    document.getElementById('generateVideoImage').click();
+                    const status = document.getElementById('videoImageStatus');
+                    assert(!status.hidden && status.textContent.includes('Taking screencap'), 'Processing indicator missing');
+                    assert(status.parentElement === f.video.parentElement, 'Indicator is outside the video stage');
+                    assert(f.video.currentTime === 62.345 && f.video.paused, 'Screencap changed explicit paused position');
+                    finish({ ok: true });
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                    assert(status.textContent.includes('Screencap saved'), 'Success status missing');
+                } finally {
+                    window.fetch = originalFetch;
+                    document.body.classList.remove('theater-mode');
+                }
+            });
+            await check('Screencap failures retain the processing error indicator', async function () {
+                fixture('12', 1);
+                setupVideoThumbnailButton();
+                const originalFetch = window.fetch;
+                window.fetch = () => Promise.resolve({ ok: false });
+                try {
+                    document.getElementById('generateVideoImage').click();
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                    const status = document.getElementById('videoImageStatus');
+                    assert(!status.hidden && status.textContent.includes('Screencap failed'), 'Failure status missing');
+                    assert(!document.getElementById('generateVideoImage').disabled, 'Screencap button remained disabled');
+                } finally {
+                    window.fetch = originalFetch;
+                }
+            });
+            await check('Bio Like controls still work on video and image items', function () {
+                const originalPost = $.post;
+                const likes = [];
+                $.post = function (url, data, success) {
+                    likes.push(url);
+                    success();
+                    return { fail: function () {} };
+                };
+                try {
+                    fixture('12', 1);
+                    setupVideoThumbnailButton();
+                    const button = document.querySelector('[data-bio-like]');
+                    button.click();
+                    assert(button.classList.contains('fancybox-like__pressed'), 'Video Like feedback missing');
+                    document.getElementById('fixture').innerHTML =
+                        '<img alt="ordinary image"><button data-bio-like data-album="trip" data-media-id="image-id">Like</button>';
+                    setupVideoThumbnailButton();
+                    document.querySelector('[data-bio-like]').click();
+                    assert(likes.join(',') === '/albums/trip/clip-id/add-like,/albums/trip/image-id/add-like', 'Incorrect Like requests');
+                } finally {
+                    $.post = originalPost;
                 }
             });
             window.testResults = results;
