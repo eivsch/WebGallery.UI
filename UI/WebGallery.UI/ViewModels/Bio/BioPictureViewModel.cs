@@ -10,5 +10,8 @@ namespace WebGallery.UI.ViewModels.Bio
         public string Name { get; set; }
         public List<string> Tags { get; set; }
         public string Album { get; set; }
+        public string SourceVideoUrl { get; set; }
+        public string SourceVideoTimestamp { get; set; }
+        public double? StartPositionSeconds { get; set; }
     }
 }

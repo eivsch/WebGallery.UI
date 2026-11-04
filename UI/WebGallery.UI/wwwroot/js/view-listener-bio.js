@@ -305,6 +305,7 @@ function setupVideoThumbnailButton() {
     }
 
     setupVideoEnlargeToggle();
+    setupVideoStartPosition(video);
 
     var generatedImagesContainer = document.getElementById('generatedVideoImagesContainer');
     if (generatedImagesContainer) {
@@ -332,6 +333,40 @@ function setupVideoThumbnailButton() {
             var fileName = target.getAttribute('data-name') || target.textContent || '';
             seekVideoToGeneratedImageTimestamp(fileName);
         };
+    }
+}
+
+function setupVideoStartPosition(video) {
+    if (!video || video.dataset.explicitStart === 'true') return;
+    var rawPosition = video.getAttribute('data-start-position');
+    if (!rawPosition || !/^[0-9]+(?:\.[0-9]+)?$/.test(rawPosition)) return;
+    var seconds = Number(rawPosition);
+    if (!Number.isFinite(seconds) || seconds < 0) return;
+
+    video.dataset.explicitStart = 'true';
+    var reportError = function (error) {
+        console.error('Unable to seek video to screencap timestamp.', error);
+        var status = document.getElementById('videoStartError');
+        if (status) {
+            status.textContent = 'Unable to open the video at the screencap timestamp. Use the player controls to seek.';
+            status.hidden = false;
+        }
+    };
+    var seek = function () {
+        try {
+            video.currentTime = Number.isFinite(video.duration) ? Math.min(seconds, video.duration) : seconds;
+        } catch (error) {
+            reportError(error);
+        }
+    };
+
+    video.addEventListener('error', reportError, { once: true });
+    if (video.readyState >= 1) {
+        seek();
+    } else {
+        video.addEventListener('loadedmetadata', seek, { once: true });
+        video.preload = 'metadata';
+        video.load();
     }
 }
 
@@ -405,29 +440,15 @@ function seekVideoToGeneratedImageTimestamp(fileName) {
     }
 
     video.addEventListener('loadedmetadata', setCurrentTime, { once: true });
+    video.preload = 'metadata';
+    video.load();
 }
 
 function parseGeneratedImageTimestamp(fileName) {
-    var fileNameNoExt = fileName.replace(/\.jpg$/i, '');
-    var underscoreIndex = fileNameNoExt.lastIndexOf('_');
-    if (underscoreIndex < 0) {
-        return null;
-    }
-
-    var timestamp = fileNameNoExt.substring(underscoreIndex + 1);
-    var timestampParts = timestamp.split('.');
-    if (timestampParts.length !== 2 || timestampParts[0].length !== 6 || timestampParts[1].length !== 3) {
-        return null;
-    }
-
-    var hours = parseInt(timestampParts[0].substring(0, 2), 10);
-    var minutes = parseInt(timestampParts[0].substring(2, 4), 10);
-    var seconds = parseInt(timestampParts[0].substring(4, 6), 10);
-    var milliseconds = parseInt(timestampParts[1], 10);
-
-    var totalSeconds = (hours * 3600) + (minutes * 60) + seconds + (milliseconds / 1000);
-    
-    return totalSeconds;
+    var match = /^.+_([0-9]{2,})([0-5][0-9])([0-5][0-9])\.([0-9]{3})\.jpg$/i.exec(fileName);
+    if (!match || match[0].length !== fileName.length) return null;
+    var totalSeconds = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3]) + Number(match[4]) / 1000;
+    return Number.isFinite(totalSeconds) ? totalSeconds : null;
 }
 
 // The video element is replaced when switching items via ajax, so listen on the document (play does not bubble, so use capture).
@@ -450,6 +471,11 @@ document.addEventListener('play', function (e) {
     video.dataset.mediaId = mediaId;
     video.dataset.playedSeconds = '0';
     video.dataset.lastTime = String(video.currentTime);
+
+    if (video.dataset.explicitStart === 'true') {
+        video.dataset.savePositions = 'true';
+        return;
+    }
 
     // Resume from the saved position; position saving starts once this has resolved so 0 never overwrites it.
     fetch('/Bio/resume?album=' + encodeURIComponent(album.trim()) + '&mediaName=' + encodeURIComponent(mediaName))

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Bio player checks</title>
+</head>
+<body>
+    <h1>Bio player checks</h1>
+    <p>Open this file in a browser. These checks use the production script with controlled media metadata and a fake resume endpoint; no gallery services are required.</p>
+    <pre id="results">Running...</pre>
+    <div id="fixture"></div>
+    <script src="../WebGallery.UI/wwwroot/lib/jquery/dist/jquery.min.js"></script>
+    <script src="../WebGallery.UI/wwwroot/js/view-listener-bio.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async function () {
+            const results = [];
+            let requests = [];
+            window.fetch = function (url) {
+                requests.push(url);
+                return Promise.resolve({ json: () => Promise.resolve({ positionSeconds: 90 }) });
+            };
+            function assert(condition, message) {
+                if (!condition) throw new Error(message);
+            }
+            async function check(name, run) {
+                try {
+                    await run();
+                    results.push({ name, passed: true });
+                } catch (error) {
+                    results.push({ name, passed: false, error: error.message });
+                }
+            }
+            function fixture(start, readyState = 0, duration = 120, failSeek = false) {
+                document.getElementById('fixture').innerHTML =
+                    '<div id="album-id-placeholder">trip</div><div id="image-id-placeholder">clip-id</div>' +
+                    '<div id="bioVideoWrapper"><div>clip.mp4</div><video class="bio-img" controls preload="none"></video></div>' +
+                    '<p id="videoStartError" role="status" hidden></p>';
+                const video = document.querySelector('video');
+                if (start !== null) video.setAttribute('data-start-position', start);
+                let position = 0;
+                let loads = 0;
+                let plays = 0;
+                Object.defineProperties(video, {
+                    readyState: { get: () => readyState },
+                    duration: { get: () => duration },
+                    currentTime: {
+                        get: () => position,
+                        set: value => {
+                            if (failSeek) throw new Error('Simulated seek failure');
+                            position = value;
+                        }
+                    }
+                });
+                video.load = () => loads++;
+                video.play = () => { plays++; return Promise.resolve(); };
+                requests = [];
+                return { video, loads: () => loads, plays: () => plays };
+            }
+            await check('Loads metadata, seeks to milliseconds, and stays paused', function () {
+                const f = fixture('62.345');
+                setupVideoThumbnailButton();
+                assert(f.loads() === 1 && f.video.preload === 'metadata', 'Metadata was not requested');
+                f.video.dispatchEvent(new Event('loadedmetadata'));
+                assert(f.video.currentTime === 62.345, 'Incorrect position');
+                assert(f.video.paused && f.plays() === 0, 'Unexpected autoplay');
+                setupVideoThumbnailButton();
+                assert(f.loads() === 1, 'Initialization was repeated');
+            });
+            await check('Explicit timestamp overrides a later saved resume position on first play', async function () {
+                const f = fixture('12.345', 1);
+                setupVideoThumbnailButton();
+                f.video.dispatchEvent(new Event('play'));
+                await new Promise(resolve => setTimeout(resolve, 0));
+                assert(f.video.currentTime === 12.345, 'Resume overwrote the timestamp');
+                assert(requests.length === 0, 'Explicit navigation fetched resume');
+                assert(f.video.dataset.savePositions === 'true', 'Position saving was disabled');
+            });
+            await check('Zero is an explicit position, not a missing value', function () {
+                const f = fixture('0', 1);
+                setupVideoThumbnailButton();
+                f.video.dispatchEvent(new Event('play'));
+                assert(f.video.currentTime === 0 && requests.length === 0, 'Zero did not override resume');
+            });
+            await check('Out-of-range timestamp is clamped to video duration', function () {
+                const f = fixture('200.5', 1);
+                setupVideoThumbnailButton();
+                assert(f.video.currentTime === 120, 'Position was not clamped');
+            });
+            await check('AJAX replacement with an ordinary video keeps normal resume', async function () {
+                fixture('12', 1);
+                setupVideoThumbnailButton();
+                const f = fixture(null, 1);
+                setupVideoThumbnailButton();
+                assert(f.loads() === 0 && f.video.dataset.explicitStart === undefined, 'Timestamp leaked into the next video');
+                f.video.dispatchEvent(new Event('play'));
+                await new Promise(resolve => setTimeout(resolve, 0));
+                assert(f.video.currentTime === 90 && requests.length === 1, 'Ordinary resume was changed');
+            });
+            await check('Malformed positions do not seek or trigger metadata loading', function () {
+                for (const start of ['', '-1', 'NaN', 'Infinity', '1,5', '12x', '9'.repeat(400)]) {
+                    const f = fixture(start);
+                    setupVideoThumbnailButton();
+                    assert(f.loads() === 0 && f.video.dataset.explicitStart === undefined, 'Accepted invalid position: ' + start);
+                }
+            });
+            await check('Seek failures expose a visible error', function () {
+                fixture('12', 1, 120, true);
+                setupVideoThumbnailButton();
+                const status = document.getElementById('videoStartError');
+                assert(!status.hidden && status.textContent.includes('Unable'), 'Seek failure was hidden');
+            });
+            await check('Normal images remain usable without a video element', function () {
+                document.getElementById('fixture').innerHTML = '<img alt="ordinary image">';
+                setupVideoThumbnailButton();
+                assert(document.querySelector('video') === null, 'Unexpected video');
+            });
+            await check('Generated-name parser handles long hours and rejects malformed timestamps', function () {
+                assert(parseGeneratedImageTimestamp('clip_part_1000203.004.jpg') === 360123.004, 'Long hours were truncated');
+                assert(parseGeneratedImageTimestamp('clip_000000.000.jpg') === 0, 'Zero timestamp failed');
+                for (const name of ['clip_006000.000.jpg', 'clip_000060.000.jpg', 'clip_00x000.000.jpg',
+                    'clip_000000.0x0.jpg', 'clip_000001.000.jpg\n', 'clip_000001.000.png']) {
+                    assert(parseGeneratedImageTimestamp(name) === null, 'Accepted malformed name: ' + name);
+                }
+            });
+            window.testResults = results;
+            const failures = results.filter(result => !result.passed).length;
+            document.getElementById('results').textContent = results.map(result =>
+                (result.passed ? 'PASS ' : 'FAIL ') + result.name + (result.error ? ': ' + result.error : '')).join('\n');
+            document.title = failures ? failures + ' Bio player checks failed' : results.length + ' Bio player checks passed';
+        });
+    </script>
+</body>
+</html>

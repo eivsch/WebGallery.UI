@@ -8,7 +8,7 @@ namespace WebGallery.UI.Helpers
     {
         public static MediaType DetermineMediaType(string name)
         {
-            string ext = Path.GetExtension(name);
+            string ext = Path.GetExtension(name).ToLowerInvariant();
             switch (ext)
             {
                 case ".mp4":
