@@ -52,10 +52,6 @@ else
 }
 </figure>
 
-<button type="button" class="btn btn-dark btn-sm" data-bio-like data-album="@Model.Album" data-media-id="@Model.Id">
-    Like
-</button>
-
 <div data-aos="fade-left" data-aos-duration="1000">
     <ul class="tag-list" id="bioPictureTags">
         @foreach (var tag in Model.Tags)
@@ -74,7 +70,7 @@ else
     {
         <div class="row">
             <div class="bio-nav-item">
-                <a class="regular-text-link" href="@Model.SourceVideoUrl">Open source video at @Model.SourceVideoTimestamp</a>
+                <a class="regular-text-link bio-source-video-link" href="@Model.SourceVideoUrl">Open source video at @Model.SourceVideoTimestamp</a>
             </div>
         </div>
     }

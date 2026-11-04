@@ -8,7 +8,14 @@
         <div id="bio-img-partial">
             <partial name="_Picture" model="Model.BioPictureViewModel" />
         </div>
-        <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
+        <div class="bio-tags-button">
+            <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
+        </div>
+        <div>
+            <button type="button" class="btn btn-dark btn-sm" data-bio-like title="Shortcut: L" aria-keyshortcuts="L">
+                Like <span class="bio-key-hint">L</span>
+            </button>
+        </div>
         <div id="myDropdown">
             <input type="text" placeholder="Search or add a tag..." id="myInput" style="display:none" />
             @foreach (var tag in Model.AllTags)
