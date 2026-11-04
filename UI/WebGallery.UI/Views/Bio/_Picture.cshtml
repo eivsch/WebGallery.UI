@@ -22,7 +22,9 @@
     <div class="bio-video-wrapper" id="bioVideoWrapper">
         <div>@Model.Name</div>
         <div class="bio-video-stage">
-            <video class="bio-img" controls preload="none" poster="@thumbsUri" style="width:100%;height:auto;">
+            <video class="bio-img" controls preload="none" poster="@thumbsUri"
+                   data-start-position="@Model.StartPositionSeconds?.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)"
+                   style="width:100%;height:auto;">
                 <source src="@videoUri" type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
@@ -31,6 +33,10 @@
                 <span data-status-text></span>
             </span>
         </div>
+        @if (Model.StartPositionSeconds.HasValue)
+        {
+            <p id="videoStartError" role="status" hidden></p>
+        }
         <button id="videoEnlargeToggle" type="button" class="btn btn-dark btn-sm bio-video-enlarge-btn" aria-label="Toggle theater mode" title="Shortcut: T">
             <i class="fas fa-expand-alt"></i> Theater mode <span class="bio-key-hint">T</span>
         </button>
@@ -64,6 +70,14 @@ else
 </div>
 
 <div class="bio-nav-container">
+    @if (Model.SourceVideoUrl != null)
+    {
+        <div class="row">
+            <div class="bio-nav-item">
+                <a class="regular-text-link" href="@Model.SourceVideoUrl">Open source video at @Model.SourceVideoTimestamp</a>
+            </div>
+        </div>
+    }
     <div class="bio-nav-item">
         <a class="bio-nav-prev" href="" aria-label="Previous"
            data-ajax="true"

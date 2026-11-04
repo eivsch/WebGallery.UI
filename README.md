@@ -84,4 +84,8 @@ Under `/users/{username}`: user create/delete, `albums` (list, create, rename, m
 
 ## Notes
 
+On a generated screencap's Bio page, **Open source video at HH:MM:SS.mmm** opens the source video paused at that frame's timestamp, overriding its saved resume position. The link requires the `screencap` tag, the generated `<video stem>_HHMMSS.mmm.jpg` filename in `<album>_video_images`, and an exact source MP4 match in `<album>`. Images with malformed timestamps or missing/ambiguous sources keep their normal image controls without a source link.
+
+Run focused UI tests with `dotnet test UI\WebGallery.UI.Tests\WebGallery.UI.Tests.csproj`. Open `UI\WebGallery.UI.Tests\bio-player.tests.html` in a browser for player lifecycle checks against the production JavaScript using controlled media metadata and a fake resume endpoint.
+
 The API allows any CORS origin and has no authentication of its own; don't expose it publicly.

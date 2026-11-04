@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Infrastructure.FileServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebGallery.UI.Models;
+using WebGallery.UI.Helpers;
 using WebGallery.UI.ViewModels.Bio;
 
 namespace WebGallery.UI.Controllers
@@ -58,15 +60,16 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("{album}/{index}")]
-        public async Task<IActionResult> Index(string album, int index)
+        public async Task<IActionResult> Index(string album, int index, [FromQuery] string start = null)
         {
             ViewBag.Current = "Bio";
             BioViewModel vm = await BuildBioViewModelAsync(album, index);
+            SetStartPosition(vm.BioPictureViewModel, start);
             return View(vm);
         }
 
         [HttpGet("id/{id}")]
-        public async Task<IActionResult> Index(string id)
+        public async Task<IActionResult> Index(string id, [FromQuery] string start = null)
         {
             ViewBag.Current = "Bio";
 
@@ -91,6 +94,8 @@ namespace WebGallery.UI.Controllers
                 }
             };
 
+            await AddSourceVideoAsync(vm.BioPictureViewModel);
+            SetStartPosition(vm.BioPictureViewModel, start);
             return View(vm);
         }
 
@@ -102,7 +107,7 @@ namespace WebGallery.UI.Controllers
             List<AlbumMetaDTO> albums = await GetAlbumsAsync();
             IEnumerable<string> allTags = albums.SelectMany(s => s.Tags).Select(s => s.TagName).Distinct();
 
-            return new BioViewModel
+            BioViewModel vm = new()
             {
                 AllTags = allTags.ToList(),
                 BioPictureViewModel = new BioPictureViewModel
@@ -115,6 +120,32 @@ namespace WebGallery.UI.Controllers
                     Album = album,
                 }
             };
+            await AddSourceVideoAsync(vm.BioPictureViewModel);
+            return vm;
+        }
+
+        private static void SetStartPosition(BioPictureViewModel picture, string start)
+        {
+            if (Utils.DetermineMediaType(picture.Name) == MediaType.Video &&
+                double.TryParse(start, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out double seconds) &&
+                double.IsFinite(seconds) && seconds >= 0)
+                picture.StartPositionSeconds = seconds;
+        }
+
+        private async Task AddSourceVideoAsync(BioPictureViewModel picture)
+        {
+            ScreencapSource source = ScreencapSource.Parse(picture.Album, picture.Name, picture.Tags);
+            if (source == null) return;
+
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
+            if (!albums.Any(a => string.Equals(a.AlbumName, source.Album, StringComparison.OrdinalIgnoreCase))) return;
+
+            int? index = await source.FindVideoIndexAsync(_minimalApiProxy, _username);
+            if (!index.HasValue) return;
+
+            string position = source.PositionSeconds.ToString("0.###", CultureInfo.InvariantCulture);
+            picture.SourceVideoUrl = $"/Bio/{Uri.EscapeDataString(source.Album)}/{index.Value}?start={position}";
+            picture.SourceVideoTimestamp = source.Timestamp;
         }
 
         [HttpGet("switch/{album}/{index}")]
@@ -133,6 +164,7 @@ namespace WebGallery.UI.Controllers
                 Tags = media.Tags.Select(s => s.TagName).ToList(),
             };
 
+            await AddSourceVideoAsync(vm);
             return PartialView("_Picture", vm);
         }
 

@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebGallery.UI", "WebGallery
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{76554757-4D20-4615-8C71-F94C28360F5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebGallery.UI.Tests", "WebGallery.UI.Tests\WebGallery.UI.Tests.csproj", "{67DC7DCB-536B-4756-9FD0-90BC2D95BDC5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{76554757-4D20-4615-8C71-F94C28360F5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76554757-4D20-4615-8C71-F94C28360F5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76554757-4D20-4615-8C71-F94C28360F5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67DC7DCB-536B-4756-9FD0-90BC2D95BDC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67DC7DCB-536B-4756-9FD0-90BC2D95BDC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67DC7DCB-536B-4756-9FD0-90BC2D95BDC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67DC7DCB-536B-4756-9FD0-90BC2D95BDC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
