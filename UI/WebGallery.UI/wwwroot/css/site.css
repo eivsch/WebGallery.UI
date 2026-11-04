@@ -99,6 +99,10 @@
     margin-bottom: 10px;
 }
 
+.bio-tags-button {
+    margin-bottom: 10px;
+}
+
 .bio-content__deletebtn a {
     display: inline-block;
     padding: 10px 20px;
@@ -260,6 +264,11 @@ html {
     font-size: 25px;
     display: inline-block;
     color: gray;
+}
+
+.bio-nav-item a.bio-source-video-link {
+    font-size: 0.85rem;
+    color: #b7d8ff !important;
 }
 
 .bio-nav-item a {

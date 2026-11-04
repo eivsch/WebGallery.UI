@@ -4,21 +4,15 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "WebGallery.UI",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build-ui",
-            "program": "${workspaceFolder}/UI/WebGallery.UI/bin/Debug/net10.0/WebGallery.UI.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/UI/WebGallery.UI",
-            "stopAtEntry": false,
-        "env": {},
-        "serverReadyAction": {
-            "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
-            "uriFormat": "{0}",
-            "action": "openExternally"
-        },
+    {
+        "name": "WebGallery.UI",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build-ui",
+        "program": "${workspaceFolder}/UI/WebGallery.UI/bin/Debug/net10.0/WebGallery.UI.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/UI/WebGallery.UI",
+        "stopAtEntry": false,
         "presentation": {
             "hidden": false,
             "group": "1-Individual",
@@ -38,16 +32,11 @@
             "WEBGALLERY_HTTPS_PORT": "5041",
             "WEBGALLERY_HTTP_PORT": "5042"
         },
-        "serverReadyAction": {
-            "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
-            "uriFormat": "{0}",
-            "action": "openExternally"
-        },
         "presentation": {
             "hidden": false,
             "group": "1-Individual",
             "order": 2
-            }
+        }
     },
     {
         "name": "WebGallery.FileServer",
@@ -61,11 +50,6 @@
         "env": {
             "WEBGALLERY_HTTPS_PORT": "5031",
             "WEBGALLERY_HTTP_PORT": "5032"
-        },
-        "serverReadyAction": {
-            "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
-            "uriFormat": "{0}",
-            "action": "openExternally"
         },
         "presentation": {
             "hidden": false,

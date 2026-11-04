@@ -3,11 +3,11 @@ setupGalleryLikes(function () {
         album: $('#album-id-placeholder').text(),
         id: $('#image-id-placeholder').text()
     };
-}, false);
+}, true);
 
 $('body').on('click', '[data-bio-like]', function (e) {
     var button = $(e.currentTarget);
-    addMediaLike(button, button.attr('data-album'), button.attr('data-media-id'));
+    addMediaLike(button, $('#album-id-placeholder').text(), $('#image-id-placeholder').text());
 });
 
 function tagExists(tag) {
@@ -628,6 +628,19 @@ document.addEventListener('click', function (e) {
 document.addEventListener('keydown', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.defaultPrevented) return;
+
+    if (e.key.toLowerCase() === 'l' &&
+        !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey &&
+        !e.target.isContentEditable &&
+        !/^(INPUT|TEXTAREA|SELECT|VIDEO|AUDIO)$/.test(e.target.tagName) &&
+        !document.querySelector('.fancybox-container')) {
+        var likeButton = document.querySelector('[data-bio-like]');
+        if (likeButton) {
+            e.preventDefault();
+            likeButton.click();
+        }
+        return;
+    }
 
     if (e.key === 'Escape') {
         if (document.body.classList.contains('theater-mode')) {
