@@ -235,7 +235,20 @@ function viewGeneratedImages(button) {
 
 function bioSwitch(album, sortOrder) {
     window.history.pushState("", "", '/Bio/' + album + '/' + sortOrder);
+    updateBioDeleteLink();
     setupVideoThumbnailButton();
+}
+
+function updateBioDeleteLink() {
+    var deleteLink = document.querySelector('.bio-delete-link');
+    var album = document.getElementById('album-id-placeholder')?.textContent;
+    var mediaName = document.getElementById('media-name-placeholder')?.textContent;
+    if (!deleteLink || !album || !mediaName) {
+        return;
+    }
+
+    deleteLink.href = '/Bio/picture/delete/' + encodeURIComponent(album) + '/' + encodeURIComponent(mediaName);
+    deleteLink.setAttribute('data-confirm-message', "Are you sure you want to delete '" + mediaName + "'? This cannot be undone.");
 }
 
 function setupVideoThumbnailButton() {

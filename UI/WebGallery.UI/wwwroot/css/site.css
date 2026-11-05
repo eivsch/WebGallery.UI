@@ -91,7 +91,7 @@
 }
 
 .bio-content__deletebtn {
-    margin-top: 20px;
+    margin-top: 14px;
     text-align: center;
 }
 
@@ -100,7 +100,11 @@
 }
 
 .bio-tags-button {
-    margin-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+.bio-like-button {
+    margin-bottom: 4px;
 }
 
 .bio-content__deletebtn a {
@@ -123,10 +127,10 @@
 .bio-content button {
     background-color: #000;
     color: #fff;
-    border: 2px solid #ef6c57;
+    border: 2px solid rgba(255, 255, 255, 0.8);
     border-radius: 30px;
     padding: 10px 20px;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -167,10 +171,11 @@
     width: 26px;
     height: 26px;
     padding: 0 !important;
-    border: 1px solid rgba(180, 180, 180, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
     border-radius: 50% !important;
     background: rgba(45, 45, 45, 0.55) !important;
     color: rgba(190, 190, 190, 0.75) !important;
+    font-size: 0.7rem !important;
     cursor: pointer;
 }
 
@@ -204,7 +209,7 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    margin: 4px 0 15px;
+    margin: 4px 0 19px;
 }
 
 .bio-key-hint {
@@ -242,6 +247,11 @@ html {
 
 .tag-list, .tag-list li {
     display: inline;
+}
+
+#bioPictureTags {
+    margin-bottom: 0;
+    padding-left: 0;
 }
 
 .bio-generated-images__list {
@@ -286,7 +296,7 @@ html {
 }
 
 .bio-nav-container {
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .bio-nav-item {

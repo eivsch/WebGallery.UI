@@ -12,6 +12,7 @@
 
 <div id="image-id-placeholder" style="display:none">@Model.Id</div>
 <div id="album-id-placeholder" style="display:none">@Model.Album</div>
+<div id="media-name-placeholder" style="display:none">@Model.Name</div>
 <div id="media-type-placeholder" style="display:none">@mediaType</div>
 
 <figure class="bio-figure" data-aos="fade-in">
@@ -50,6 +51,12 @@ else
     </a>
 }
 </figure>
+
+<div class="bio-like-button">
+    <button type="button" class="btn btn-dark btn-sm" data-bio-like title="Shortcut: L" aria-keyshortcuts="L">
+        Like <span class="bio-key-hint">L</span>
+    </button>
+</div>
 
 <div data-aos="fade-left" data-aos-duration="1000">
     <ul class="tag-list" id="bioPictureTags">
@@ -113,9 +120,3 @@ else
 </div>
 
 <div id="generatedVideoImagesContainer" class="bio-generated-images" style="display:none;" aria-live="polite"></div>
-
-<div class="bio-content__deletebtn">
-    <a href="/Bio/picture/delete/@Model.Album/@Model.Name"
-       class="bio-delete-link"
-       data-confirm-message="Are you sure you want to delete '@Model.Name'? This cannot be undone.">Delete</a>
-</div>
