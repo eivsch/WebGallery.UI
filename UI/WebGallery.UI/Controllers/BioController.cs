@@ -90,6 +90,7 @@ namespace WebGallery.UI.Controllers
                     AppPath = $"{searchHit.AlbumName}/{searchHit.MediaItem.Name}",
                     Tags = searchHit.MediaItem.Tags.Select(s => s.TagName).ToList(),
                     AlbumMediaIndex = searchHit.MediaAlbumIndex,
+                    AlbumMediaCount = albums.FirstOrDefault(a => a.AlbumName == searchHit.AlbumName)?.TotalCount ?? 0,
                     Album = searchHit.AlbumName,
                 }
             };
@@ -117,6 +118,7 @@ namespace WebGallery.UI.Controllers
                     AppPath = $"{album}/{media.Name}",
                     Tags = media.Tags.Select(s => s.TagName).ToList(),
                     AlbumMediaIndex = index,
+                    AlbumMediaCount = albumContents.TotalCount,
                     Album = album,
                 }
             };
@@ -168,13 +170,25 @@ namespace WebGallery.UI.Controllers
         [HttpGet("switch/{album}/{index}")]
         public async Task<IActionResult> Switch(string album, int index)
         {
+            if (index < 0)
+                return NotFound();
+
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
+            AlbumMetaDTO albumMeta = albums?.FirstOrDefault(a => a.AlbumName == album);
+            if (albumMeta == null || index >= albumMeta.TotalCount)
+                return NotFound();
+
             AlbumContentsDTO albumContents = await _minimalApiProxy.GetAlbumContents(_username, album, index, 1);
+            if (albumContents?.Items == null || albumContents.Items.Count == 0)
+                return NotFound();
+
             MediaDTO media = albumContents.Items[0];
 
             BioPictureViewModel vm = new()
             {
                 Album = album,
                 AlbumMediaIndex = index,
+                AlbumMediaCount = albumContents.TotalCount,
                 AppPath = $"{album}/{media.Name}",
                 Id = media.Id,
                 Name = media.Name,

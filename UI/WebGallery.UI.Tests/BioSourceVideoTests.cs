@@ -31,7 +31,23 @@ public class BioSourceVideoTests
         Assert.Equal("/Bio/trip%20%26%20snow/205?start=62.345", initial.SourceVideoUrl);
         Assert.Equal("00:01:02.345", initial.SourceVideoTimestamp);
         Assert.Equal(initial.SourceVideoUrl, switched.SourceVideoUrl);
+        Assert.Equal(1, initial.AlbumMediaCount);
+        Assert.Equal(1, switched.AlbumMediaCount);
         Assert.Contains(catalog.Requests, r => r.Contains("from=200"));
+    }
+
+    [Theory]
+    [InlineData(-1, 0)]
+    [InlineData(1, 1)]
+    public async Task Switch_outside_album_bounds_returns_not_found_without_fetching_media(int index, int expectedRequests)
+    {
+        using var catalog = new Catalog();
+
+        var result = await catalog.Controller().Switch(catalog.ScreencapAlbum, index);
+
+        Assert.IsType<NotFoundResult>(result);
+        Assert.Equal(expectedRequests, catalog.Requests.Count);
+        Assert.DoesNotContain(catalog.Requests, r => r.Contains("/albums/" + catalog.ScreencapAlbum + "?"));
     }
 
     [Fact]
@@ -108,7 +124,7 @@ public class BioSourceVideoTests
         var result = Assert.IsType<PartialViewResult>(await catalog.Controller().Switch(catalog.ScreencapAlbum, 0));
 
         Assert.Null(Assert.IsType<BioPictureViewModel>(result.Model).SourceVideoUrl);
-        Assert.Single(catalog.Requests);
+        Assert.DoesNotContain(catalog.Requests, r => r.Contains("/albums/trip?"));
     }
 
     [Fact]
@@ -193,10 +209,10 @@ public class BioSourceVideoTests
             var status = HttpStatusCode.OK;
             if (path == "/users/tester/albums")
             {
-                var albums = new List<AlbumMetaDTO> { new() { AlbumName = ScreencapAlbum, Tags = [] } };
-                if (SourceAlbumExists) albums.Add(new() { AlbumName = Album, Tags = [] });
+                var albums = new List<AlbumMetaDTO> { new() { AlbumName = ScreencapAlbum, Tags = [], TotalCount = 1 } };
+                if (SourceAlbumExists) albums.Add(new() { AlbumName = Album, Tags = [], TotalCount = SourceItems.Count });
                 // A similar album must not substitute for the exact source album.
-                albums.Add(new() { AlbumName = Album + "-backup", Tags = [] });
+                albums.Add(new() { AlbumName = Album + "-backup", Tags = [], TotalCount = SourceItems.Count });
                 body = new { TotalCount = albums.Count, Albums = albums.Skip(from).Take(size).ToList() };
             }
             else if (path == "/users/tester/search")

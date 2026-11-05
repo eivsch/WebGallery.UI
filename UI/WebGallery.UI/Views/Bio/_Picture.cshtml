@@ -52,59 +52,77 @@ else
 }
 </figure>
 
-<div class="bio-like-button">
-    <button type="button" class="btn btn-dark btn-sm" data-bio-like title="Shortcut: L" aria-keyshortcuts="L">
-        Like <span class="bio-key-hint">L</span>
-    </button>
-</div>
-
-<div data-aos="fade-left" data-aos-duration="1000">
-    <ul class="tag-list" id="bioPictureTags">
-        @foreach (var tag in Model.Tags)
-        {
-            string tagStr = tag;
-            if (!tag.StartsWith('#'))
-                tagStr = "#" + tag;
-
-            <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id', '@Model.Album')" class="far fa-minus-square"></i></li>
-        }
-    </ul>
-</div>
-
-<div class="bio-nav-container">
-    @if (Model.SourceVideoUrl != null)
-    {
-        <div class="row">
-            <div class="bio-nav-item">
-                <a class="regular-text-link bio-source-video-link" href="@Model.SourceVideoUrl">Open source video at @Model.SourceVideoTimestamp</a>
-            </div>
+<div class="bio-primary-controls">
+    <nav class="bio-navigation" aria-label="Bio media navigation">
+        <div class="bio-nav-item bio-like-button">
+            <button type="button" data-bio-like aria-label="Like" title="Like (L)" aria-keyshortcuts="L">L</button>
         </div>
-    }
-    <div class="bio-nav-item">
-        <a class="bio-nav-prev" href="" aria-label="Previous"
-           data-ajax="true"
-           data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)"
-           data-ajax-update="#bio-img-partial"
-           data-ajax-begin="showBioLoading()"
-           data-ajax-complete="hideBioLoading()"
-           data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))">
-            <i class="fas fa-chevron-left"></i>
-        </a>
-    </div>
-    <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - <a class="regular-text-link" href="/admin/albums/@Model.Album">@Model.Album</a></div>
-    <div class="bio-nav-item">
-        <a class="bio-nav-next" href="" aria-label="Next"
-           data-ajax="true"
-           data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)"
-           data-ajax-update="#bio-img-partial"
-           data-ajax-begin="showBioLoading()"
-           data-ajax-complete="hideBioLoading()"
-           data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">
-            <i class="fas fa-chevron-right"></i>
-        </a>
-    </div>
-    @if (mediaType == MediaType.Video)
+        <div class="bio-nav-item">
+            @if (Model.AlbumMediaIndex > 0)
+            {
+                <a class="bio-nav-prev" href="" aria-label="Previous"
+               data-ajax="true"
+               data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex - 1)"
+               data-ajax-update="#bio-img-partial"
+               data-ajax-begin="showBioLoading()"
+               data-ajax-complete="hideBioLoading()"
+               data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex - 1))">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            }
+            else
+            {
+                <span class="bio-nav-disabled" aria-label="No previous media" aria-disabled="true">
+                    <i class="fas fa-chevron-left"></i>
+                </span>
+            }
+        </div>
+        <div class="bio-nav-item" id="bioImgCounter">#@Model.AlbumMediaIndex - <a class="regular-text-link" href="/admin/albums/@Model.Album">@Model.Album</a></div>
+        <div class="bio-nav-item">
+            @if (Model.AlbumMediaIndex + 1 < Model.AlbumMediaCount)
+            {
+                <a class="bio-nav-next" href="" aria-label="Next"
+               data-ajax="true"
+               data-ajax-url="/Bio/switch/@Model.Album/@(Model.AlbumMediaIndex + 1)"
+               data-ajax-update="#bio-img-partial"
+               data-ajax-begin="showBioLoading()"
+               data-ajax-complete="hideBioLoading()"
+               data-ajax-success="bioSwitch('@Model.Album', @(Model.AlbumMediaIndex + 1))">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            }
+            else
+            {
+                <span class="bio-nav-disabled" aria-label="No next media" aria-disabled="true">
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            }
+        </div>
+    </nav>
+</div>
+
+<ul class="tag-list" id="bioPictureTags">
+    @foreach (var tag in Model.Tags)
     {
+        string tagStr = tag;
+        if (!tag.StartsWith('#'))
+            tagStr = "#" + tag;
+
+        <li class="tag-list-item" data-tag-name="@tag">@tagStr <i onclick="deleteTag('@tag', '@Model.Id', '@Model.Album')" class="far fa-minus-square"></i></li>
+    }
+</ul>
+
+@if (Model.SourceVideoUrl != null)
+{
+    <div class="bio-source-video-row">
+        <a class="regular-text-link bio-source-video-link" href="@Model.SourceVideoUrl">Open source video at @Model.SourceVideoTimestamp</a>
+    </div>
+}
+
+@if (mediaType == MediaType.Video)
+{
+    <details class="bio-disclosure bio-video-tools">
+        <summary>Video tools</summary>
         <div class="bio-video-actions">
             <button id="setVideoThumbnail" type="button" data-app-path-b64="@appPathBase64">
                 Set as thumbnail
@@ -112,11 +130,10 @@ else
             <button id="generateVideoImage" type="button" data-app-path-b64="@appPathBase64" title="Shortcut: X">
                 Generate image <span class="bio-key-hint">X</span>
             </button>
-            <button id="viewGeneratedImages" type="button" data-album="@(Model.Album + "_video_images")" data-file-name-no-ext="@System.IO.Path.GetFileNameWithoutExtension(Model.Name)_">
-                Generated images
+            <button id="viewGeneratedImages" type="button" data-album="@(Model.Album + "_video_images")" data-file-name-no-ext="@System.IO.Path.GetFileNameWithoutExtension(Model.Name)_" aria-expanded="false" aria-controls="generatedVideoImagesContainer">
+                <span data-generated-images-label>Generated images</span> <i class="fas fa-chevron-down" aria-hidden="true"></i>
             </button>
         </div>
-    }
-</div>
-
-<div id="generatedVideoImagesContainer" class="bio-generated-images" style="display:none;" aria-live="polite"></div>
+        <div id="generatedVideoImagesContainer" class="bio-generated-images" hidden aria-live="polite" aria-label="Generated screencaps"></div>
+    </details>
+}

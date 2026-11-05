@@ -8,21 +8,28 @@
         <div id="bio-img-partial">
             <partial name="_Picture" model="Model.BioPictureViewModel" />
         </div>
-        <div class="bio-tags-button">
-            <button class="btn btn-dark btn-sm" onclick="focusInput()">Tags</button>
-        </div>
-        <div id="myDropdown">
-            <input type="text" placeholder="Search or add a tag..." id="myInput" style="display:none" />
-            @foreach (var tag in Model.AllTags)
-            {
-                <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>
-            }
-        </div>
-        <div class="bio-content__deletebtn">
-            <a href="/Bio/picture/delete/@Uri.EscapeDataString(Model.BioPictureViewModel.Album)/@Uri.EscapeDataString(Model.BioPictureViewModel.Name)"
-               class="bio-delete-link"
-               data-confirm-message="Are you sure you want to delete '@Model.BioPictureViewModel.Name'? This cannot be undone.">Delete</a>
-        </div>
+        <details id="myDropdown" class="bio-disclosure bio-tags-disclosure">
+            <summary>Tags</summary>
+            <div class="bio-tags-content">
+                <div id="bio-assigned-tags-container"></div>
+                <input type="text" placeholder="Search or add a tag..." id="myInput" aria-label="Search or add a tag" />
+                <div id="bioTagOptions">
+                    @foreach (var tag in Model.AllTags)
+                    {
+                        <a class="dropdown-item" onclick="addTag('@tag')" style="display:none">@tag</a>
+                    }
+                </div>
+            </div>
+        </details>
+        <div id="bio-video-tools-container"></div>
+        <details class="bio-disclosure bio-actions-disclosure">
+            <summary>Actions</summary>
+            <div class="bio-content__deletebtn">
+                <a href="/Bio/picture/delete/@Uri.EscapeDataString(Model.BioPictureViewModel.Album)/@Uri.EscapeDataString(Model.BioPictureViewModel.Name)"
+                   class="bio-delete-link"
+                   data-confirm-message="Are you sure you want to delete '@Model.BioPictureViewModel.Name'? This cannot be undone.">Delete</a>
+            </div>
+        </details>
     </div>
 
     <div class="row justify-content-center">
