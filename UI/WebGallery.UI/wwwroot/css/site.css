@@ -400,6 +400,10 @@ html {
 .fancybox-button--like {
     padding-top: 7px;
 }
+.fancybox-button--source-video {
+    position: relative;
+    top: -2px;
+}
 .fancybox-button--source-video[hidden] {
     display: none !important;
 }

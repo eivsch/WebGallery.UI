@@ -13,10 +13,10 @@ function addMediaLike(button, album, mediaId) {
 function setupGalleryLikes(getMedia, enableShortcut) {
     var title = enableShortcut ? 'Like (L)' : 'Like';
     $.fancybox.defaults.btnTpl.like = '<button data-fancybox-like class="fancybox-button fancybox-button--like" title="' + title + '">L</button>';
-    $.fancybox.defaults.btnTpl.sourceVideo = '<button type="button" data-fancybox-source-video class="fancybox-button fancybox-button--source-video" title="Open source video" aria-label="Open source video" hidden><i class="fas fa-video" aria-hidden="true"></i></button>';
+    $.fancybox.defaults.btnTpl.sourceVideo = '<button type="button" data-fancybox-source-video class="fancybox-button fancybox-button--source-video" title="Open source video (V)" aria-label="Open source video" aria-keyshortcuts="V" hidden><i class="fas fa-video" aria-hidden="true"></i></button>';
     $.fancybox.defaults.buttons = [
-        'like',
         'sourceVideo',
+        'like',
         'zoom',
         'fullScreen',
         'thumbs',
@@ -48,6 +48,23 @@ function setupGalleryLikes(getMedia, enableShortcut) {
             instance.$refs.toolbar.find('[data-fancybox-like]').trigger('click');
         });
     }
+
+    $(document).on('afterKeydown.fb', function (e, instance, slide, keypress, keycode) {
+        if (keycode !== 86 || slide.type !== 'image' ||
+            keypress.ctrlKey || keypress.altKey || keypress.shiftKey || keypress.metaKey ||
+            keypress.target.isContentEditable ||
+            $(keypress.target).is('input,textarea,select,video,audio')) {
+            return;
+        }
+
+        var sourceButton = instance.$refs.toolbar.find('[data-fancybox-source-video]');
+        if (sourceButton.prop('hidden')) {
+            return;
+        }
+
+        keypress.preventDefault();
+        sourceButton.trigger('click');
+    });
 
     $(document).on('afterShow.fb', function (e, instance) {
         instance.$refs.toolbar.find('[data-fancybox-like]').removeClass('fancybox-like__pressed');
