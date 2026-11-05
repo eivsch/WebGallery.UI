@@ -148,6 +148,23 @@ namespace WebGallery.UI.Controllers
             picture.SourceVideoTimestamp = source.Timestamp;
         }
 
+        [HttpGet("source-video")]
+        public async Task<IActionResult> OpenSourceVideo(string album, string name)
+        {
+            ScreencapSource source = ScreencapSource.Parse(album, name, ["screencap"]);
+            if (source is null) return NotFound();
+
+            List<AlbumMetaDTO> albums = await GetAlbumsAsync();
+            if (albums?.Any(a => string.Equals(a.AlbumName, source.Album, StringComparison.OrdinalIgnoreCase)) != true)
+                return NotFound();
+
+            int? index = await source.FindVideoIndexAsync(_minimalApiProxy, _username);
+            if (!index.HasValue) return NotFound();
+
+            string position = source.PositionSeconds.ToString("0.###", CultureInfo.InvariantCulture);
+            return Redirect($"/Bio/{Uri.EscapeDataString(source.Album)}/{index.Value}?start={position}");
+        }
+
         [HttpGet("switch/{album}/{index}")]
         public async Task<IActionResult> Switch(string album, int index)
         {

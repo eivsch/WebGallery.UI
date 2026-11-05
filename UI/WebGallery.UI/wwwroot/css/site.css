@@ -400,6 +400,9 @@ html {
 .fancybox-button--like {
     padding-top: 7px;
 }
+.fancybox-button--source-video[hidden] {
+    display: none !important;
+}
 .fancybox-like__pressed {
     color: blue;
     animation-name: presslike;

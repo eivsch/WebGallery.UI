@@ -47,6 +47,31 @@ public class BioSourceVideoTests
     }
 
     [Fact]
+    public async Task Source_video_endpoint_resolves_redirect_only_when_requested()
+    {
+        using var catalog = new Catalog("trip & snow");
+        catalog.SourceItems.AddRange(Enumerable.Range(0, 205).Select(i => Media($"other{i}.mp4")));
+        catalog.SourceItems.Add(Media("clip.mp4"));
+
+        var result = Assert.IsType<RedirectResult>(
+            await catalog.Controller().OpenSourceVideo(catalog.ScreencapAlbum, catalog.Picture.Name));
+
+        Assert.Equal("/Bio/trip%20%26%20snow/205?start=62.345", result.Url);
+        Assert.Contains(catalog.Requests, r => r.Contains("from=200"));
+    }
+
+    [Fact]
+    public async Task Source_video_endpoint_rejects_names_that_do_not_match_screencap_pattern()
+    {
+        using var catalog = new Catalog();
+
+        var result = await catalog.Controller().OpenSourceVideo(catalog.ScreencapAlbum, "not-a-screencap.jpg");
+
+        Assert.IsType<NotFoundResult>(result);
+        Assert.Empty(catalog.Requests);
+    }
+
+    [Fact]
     public async Task Duplicate_on_a_later_page_is_not_treated_as_an_unambiguous_source()
     {
         using var catalog = new Catalog();

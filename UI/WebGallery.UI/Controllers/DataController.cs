@@ -286,6 +286,7 @@ namespace WebGallery.UI.Controllers
                 AlbumName = hit.AlbumName,
                 AppPath = Path.Combine(hit.AlbumName, media.Name),
                 TagSearchText = BuildTagSearchText(media.Tags),
+                IsScreencap = ScreencapSource.IsScreencap(hit.AlbumName, media.Name, media.Tags?.Select(tag => tag.TagName)),
                 MediaType = Utils.DetermineMediaType(media.Name).ToString()
             };
         }
@@ -323,6 +324,7 @@ namespace WebGallery.UI.Controllers
             public string AlbumName { get; set; }
             public string AppPath { get; set; }
             public string TagSearchText { get; set; }
+            public bool IsScreencap { get; set; }
             public string MediaType { get; set; }
         }
 

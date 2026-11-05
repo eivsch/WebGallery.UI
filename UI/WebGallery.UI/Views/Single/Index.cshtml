@@ -76,6 +76,8 @@
                            data-name="@item.Name"
                            data-album="@searchableAlbum"
                            data-tags="@searchableTags"
+                           data-screencap-album="@(item.IsScreencap ? item.AlbumName : null)"
+                           data-screencap-name="@(item.IsScreencap ? item.Name : null)"
                            data-fancybox="gallery"
                            data-type="video"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>"
@@ -99,6 +101,8 @@
                            data-name="@item.Name"
                            data-album="@searchableAlbum"
                            data-tags="@searchableTags"
+                           data-screencap-album="@(item.IsScreencap ? item.AlbumName : null)"
+                           data-screencap-name="@(item.IsScreencap ? item.Name : null)"
                            data-fancybox="gallery"
                            data-type="image"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>">

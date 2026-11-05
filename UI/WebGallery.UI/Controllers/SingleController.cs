@@ -81,6 +81,7 @@ namespace WebGallery.UI.Controllers
                     Name = media.Name,
                     AlbumName = album.AlbumName,
                     TagSearchText = BuildTagSearchText(media.Tags),
+                    IsScreencap = ScreencapSource.IsScreencap(album.AlbumName, media.Name, media.Tags?.Select(tag => tag.TagName)),
                     GalleryIndex = randomMediaIndex,
                     IndexGlobal = -1,
                     MediaType = Utils.DetermineMediaType(media.Name),
@@ -240,6 +241,7 @@ namespace WebGallery.UI.Controllers
                     Name = hit.MediaItem.Name,
                     AlbumName = hit.AlbumName,
                     TagSearchText = BuildTagSearchText(hit.MediaItem.Tags),
+                    IsScreencap = ScreencapSource.IsScreencap(hit.AlbumName, hit.MediaItem.Name, hit.MediaItem.Tags?.Select(tag => tag.TagName)),
                 };
 
                 items.Add(imageVm);

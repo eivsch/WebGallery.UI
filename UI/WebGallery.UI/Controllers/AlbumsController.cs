@@ -150,6 +150,7 @@ namespace WebGallery.UI.Controllers
                     MediaType = Utils.DetermineMediaType(media.Name),
                     Name = media.Name,
                     AlbumName = id,
+                    IsScreencap = ScreencapSource.IsScreencap(id, media.Name, media.Tags?.Select(tag => tag.TagName)),
                 };
                 items.Add(imageVm);
             }

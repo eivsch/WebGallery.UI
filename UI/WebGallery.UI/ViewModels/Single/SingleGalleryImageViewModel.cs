@@ -9,6 +9,7 @@ namespace WebGallery.UI.ViewModels.Single
         public string Name { get; set; }
         public string AlbumName { get; set; }
         public string TagSearchText { get; set; }
+        public bool IsScreencap { get; set; }
         public int IndexGlobal { get; set; }
         public int GalleryIndex { get; set; }
         public MediaType MediaType { get; set; }
