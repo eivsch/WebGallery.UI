@@ -253,7 +253,7 @@ function setupVideoThumbnailButton() {
         imageStatus.querySelector('[data-status-icon]').className = state === 'processing'
             ? 'fas fa-spinner fa-spin'
             : state === 'success' ? 'fas fa-check' : 'fas fa-exclamation-circle';
-        imageStatus.querySelector('[data-status-text]').textContent = message;
+        imageStatus.setAttribute('aria-label', message);
         imageStatus.hidden = false;
         if (state !== 'processing') {
             imageStatusTimer = setTimeout(function () {
