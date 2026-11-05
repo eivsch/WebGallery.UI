@@ -79,7 +79,7 @@ $('#myInput').keyup(function (e) {
         var tag = $('#myInput').val();
         if (tag != '') {
             if (addTag(tag)) {
-                $('#myDropdown').append('<a class="dropdown-item" onclick="addTag(\'' + tag + '\')" >' + tag + '</a>');
+                $('#bioTagOptions').append('<a class="dropdown-item" onclick="addTag(\'' + tag + '\')" >' + tag + '</a>');
             }
         }
     }
@@ -122,30 +122,14 @@ function hideAll() {
     }
 }
 
-function focusInput() {
-    const input = document.getElementById("myInput");
-    const dropdown = document.getElementById("myDropdown");
-
-    // Toggle visibility of the input and dropdown
-    if (input.style.display === "none") {
-        input.style.display = "block";
-        dropdown.style.display = "block";
-        input.focus(); // Focus on the input field
-    } else {
-        input.style.display = "none";
-        dropdown.style.display = "none";
-    }
-}
-
 function viewGeneratedImages(button) {
     const container = document.getElementById('generatedVideoImagesContainer');
     if (!button || !container) {
         return;
     }
 
-    if (container.dataset.loaded === 'true') {
-        const isVisible = container.style.display !== 'none';
-        container.style.display = isVisible ? 'none' : 'block';
+    if (container.dataset.loaded === 'true' || !container.hidden) {
+        setGeneratedImagesExpanded(button, container, container.hidden);
         return;
     }
 
@@ -155,9 +139,11 @@ function viewGeneratedImages(button) {
         return;
     }
 
-    const originalText = button.textContent;
+    const label = button.querySelector('[data-generated-images-label]');
     button.disabled = true;
-    button.textContent = 'Loading...';
+    if (label) {
+        label.textContent = 'Loading...';
+    }
 
     fetch('/single/search?albums=' + encodeURIComponent(album) + '&mediaNameContains=' + encodeURIComponent(fileNameNoExt), {
         method: 'GET',
@@ -217,25 +203,82 @@ function viewGeneratedImages(button) {
             } else {
                 container.innerHTML = '<p>No associated image names were found.</p>';
             }
+        } else {
+            container.innerHTML = '<p>No associated images were found.</p>';
         }
 
         container.dataset.loaded = 'true';
-        container.style.display = 'block';
+        setGeneratedImagesExpanded(button, container, true);
     })
     .catch(function () {
         container.innerHTML = '<p>Unable to load associated images.</p>';
-        container.dataset.loaded = 'true';
-        container.style.display = 'block';
+        setGeneratedImagesExpanded(button, container, true);
     })
     .finally(function () {
         button.disabled = false;
-        button.textContent = originalText;
+        if (label) {
+            label.textContent = 'Generated images';
+        }
     });
+}
+
+function setGeneratedImagesExpanded(button, container, expanded) {
+    container.hidden = !expanded;
+    button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    var icon = button.querySelector('i');
+    if (icon) {
+        icon.className = expanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+    }
 }
 
 function bioSwitch(album, sortOrder) {
     window.history.pushState("", "", '/Bio/' + album + '/' + sortOrder);
+    initializeBioPicture();
+}
+
+function initializeBioPicture() {
+    updateBioDeleteLink();
+    moveBioPictureTags();
+    moveBioVideoTools();
     setupVideoThumbnailButton();
+}
+
+function moveBioPictureTags() {
+    var tagsContainer = document.getElementById('bio-assigned-tags-container');
+    var pictureTags = document.querySelector('#bio-img-partial #bioPictureTags');
+    if (!tagsContainer) {
+        return;
+    }
+
+    tagsContainer.replaceChildren();
+    if (pictureTags) {
+        tagsContainer.appendChild(pictureTags);
+    }
+}
+
+function moveBioVideoTools() {
+    var toolsContainer = document.getElementById('bio-video-tools-container');
+    var videoTools = document.querySelector('#bio-img-partial .bio-video-tools');
+    if (!toolsContainer) {
+        return;
+    }
+
+    toolsContainer.replaceChildren();
+    if (videoTools) {
+        toolsContainer.appendChild(videoTools);
+    }
+}
+
+function updateBioDeleteLink() {
+    var deleteLink = document.querySelector('.bio-delete-link');
+    var album = document.getElementById('album-id-placeholder')?.textContent;
+    var mediaName = document.getElementById('media-name-placeholder')?.textContent;
+    if (!deleteLink || !album || !mediaName) {
+        return;
+    }
+
+    deleteLink.href = '/Bio/picture/delete/' + encodeURIComponent(album) + '/' + encodeURIComponent(mediaName);
+    deleteLink.setAttribute('data-confirm-message', "Are you sure you want to delete '" + mediaName + "'? This cannot be undone.");
 }
 
 function setupVideoThumbnailButton() {
@@ -253,7 +296,7 @@ function setupVideoThumbnailButton() {
         imageStatus.querySelector('[data-status-icon]').className = state === 'processing'
             ? 'fas fa-spinner fa-spin'
             : state === 'success' ? 'fas fa-check' : 'fas fa-exclamation-circle';
-        imageStatus.querySelector('[data-status-text]').textContent = message;
+        imageStatus.setAttribute('aria-label', message);
         imageStatus.hidden = false;
         if (state !== 'processing') {
             imageStatusTimer = setTimeout(function () {
@@ -431,8 +474,11 @@ function setEnlargedVideoView(enlarged) {
     var toggleBtn = document.getElementById('videoEnlargeToggle');
     if (toggleBtn) {
         toggleBtn.innerHTML = enlarged
-            ? '<i class="fas fa-compress-alt"></i> Exit theater mode'
-            : '<i class="fas fa-expand-alt"></i> Theater mode';
+            ? '<i class="fas fa-compress-alt" aria-hidden="true"></i>'
+            : '<i class="fas fa-expand-alt" aria-hidden="true"></i>';
+        toggleBtn.setAttribute('aria-label', enlarged ? 'Exit theater mode' : 'Enter theater mode');
+        toggleBtn.setAttribute('title', enlarged ? 'Exit theater mode (T)' : 'Theater mode (T)');
+        toggleBtn.setAttribute('aria-pressed', enlarged ? 'true' : 'false');
     }
 }
 
@@ -447,6 +493,7 @@ function setupVideoEnlargeToggle() {
     toggleBtn.onclick = function () {
         setEnlargedVideoView(!document.body.classList.contains('theater-mode'));
     };
+    setEnlargedVideoView(document.body.classList.contains('theater-mode'));
 }
 
 function seekVideoToGeneratedImageTimestamp(fileName) {
@@ -595,9 +642,9 @@ document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') saveVideoPosition(document.querySelector('video.bio-img'));
 });
 
-// Initialize the video thumbnail button on page load
+// Initialize the controls for the initially rendered picture.
 document.addEventListener('DOMContentLoaded', function() {
-    setupVideoThumbnailButton();
+    initializeBioPicture();
 });
 
 function showBioLoading() {

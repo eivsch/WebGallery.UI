@@ -91,7 +91,7 @@
 }
 
 .bio-content__deletebtn {
-    margin-top: 20px;
+    margin-top: 14px;
     text-align: center;
 }
 
@@ -100,16 +100,59 @@
 }
 
 .bio-tags-button {
-    margin-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+.bio-like-button {
+    margin-bottom: 0;
+}
+
+.bio-content .bio-like-button button {
+    display: inline-block;
+    padding: 4px 8px !important;
+    border: 0 !important;
+    border-radius: 4px;
+    background: transparent !important;
+    color: gray !important;
+    font-size: 25px !important;
+    line-height: 1.2;
+    text-transform: none;
+    transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.bio-content .bio-like-button button:hover {
+    background: transparent !important;
+    color: #ef6c57 !important;
+    transform: scale(1.2);
+}
+
+.bio-content .bio-like-button button:focus-visible {
+    outline: 2px solid #ef6c57;
+    outline-offset: 2px;
+}
+
+.bio-primary-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 12px;
+    margin-bottom: 8px;
+}
+
+.bio-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .bio-content__deletebtn a {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 9px 18px;
     background-color: #d94c3a; /* Red for delete */
     color: #fff;
     text-transform: uppercase;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     border-radius: 5px;
     text-decoration: none;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -123,10 +166,10 @@
 .bio-content button {
     background-color: #000;
     color: #fff;
-    border: 2px solid #ef6c57;
+    border: 2px solid rgba(255, 255, 255, 0.8);
     border-radius: 30px;
     padding: 10px 20px;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -136,6 +179,11 @@
     background-color: #ef6c57;
     color: #fff;
     transform: scale(1.05);
+}
+
+.bio-content button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
 }
 
 .bio-img {
@@ -156,6 +204,32 @@
     display: block;
 }
 
+.bio-content .bio-video-theater-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 50% !important;
+    background: rgba(45, 45, 45, 0.55) !important;
+    color: rgba(190, 190, 190, 0.75) !important;
+    font-size: 0.7rem !important;
+    cursor: pointer;
+}
+
+.bio-content .bio-video-theater-toggle:hover,
+.bio-content .bio-video-theater-toggle:focus-visible {
+    background: rgba(80, 80, 80, 0.8) !important;
+    color: rgba(220, 220, 220, 0.95) !important;
+    transform: none !important;
+}
+
 .bio-video-status {
     position: absolute;
     top: 10px;
@@ -173,15 +247,87 @@
     margin-right: 5px;
 }
 
-.bio-video-enlarge-btn {
-    margin-top: 8px;
+.bio-video-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 8px 0 0;
+}
+
+.bio-disclosure {
+    margin: 8px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.bio-disclosure summary {
+    padding: 8px 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.bio-disclosure summary::-webkit-details-marker {
+    display: none;
+}
+
+.bio-disclosure summary::after {
+    content: "+";
+    float: right;
+    font-weight: 700;
+}
+
+.bio-disclosure[open] summary::after {
+    content: "-";
+}
+
+.bio-video-tools {
+    margin-bottom: 12px;
+}
+
+.bio-video-tools[open] .bio-video-actions {
+    padding: 0 12px 10px;
+}
+
+.bio-content .bio-video-actions button {
+    padding: 8px 12px;
+    border-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(40, 40, 40, 0.85);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.65rem;
+}
+
+.bio-content .bio-video-actions button:hover,
+.bio-content .bio-video-actions button:focus-visible {
+    background-color: rgba(85, 85, 85, 0.95);
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+    transform: none;
+}
+
+.bio-generated-images {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.18);
+    text-align: left;
+}
+
+.bio-generated-images[hidden] {
+    display: none !important;
 }
 
 .bio-key-hint {
     display: inline-block;
     margin-left: 6px;
-    padding: 0 5px;
-    font-size: 0.75rem;
+    padding: 1px 4px;
+    font-size: 0.65rem;
+    line-height: 1;
+    vertical-align: middle;
     border: 1px solid currentColor;
     border-radius: 3px;
     opacity: 0.7;
@@ -212,6 +358,11 @@ html {
 
 .tag-list, .tag-list li {
     display: inline;
+}
+
+#bioPictureTags {
+    margin-bottom: 0;
+    padding-left: 0;
 }
 
 .bio-generated-images__list {
@@ -255,10 +406,6 @@ html {
     }
 }
 
-.bio-nav-container {
-    margin-top: 10px;
-}
-
 .bio-nav-item {
     margin-bottom: 15px;
     font-size: 25px;
@@ -266,7 +413,15 @@ html {
     color: gray;
 }
 
-.bio-nav-item a.bio-source-video-link {
+.bio-navigation .bio-nav-item {
+    margin-bottom: 0;
+}
+
+.bio-source-video-row {
+    text-align: center;
+}
+
+.bio-source-video-row a.bio-source-video-link {
     font-size: 0.85rem;
     color: #b7d8ff !important;
 }
@@ -277,6 +432,13 @@ html {
     display: inline-block;
     padding: 4px 8px;
     border-radius: 4px;
+}
+
+.bio-nav-item .bio-nav-disabled {
+    display: inline-block;
+    padding: 4px 8px;
+    color: rgba(128, 128, 128, 0.35);
+    cursor: not-allowed;
 }
 
 .bio-nav-item a:hover {
@@ -302,29 +464,22 @@ html {
     padding-right: 10px;
 }
 
-#myDropdown {
-    position: relative;
-    display: none; /* Initially hidden */
-    background-color: #333; /* Dark background */
-    border: 1px solid #444; /* Subtle border */
-    border-radius: 5px; /* Rounded corners */
-    max-height: 200px; /* Limit height */
-    overflow-y: auto; /* Add scroll for long lists */
-    z-index: 1000; /* Ensure it appears above other elements */
+.bio-actions-disclosure .bio-content__deletebtn {
+    margin-top: 0;
+    padding: 0 8px 8px;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.bio-tags-content {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0 8px 8px;
 }
 
-#myDropdown input {
+#bio-assigned-tags-container {
+    margin-bottom: 8px;
+}
+
+.bio-tags-content input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
@@ -333,7 +488,7 @@ html {
     display: block;
 }
 
-#myDropdown .dropdown-item {
+.bio-tags-content .dropdown-item {
     display: block;
     padding: 10px;
     background-color: #333;
@@ -344,12 +499,12 @@ html {
     cursor: pointer;
 }
 
-#myDropdown .dropdown-item:hover {
+.bio-tags-content .dropdown-item:hover {
     background-color: #ef6c57;
     color: #fff;
 }
 
-#myDropdown .dropdown-item:last-child {
+.bio-tags-content .dropdown-item:last-child {
     border-bottom: none;
 }
 
@@ -358,11 +513,11 @@ html {
         padding: 15px;
     }
 
-    #myDropdown {
+    .bio-tags-content {
         max-height: 150px;
     }
 
-    #myDropdown input {
+    .bio-tags-content input {
         width: 100%;
         font-size: 0.9rem;
     }
@@ -399,6 +554,13 @@ html {
 }
 .fancybox-button--like {
     padding-top: 7px;
+}
+.fancybox-button--source-video {
+    position: relative;
+    top: -2px;
+}
+.fancybox-button--source-video[hidden] {
+    display: none !important;
 }
 .fancybox-like__pressed {
     color: blue;

@@ -57,6 +57,8 @@
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="video"
+                           data-screencap-album="@(item.IsScreencap ? item.AlbumName : null)"
+                           data-screencap-name="@(item.IsScreencap ? item.Name : null)"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>">
 
                             <img src="@thumbsUri" alt="Image" class="img-fluid">
@@ -78,6 +80,8 @@
                            class="d-block photo-item"
                            data-fancybox="gallery"
                            data-type="image"
+                           data-screencap-album="@(item.IsScreencap ? item.AlbumName : null)"
+                           data-screencap-name="@(item.IsScreencap ? item.Name : null)"
                            data-caption="<div data-current-image='@item.Id'><a href='/Bio/id/@item.Id'>@item.Name</a></div>">
 
                             <img src="@imageUri" alt="Image" class="img-fluid">

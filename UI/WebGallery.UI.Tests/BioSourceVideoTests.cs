@@ -31,7 +31,23 @@ public class BioSourceVideoTests
         Assert.Equal("/Bio/trip%20%26%20snow/205?start=62.345", initial.SourceVideoUrl);
         Assert.Equal("00:01:02.345", initial.SourceVideoTimestamp);
         Assert.Equal(initial.SourceVideoUrl, switched.SourceVideoUrl);
+        Assert.Equal(1, initial.AlbumMediaCount);
+        Assert.Equal(1, switched.AlbumMediaCount);
         Assert.Contains(catalog.Requests, r => r.Contains("from=200"));
+    }
+
+    [Theory]
+    [InlineData(-1, 0)]
+    [InlineData(1, 1)]
+    public async Task Switch_outside_album_bounds_returns_not_found_without_fetching_media(int index, int expectedRequests)
+    {
+        using var catalog = new Catalog();
+
+        var result = await catalog.Controller().Switch(catalog.ScreencapAlbum, index);
+
+        Assert.IsType<NotFoundResult>(result);
+        Assert.Equal(expectedRequests, catalog.Requests.Count);
+        Assert.DoesNotContain(catalog.Requests, r => r.Contains("/albums/" + catalog.ScreencapAlbum + "?"));
     }
 
     [Fact]
@@ -44,6 +60,31 @@ public class BioSourceVideoTests
         var model = Assert.IsType<BioViewModel>(result.Model);
 
         Assert.Equal("/Bio/trip/0?start=62.345", model.BioPictureViewModel.SourceVideoUrl);
+    }
+
+    [Fact]
+    public async Task Source_video_endpoint_resolves_redirect_only_when_requested()
+    {
+        using var catalog = new Catalog("trip & snow");
+        catalog.SourceItems.AddRange(Enumerable.Range(0, 205).Select(i => Media($"other{i}.mp4")));
+        catalog.SourceItems.Add(Media("clip.mp4"));
+
+        var result = Assert.IsType<RedirectResult>(
+            await catalog.Controller().OpenSourceVideo(catalog.ScreencapAlbum, catalog.Picture.Name));
+
+        Assert.Equal("/Bio/trip%20%26%20snow/205?start=62.345", result.Url);
+        Assert.Contains(catalog.Requests, r => r.Contains("from=200"));
+    }
+
+    [Fact]
+    public async Task Source_video_endpoint_rejects_names_that_do_not_match_screencap_pattern()
+    {
+        using var catalog = new Catalog();
+
+        var result = await catalog.Controller().OpenSourceVideo(catalog.ScreencapAlbum, "not-a-screencap.jpg");
+
+        Assert.IsType<NotFoundResult>(result);
+        Assert.Empty(catalog.Requests);
     }
 
     [Fact]
@@ -83,7 +124,7 @@ public class BioSourceVideoTests
         var result = Assert.IsType<PartialViewResult>(await catalog.Controller().Switch(catalog.ScreencapAlbum, 0));
 
         Assert.Null(Assert.IsType<BioPictureViewModel>(result.Model).SourceVideoUrl);
-        Assert.Single(catalog.Requests);
+        Assert.DoesNotContain(catalog.Requests, r => r.Contains("/albums/trip?"));
     }
 
     [Fact]
@@ -168,10 +209,10 @@ public class BioSourceVideoTests
             var status = HttpStatusCode.OK;
             if (path == "/users/tester/albums")
             {
-                var albums = new List<AlbumMetaDTO> { new() { AlbumName = ScreencapAlbum, Tags = [] } };
-                if (SourceAlbumExists) albums.Add(new() { AlbumName = Album, Tags = [] });
+                var albums = new List<AlbumMetaDTO> { new() { AlbumName = ScreencapAlbum, Tags = [], TotalCount = 1 } };
+                if (SourceAlbumExists) albums.Add(new() { AlbumName = Album, Tags = [], TotalCount = SourceItems.Count });
                 // A similar album must not substitute for the exact source album.
-                albums.Add(new() { AlbumName = Album + "-backup", Tags = [] });
+                albums.Add(new() { AlbumName = Album + "-backup", Tags = [], TotalCount = SourceItems.Count });
                 body = new { TotalCount = albums.Count, Albums = albums.Skip(from).Take(size).ToList() };
             }
             else if (path == "/users/tester/search")

@@ -15,6 +15,9 @@ public record ScreencapSource(string Album, string VideoName, double PositionSec
         @"\A(?<stem>.+)_(?<hours>[0-9]{2,})(?<minutes>[0-5][0-9])(?<seconds>[0-5][0-9])\.(?<milliseconds>[0-9]{3})\.jpg\z",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
+    public static bool IsScreencap(string album, string name, IEnumerable<string> tags) =>
+        Parse(album, name, tags) is not null;
+
     public static ScreencapSource Parse(string album, string name, IEnumerable<string> tags)
     {
         if (string.IsNullOrEmpty(album) || string.IsNullOrEmpty(name) ||

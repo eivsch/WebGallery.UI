@@ -321,6 +321,7 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
                 '</div>'
             ].join('');
 
+            setScreencapData(card, item);
             return card;
         }
 
@@ -332,7 +333,20 @@ if (headline && galleryGrid && filterInput && filterStatus && deepSearchButton) 
             '</a>'
         ].join('');
 
+        setScreencapData(card, item);
         return card;
+    }
+
+    function setScreencapData(card, item) {
+        if (!item.isScreencap) {
+            return;
+        }
+
+        const link = card.querySelector('a.photo-item');
+        if (link) {
+            link.dataset.screencapAlbum = item.albumName ?? '';
+            link.dataset.screencapName = item.name ?? '';
+        }
     }
 
     function createEmptyStateMarkup(message) {

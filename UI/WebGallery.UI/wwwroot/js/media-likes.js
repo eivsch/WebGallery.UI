@@ -13,7 +13,9 @@ function addMediaLike(button, album, mediaId) {
 function setupGalleryLikes(getMedia, enableShortcut) {
     var title = enableShortcut ? 'Like (L)' : 'Like';
     $.fancybox.defaults.btnTpl.like = '<button data-fancybox-like class="fancybox-button fancybox-button--like" title="' + title + '">L</button>';
+    $.fancybox.defaults.btnTpl.sourceVideo = '<button type="button" data-fancybox-source-video class="fancybox-button fancybox-button--source-video" title="Open source video (V)" aria-label="Open source video" aria-keyshortcuts="V" hidden><i class="fas fa-video" aria-hidden="true"></i></button>';
     $.fancybox.defaults.buttons = [
+        'sourceVideo',
         'like',
         'zoom',
         'fullScreen',
@@ -24,6 +26,13 @@ function setupGalleryLikes(getMedia, enableShortcut) {
     $('body').on('click', '[data-fancybox-like]', function (e) {
         var media = getMedia();
         addMediaLike($(e.currentTarget), media.album, media.id);
+    });
+
+    $('body').on('click', '[data-fancybox-source-video]', function (e) {
+        var sourceUrl = $(e.currentTarget).attr('data-source-url');
+        if (sourceUrl) {
+            window.location.assign(sourceUrl);
+        }
     });
 
     if (enableShortcut) {
@@ -40,7 +49,38 @@ function setupGalleryLikes(getMedia, enableShortcut) {
         });
     }
 
+    $(document).on('afterKeydown.fb', function (e, instance, slide, keypress, keycode) {
+        if (keycode !== 86 || slide.type !== 'image' ||
+            keypress.ctrlKey || keypress.altKey || keypress.shiftKey || keypress.metaKey ||
+            keypress.target.isContentEditable ||
+            $(keypress.target).is('input,textarea,select,video,audio')) {
+            return;
+        }
+
+        var sourceButton = instance.$refs.toolbar.find('[data-fancybox-source-video]');
+        if (sourceButton.prop('hidden')) {
+            return;
+        }
+
+        keypress.preventDefault();
+        sourceButton.trigger('click');
+    });
+
     $(document).on('afterShow.fb', function (e, instance) {
         instance.$refs.toolbar.find('[data-fancybox-like]').removeClass('fancybox-like__pressed');
+        var sourceButton = instance.$refs.toolbar.find('[data-fancybox-source-video]');
+        var original = instance.current && instance.current.opts.$orig;
+        var album = original && original.attr('data-screencap-album');
+        var name = original && original.attr('data-screencap-name');
+
+        if (!album || !name) {
+            sourceButton.prop('hidden', true).removeAttr('data-source-url');
+            return;
+        }
+
+        var sourceUrl = new URL('/Bio/source-video', window.location.origin);
+        sourceUrl.searchParams.set('album', album);
+        sourceUrl.searchParams.set('name', name);
+        sourceButton.attr('data-source-url', sourceUrl.toString()).prop('hidden', false);
     });
 }
