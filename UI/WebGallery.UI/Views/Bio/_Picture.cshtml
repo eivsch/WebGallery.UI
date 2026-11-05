@@ -31,14 +31,14 @@
             <span id="videoImageStatus" class="bio-video-status" role="status" aria-live="polite" aria-atomic="true" hidden>
                 <i data-status-icon aria-hidden="true"></i>
             </span>
+            <button id="videoEnlargeToggle" type="button" class="bio-video-theater-toggle" aria-label="Enter theater mode" aria-keyshortcuts="T" aria-pressed="false" title="Theater mode (T)">
+                <i class="fas fa-expand-alt" aria-hidden="true"></i>
+            </button>
         </div>
         @if (Model.StartPositionSeconds.HasValue)
         {
             <p id="videoStartError" role="status" hidden></p>
         }
-        <button id="videoEnlargeToggle" type="button" class="btn btn-dark btn-sm bio-video-enlarge-btn" aria-label="Toggle theater mode" title="Shortcut: T">
-            <i class="fas fa-expand-alt"></i> Theater mode <span class="bio-key-hint">T</span>
-        </button>
     </div>
 }
 else 
@@ -98,20 +98,16 @@ else
     </div>
     @if (mediaType == MediaType.Video)
     {
-        <div class="row">
-            <div class="bio-nav-item">
-                <button id="setVideoThumbnail" type="button" data-app-path-b64="@appPathBase64">
-                    Set as thumbnail
-                </button>
-                <button id="generateVideoImage" type="button" data-app-path-b64="@appPathBase64" style="margin-left:10px;" title="Shortcut: X">
-                    Generate image <span class="bio-key-hint">X</span>
-                </button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="bio-nav-item">
-                <button id="viewGeneratedImages" type="button" data-album="@(Model.Album + "_video_images")" data-file-name-no-ext="@System.IO.Path.GetFileNameWithoutExtension(Model.Name)_">Generated images</button>
-            </div>
+        <div class="bio-video-actions">
+            <button id="setVideoThumbnail" type="button" data-app-path-b64="@appPathBase64">
+                Set as thumbnail
+            </button>
+            <button id="generateVideoImage" type="button" data-app-path-b64="@appPathBase64" title="Shortcut: X">
+                Generate image <span class="bio-key-hint">X</span>
+            </button>
+            <button id="viewGeneratedImages" type="button" data-album="@(Model.Album + "_video_images")" data-file-name-no-ext="@System.IO.Path.GetFileNameWithoutExtension(Model.Name)_">
+                Generated images
+            </button>
         </div>
     }
 </div>

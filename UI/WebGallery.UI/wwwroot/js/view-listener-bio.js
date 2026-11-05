@@ -431,8 +431,11 @@ function setEnlargedVideoView(enlarged) {
     var toggleBtn = document.getElementById('videoEnlargeToggle');
     if (toggleBtn) {
         toggleBtn.innerHTML = enlarged
-            ? '<i class="fas fa-compress-alt"></i> Exit theater mode'
-            : '<i class="fas fa-expand-alt"></i> Theater mode';
+            ? '<i class="fas fa-compress-alt" aria-hidden="true"></i>'
+            : '<i class="fas fa-expand-alt" aria-hidden="true"></i>';
+        toggleBtn.setAttribute('aria-label', enlarged ? 'Exit theater mode' : 'Enter theater mode');
+        toggleBtn.setAttribute('title', enlarged ? 'Exit theater mode (T)' : 'Theater mode (T)');
+        toggleBtn.setAttribute('aria-pressed', enlarged ? 'true' : 'false');
     }
 }
 
@@ -447,6 +450,7 @@ function setupVideoEnlargeToggle() {
     toggleBtn.onclick = function () {
         setEnlargedVideoView(!document.body.classList.contains('theater-mode'));
     };
+    setEnlargedVideoView(document.body.classList.contains('theater-mode'));
 }
 
 function seekVideoToGeneratedImageTimestamp(fileName) {
