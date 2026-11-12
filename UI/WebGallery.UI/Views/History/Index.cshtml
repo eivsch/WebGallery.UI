@@ -26,6 +26,21 @@
     }
     else
     {
+        <div class="history-filter-controls">
+            <div>
+                <label class="visually-hidden" for="historySearch">Search videos or albums</label>
+                <input id="historySearch" type="search" class="form-control" placeholder="Search videos or albums" autocomplete="off" />
+            </div>
+            <div>
+                <label class="visually-hidden" for="historyStatus">Filter by status</label>
+                <select id="historyStatus" class="form-select">
+                    <option value="all">All videos</option>
+                    <option value="continue">Continue watching</option>
+                    <option value="watched">Watched</option>
+                </select>
+            </div>
+        </div>
+        <div id="historyNoResults" class="alert alert-info py-2 d-none" role="status">No matching videos in the loaded history.</div>
         <table class="table table-dark table-sm align-middle history-table">
             <thead>
                 <tr>
@@ -45,13 +60,14 @@
                     : "/Bio/open/" + System.Uri.EscapeDataString(item.Album) + "/" + System.Uri.EscapeDataString(item.MediaId);
                 string thumbsUri = "/files/image/" + WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.Album + "/" + item.MediaName);
                 bool resumable = !item.Watched && item.PositionSeconds > 1;
-                <tr class="history-row" data-utc="@item.LastPlayedUtc.ToString("O")">
+                string state = resumable ? "continue" : item.Watched ? "watched" : "other";
+                <tr class="history-row" data-utc="@item.LastPlayedUtc.ToString("O")" data-title="@item.MediaName" data-album="@item.Album" data-state="@state">
                     <td><a href="@href"><img class="history-thumb" src="@thumbsUri" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></a></td>
                     <td><a class="regular-text-link text-white" href="@href">@item.MediaName</a></td>
                     <td class="text-nowrap">
                         @if (resumable)
                         {
-                            <span class="badge bg-primary">Continue watching</span>
+                            <a class="badge bg-primary text-decoration-none" href="@href">Continue watching</a>
                             <span class="ms-1">@FormatTime(item.PositionSeconds)@(item.DurationSeconds > 0 ? " / " + FormatTime(item.DurationSeconds.Value) : "")</span>
                             @if (item.DurationSeconds > 0)
                             {
@@ -98,10 +114,7 @@
         if (s < 86400 * 365) return u(Math.floor(s / (86400 * 30)), 'month');
         return u(Math.floor(s / (86400 * 365)), 'year');
     }
-    function dayKey(d) { return d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate(); }
     var now = new Date();
-    var todayKey = dayKey(now);
-    var yest = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
     var lastKey = null;
     document.querySelectorAll('tr.history-row').forEach(function (row) {
         var d = new Date(row.getAttribute('data-utc'));
@@ -109,8 +122,13 @@
         var t = row.querySelector('time.history-time');
         t.title = d.toLocaleString();
         t.textContent = relTime(d);
-        var k = dayKey(d);
-        var label = k === todayKey ? 'Today' : k === dayKey(yest) ? 'Yesterday' : 'Earlier';
+        var ageSeconds = Math.max(0, (now.getTime() - d.getTime()) / 1000);
+        var label = ageSeconds < 86400 ? 'Today'
+            : ageSeconds < 86400 * 7 ? '> 1 day'
+            : ageSeconds < 86400 * 30 ? '> 7 days'
+            : ageSeconds < 86400 * 90 ? '> 30 days'
+            : ageSeconds < 86400 * 365 ? '> 3 months'
+            : '> 1 year';
         if (label !== lastKey) {
             lastKey = label;
             var h = document.createElement('tr');
@@ -120,5 +138,38 @@
             row.parentNode.insertBefore(h, row);
         }
     });
+
+    var historySearch = document.getElementById('historySearch');
+    var historyStatus = document.getElementById('historyStatus');
+    var historyNoResults = document.getElementById('historyNoResults');
+    if (historySearch && historyStatus && historyNoResults) {
+        function filterHistory() {
+            var term = historySearch.value.trim().toLowerCase();
+            var status = historyStatus.value;
+            var visibleCount = 0;
+            document.querySelectorAll('tr.history-row').forEach(function (row) {
+                var searchText = (row.dataset.title + ' ' + row.dataset.album).toLowerCase();
+                var matches = searchText.includes(term) && (status === 'all' || row.dataset.state === status);
+                row.hidden = !matches;
+                if (matches) visibleCount++;
+            });
+            document.querySelectorAll('tr.history-group').forEach(function (header) {
+                var next = header.nextElementSibling;
+                var hasVisibleRow = false;
+                while (next && !next.classList.contains('history-group')) {
+                    if (next.matches('tr.history-row') && !next.hidden) {
+                        hasVisibleRow = true;
+                        break;
+                    }
+                    next = next.nextElementSibling;
+                }
+                header.hidden = !hasVisibleRow;
+            });
+            historyNoResults.classList.toggle('d-none', visibleCount > 0);
+        }
+        historySearch.addEventListener('input', filterHistory);
+        historyStatus.addEventListener('change', filterHistory);
+        filterHistory();
+    }
 </script>
 }
