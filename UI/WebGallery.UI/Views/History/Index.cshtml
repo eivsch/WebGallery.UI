@@ -26,7 +26,7 @@
     }
     else
     {
-        <table class="table table-dark table-sm align-middle">
+        <table class="table table-dark table-sm align-middle history-table">
             <thead>
                 <tr>
                     <th></th>
@@ -46,7 +46,7 @@
                 string thumbsUri = "/files/image/" + WebGallery.UI.Helpers.Utils.GetThumbsBase64(item.Album + "/" + item.MediaName);
                 bool resumable = !item.Watched && item.PositionSeconds > 1;
                 <tr class="history-row" data-utc="@item.LastPlayedUtc.ToString("O")">
-                    <td style="width:120px;"><a href="@href"><img src="@thumbsUri" alt="" loading="lazy" style="width:112px;height:63px;object-fit:cover;border-radius:4px;background:#222;" onerror="this.style.visibility='hidden'"></a></td>
+                    <td><a href="@href"><img class="history-thumb" src="@thumbsUri" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></a></td>
                     <td><a class="regular-text-link text-white" href="@href">@item.MediaName</a></td>
                     <td class="text-nowrap">
                         @if (resumable)
@@ -65,8 +65,8 @@
                             <span class="badge bg-success">Watched</span>
                         }
                     </td>
-                    <td>@item.PlayCount</td>
-                    <td class="text-nowrap"><time class="history-time" datetime="@item.LastPlayedUtc.ToString("O")">@item.LastPlayedUtc.ToString("yyyy-MM-dd HH:mm") UTC</time></td>
+                    <td><span class="history-mobile-label">Plays</span>@item.PlayCount</td>
+                    <td class="text-nowrap"><span class="history-mobile-label">Last played</span><time class="history-time" datetime="@item.LastPlayedUtc.ToString("O")">@item.LastPlayedUtc.ToString("yyyy-MM-dd HH:mm") UTC</time></td>
                     <td class="text-nowrap">
                         <form method="post" asp-controller="History" asp-action="Remove" class="d-inline">
                             <input type="hidden" name="album" value="@item.Album" />

@@ -1538,3 +1538,101 @@ a.regular-text-link {
         font-size: 0.9rem;
     }
 }
+
+.history-mobile-label {
+    display: none;
+}
+
+.history-thumb {
+    width: 112px;
+    height: 63px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #222;
+}
+
+@media (max-width: 767.98px) {
+    .history-table,
+    .history-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .history-table thead {
+        display: none;
+    }
+
+    .history-table tr.history-group {
+        display: block;
+    }
+
+    .history-table .history-group th {
+        display: block;
+        border: 0;
+        padding: 0.8rem 0 0.4rem;
+    }
+
+    .history-table tr.history-row {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        column-gap: 12px;
+        align-items: start;
+        padding: 10px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .history-table tr.history-row td {
+        display: block;
+        min-width: 0;
+        padding: 0.2rem 0;
+        border: 0;
+        white-space: normal;
+    }
+
+    .history-table tr.history-row td:nth-child(1) {
+        grid-column: 1;
+        grid-row: 1 / span 5;
+    }
+
+    .history-table tr.history-row td:nth-child(1) img {
+        width: 72px;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: 4px;
+        background: #222;
+    }
+
+    .history-table tr.history-row td:nth-child(2) {
+        grid-column: 2;
+        grid-row: 1;
+        overflow-wrap: anywhere;
+    }
+
+    .history-table tr.history-row td:nth-child(3) {
+        grid-column: 2;
+        grid-row: 2;
+        white-space: normal !important;
+    }
+
+    .history-table tr.history-row td:nth-child(4) {
+        grid-column: 2;
+        grid-row: 3;
+    }
+
+    .history-table tr.history-row td:nth-child(5) {
+        grid-column: 2;
+        grid-row: 4;
+    }
+
+    .history-table tr.history-row td:nth-child(6) {
+        grid-column: 2;
+        grid-row: 5;
+    }
+
+    .history-mobile-label {
+        display: inline;
+        margin-right: 0.35rem;
+        color: #aaa;
+    }
+}
