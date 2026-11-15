@@ -37,8 +37,10 @@ public class ShortcutAndHistoryTests
         Assert.False(query.ContainsKey("tags"));
     }
 
-    [Fact]
-    public async Task Existing_random_shortcuts_keep_their_search_behavior()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Random_video_shortcuts_request_full_library_sampling_and_preserve_size_filters(bool longVideo)
     {
         using var api = new RecordingApi
         {
@@ -46,13 +48,19 @@ public class ShortcutAndHistoryTests
         };
 
         var result = Assert.IsType<RedirectResult>(
-            await api.Home().RandomBio("mp4", maxFileSize: 104857599));
+            await api.Home().RandomBio("mp4",
+                minFileSize: longVideo ? 104857600 : null,
+                maxFileSize: longVideo ? null : 104857599));
 
         Assert.Equal("/bio/id/short-id", result.Url);
         var query = QueryHelpers.ParseQuery(Assert.Single(api.Requests).Query);
-        Assert.Equal("1000", query["maxResults"]);
-        Assert.Equal("104857599", query["maxFileSize"]);
-        Assert.False(query.ContainsKey("random"));
+        Assert.Equal("1", query["maxResults"]);
+        Assert.Equal("mp4", query["fileExtensions"]);
+        Assert.Equal("true", query["random"]);
+        Assert.Equal(longVideo ? "104857600" : "104857599",
+            query[longVideo ? "minFileSize" : "maxFileSize"]);
+        Assert.False(query.ContainsKey(longVideo ? "maxFileSize" : "minFileSize"));
+        Assert.False(query.ContainsKey("tags"));
         Assert.False(query.ContainsKey("unwatchedOnly"));
     }
 

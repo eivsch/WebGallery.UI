@@ -49,12 +49,12 @@ namespace WebGallery.UI.Controllers
                 tags: null,
                 fileExtension: fileExtensions,
                 mediaNameContains: null,
-                maxResults: unwatchedOnly ? 1 : SearchBatchLimit,
+                maxResults: 1,
                 allTagsMustMatch: false,
                 minFileSize: minFileSize,
                 maxFileSize: maxFileSize,
                 unwatchedOnly: unwatchedOnly,
-                random: unwatchedOnly);
+                random: true);
 
             if (results == null || results.Count == 0)
             {
@@ -63,8 +63,7 @@ namespace WebGallery.UI.Controllers
                 return RedirectToAction("Index");
             }
 
-            Random rnd = new();
-            SearchHitDTO selected = results[rnd.Next(0, results.Count)];
+            SearchHitDTO selected = results[0];
             return Redirect($"/bio/id/{selected.MediaItem.Id}");
         }
 
