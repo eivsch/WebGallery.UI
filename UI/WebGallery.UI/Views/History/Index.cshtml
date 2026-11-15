@@ -20,9 +20,11 @@
         }
     </div>
 
+    <p class="text-secondary">Removing entries or clearing history makes those videos eligible for unwatched selection again.</p>
+
     @if (Model == null || Model.Count == 0)
     {
-        <div class="alert alert-info">No videos have been played yet.</div>
+        <div class="alert alert-info">@(ViewBag.HasPrevious == true ? "No videos in this history page." : "No videos have been played yet.")</div>
     }
     else
     {
@@ -94,11 +96,17 @@
             }
             </tbody>
         </table>
+    }
+    <nav class="text-center my-3" aria-label="Watch history pages">
+        @if (ViewBag.HasPrevious == true)
+        {
+            <a class="btn btn-outline-secondary" href="/History?from=@ViewBag.PreviousFrom">Previous</a>
+        }
         @if (ViewBag.HasMore == true)
         {
-            <div class="text-center my-3"><a class="btn btn-outline-secondary" href="/History?size=@ViewBag.NextSize">Load more</a></div>
+            <a class="btn btn-outline-secondary" href="/History?from=@ViewBag.NextFrom">Next</a>
         }
-    }
+    </nav>
 </div>
 </main>
 

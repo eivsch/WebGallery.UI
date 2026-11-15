@@ -313,7 +313,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
     }
 
-    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxResults, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null, long? minFileSize = null, long? maxFileSize = null)
+    public async Task<List<SearchHitDTO>> GetSearch(string username, string albums, string tags, string fileExtension, string mediaNameContains, int? maxResults, bool allTagsMustMatch, int? hitsToSkip = null, string createdAfter = null, string createdBefore = null, long? minFileSize = null, long? maxFileSize = null, bool unwatchedOnly = false, bool random = false)
     {
         string uri = $"users/{username}/search";
         Dictionary<string, string> paramss = [];
@@ -337,6 +337,10 @@ public class MinimalApiProxy(WebGalleryApiClient client)
             paramss.Add("createdAfterDate", createdAfter);
         if (createdBefore is not null)
             paramss.Add("createdBeforeDate", createdBefore);
+        if (unwatchedOnly)
+            paramss.Add("unwatchedOnly", "true");
+        if (random)
+            paramss.Add("random", "true");
 
         paramss.Add("allTagsMustMatch", allTagsMustMatch.ToString().ToLowerInvariant());
 
@@ -350,6 +354,7 @@ public class MinimalApiProxy(WebGalleryApiClient client)
         }
 
         HttpResponseMessage response = await _client.GetAsync(uri);
+        if (response.StatusCode == HttpStatusCode.NoContent) return [];
         if (response.IsSuccessStatusCode)
         {
             string responseStr = await response.Content.ReadAsStringAsync();

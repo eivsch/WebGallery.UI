@@ -17,6 +17,12 @@ record SearchRequest
     public string? MediaNameContains { get; set; }
     public long? MinFileSize { get; set; }
     public long? MaxFileSize { get; set; }
+
+    /// <summary>Exclude media with a recorded play, regardless of completion or tags.</summary>
+    public bool? UnwatchedOnly { get; set; }
+
+    /// <summary>Sample up to MaxResults uniformly across all matches after HitsToSkip.</summary>
+    public bool? Random { get; set; }
     
     [DefaultValue(128)]
     public int MaxResults { get; set; }

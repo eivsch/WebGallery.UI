@@ -23,23 +23,14 @@ static class WatchHistoryHandler
         cmd.Parameters.AddWithValue("$id", (object?)mediaId ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$played", (playedAtUtc ?? DateTime.UtcNow).ToUniversalTime().ToString("O"));
         cmd.ExecuteNonQuery();
-
-        // Retention: keep only the most recently played entries.
-        cmd.Parameters.Clear();
-        cmd.CommandText = """
-            DELETE FROM watch_history WHERE rowid NOT IN (
-                SELECT rowid FROM watch_history ORDER BY last_played_utc DESC, rowid DESC LIMIT $max);
-            """;
-        cmd.Parameters.AddWithValue("$max", MaxEntries);
-        cmd.ExecuteNonQuery();
     }
 
-    public const int MaxEntries = 500;
+    public const int MaxPageSize = 500;
 
     public static List<WatchHistoryItem> GetHistory(string username, int from = 0, int size = 100)
     {
         from = Math.Max(0, from);
-        size = Math.Clamp(size, 1, MaxEntries);
+        size = Math.Clamp(size, 1, MaxPageSize);
         List<WatchHistoryItem> result = [];
         if (!File.Exists(GetPath(username))) return result;
 
@@ -56,6 +47,27 @@ static class WatchHistoryHandler
         while (reader.Read()) result.Add(Map(reader));
 
         return result;
+    }
+
+    public static (HashSet<string> Ids, HashSet<(string Album, string MediaName)> LegacyPaths) GetPlayedMedia(string username)
+    {
+        HashSet<string> ids = [];
+        HashSet<(string Album, string MediaName)> legacyPaths = [];
+        if (!File.Exists(GetPath(username))) return (ids, legacyPaths);
+
+        using SqliteConnection connection = Open(username);
+        using SqliteCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT album, media_name, media_id FROM watch_history;";
+        using SqliteDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            if (reader.IsDBNull(2) || string.IsNullOrEmpty(reader.GetString(2)))
+                legacyPaths.Add((reader.GetString(0), reader.GetString(1)));
+            else
+                ids.Add(reader.GetString(2));
+        }
+
+        return (ids, legacyPaths);
     }
 
     public static WatchHistoryItem? GetEntry(string username, string album, string mediaName)

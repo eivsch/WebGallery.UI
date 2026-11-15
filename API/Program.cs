@@ -173,6 +173,11 @@ app.MapDelete("/users/{username}/albums/{albumName}/{mediaLocator}/tags/{tag}", 
 
 app.MapGet("/users/{username}/search", (string username, [AsParameters] SearchRequest request) => 
 {
+    if (request.Random == true && (request.MaxResults <= 0 || request.HitsToSkip < 0))
+    {
+        return Results.BadRequest("Random search requires positive 'maxResults' and non-negative 'hitsToSkip'.");
+    }
+
     if (request.MinFileSize < 0 || request.MaxFileSize < 0 || request.MinFileSize > request.MaxFileSize)
     {
         return Results.BadRequest("File size bounds must be non-negative, and 'minFileSize' cannot exceed 'maxFileSize'.");
@@ -205,7 +210,8 @@ app.MapGet("/users/{username}/search", (string username, [AsParameters] SearchRe
 })
 .Produces<List<SearchHit>>(StatusCodes.Status200OK)
 .Produces(StatusCodes.Status204NoContent)
-.Produces(StatusCodes.Status400BadRequest);
+.Produces(StatusCodes.Status400BadRequest)
+.WithDescription("Search media. unwatchedOnly excludes all recorded plays, independent of tags or completion. random samples maxResults from all matches after hitsToSkip, without an early result limit.");
 
 // Endpoints - Files
 // app.MapPost("/files/{username}/albums/{albumName}", (string username, string albumName) => {

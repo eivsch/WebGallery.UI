@@ -41,7 +41,7 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("home/random-bio")]
-        public async Task<IActionResult>         RandomBio(string fileExtensions, long? minFileSize = null, long? maxFileSize = null)
+        public async Task<IActionResult> RandomBio(string fileExtensions, long? minFileSize = null, long? maxFileSize = null, bool unwatchedOnly = false)
         {
             List<SearchHitDTO> results = await _minimalApiProxy.GetSearch(
                 _username,
@@ -49,13 +49,19 @@ namespace WebGallery.UI.Controllers
                 tags: null,
                 fileExtension: fileExtensions,
                 mediaNameContains: null,
-                maxResults: SearchBatchLimit,
-                        allTagsMustMatch: false,
-                        minFileSize: minFileSize,
-                        maxFileSize: maxFileSize);
+                maxResults: unwatchedOnly ? 1 : SearchBatchLimit,
+                allTagsMustMatch: false,
+                minFileSize: minFileSize,
+                maxFileSize: maxFileSize,
+                unwatchedOnly: unwatchedOnly,
+                random: unwatchedOnly);
 
             if (results == null || results.Count == 0)
+            {
+                if (unwatchedOnly)
+                    TempData["HomeMessage"] = "No unwatched videos match these filters.";
                 return RedirectToAction("Index");
+            }
 
             Random rnd = new();
             SearchHitDTO selected = results[rnd.Next(0, results.Count)];

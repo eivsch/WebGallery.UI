@@ -82,6 +82,11 @@ Run the current checkout next to the live app without touching it:
 
 Under `/users/{username}`: user create/delete, `albums` (list, create, rename, merge, delete, rebuild index/tags), media (add, get, delete, rename, move, likes, tags), `search`, `saved-searches`, `ad-hoc-jobs/{jobName}`. See `API/Program.cs` or Swagger.
 
+Search accepts `unwatchedOnly=true` to exclude recorded plays and `random=true` to
+sample up to `maxResults` uniformly across all matching media after `hitsToSkip`,
+without stopping at the result limit. Ordinary search ordering and paging are unchanged.
+Watch-history requests use `from` and `size` (at most 500 entries per request, not a storage limit).
+
 ## Notes
 
 On a generated screencap's Bio page, **Open source video at HH:MM:SS.mmm** opens the source video paused at that frame's timestamp, overriding its saved resume position. The link requires the `screencap` tag, the generated `<video stem>_HHMMSS.mmm.jpg` filename in `<album>_video_images`, and an exact source MP4 match in `<album>`. Images with malformed timestamps or missing/ambiguous sources keep their normal image controls without a source link.
