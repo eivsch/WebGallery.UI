@@ -3,6 +3,7 @@ using MinimalGallery.API.Storage;
 
 namespace MinimalGallery.API.Tests;
 
+[Collection("Storage")]
 public class WatchHistoryHandlerTests : IDisposable
 {
     readonly string _root = Path.Combine(Path.GetTempPath(), "wg-tests-" + Guid.NewGuid());
@@ -22,16 +23,22 @@ public class WatchHistoryHandlerTests : IDisposable
     }
 
     [Fact]
-    public void Retention_keeps_only_most_recent_entries()
+    public void History_retains_more_than_500_entries_with_bounded_pages()
     {
         DateTime t = new(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        for (int i = 0; i < WatchHistoryHandler.MaxEntries + 5; i++)
+        int count = WatchHistoryHandler.MaxPageSize + 105;
+        for (int i = 0; i < count; i++)
             WatchHistoryHandler.RecordPlay("alice", "a1", $"v{i}.mp4", playedAtUtc: t.AddMinutes(i));
 
-        var all = WatchHistoryHandler.GetHistory("alice", 0, 1000);
-        Assert.Equal(WatchHistoryHandler.MaxEntries, all.Count);
-        Assert.Equal($"v{WatchHistoryHandler.MaxEntries + 4}.mp4", all[0].MediaName);
-        Assert.DoesNotContain(all, x => x.MediaName == "v0.mp4");
+        var first = WatchHistoryHandler.GetHistory("alice", 0, 1000);
+        var next = WatchHistoryHandler.GetHistory("alice", first.Count, 1000);
+        Assert.Equal(WatchHistoryHandler.MaxPageSize, first.Count);
+        Assert.Equal(105, next.Count);
+        Assert.Equal($"v{count - 1}.mp4", first[0].MediaName);
+        Assert.Equal("v0.mp4", next[^1].MediaName);
+        Assert.Equal(count, first.Concat(next).Select(x => x.MediaName).Distinct().Count());
+        Assert.NotNull(WatchHistoryHandler.GetEntry("alice", "a1", "v0.mp4"));
+        Assert.Empty(WatchHistoryHandler.GetHistory("alice", count, 100));
     }
 
     [Fact]

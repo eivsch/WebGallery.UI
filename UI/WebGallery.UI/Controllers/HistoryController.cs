@@ -22,14 +22,16 @@ namespace WebGallery.UI.Controllers
 
         private const int PageSize = 50;
 
-        public async Task<IActionResult> Index(int size = PageSize)
+        public async Task<IActionResult> Index(int from = 0)
         {
             ViewBag.Current = "History";
-            size = System.Math.Clamp(size, PageSize, 500);
-            List<WatchHistoryItemDTO> items = await _minimalApiProxy.GetWatchHistory(_username, 0, size + 1);
-            ViewBag.HasMore = items.Count > size && size < 500;
-            ViewBag.NextSize = size + PageSize;
-            if (items.Count > size) items = items.GetRange(0, size);
+            from = System.Math.Clamp(from, 0, int.MaxValue - PageSize);
+            List<WatchHistoryItemDTO> items = await _minimalApiProxy.GetWatchHistory(_username, from, PageSize + 1);
+            ViewBag.HasMore = items.Count > PageSize;
+            ViewBag.HasPrevious = from > 0;
+            ViewBag.PreviousFrom = System.Math.Max(0, from - PageSize);
+            ViewBag.NextFrom = from + PageSize;
+            if (items.Count > PageSize) items = items.GetRange(0, PageSize);
 
             return View(items);
         }

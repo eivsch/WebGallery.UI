@@ -110,7 +110,7 @@ static class RequestHelper
         return true;
     }
 
-    public static List<SearchHit>? Search(string username, SearchRequest request, DateTimeOffset? createdAfter = null, DateTimeOffset? createdBefore = null)
+    public static List<SearchHit>? Search(string username, SearchRequest request, DateTimeOffset? createdAfter = null, DateTimeOffset? createdBefore = null, Random? randomSource = null)
     {
         string[] albumsArray = [];
         if (request.Albums is not null) albumsArray = request.Albums.Split(",");
@@ -123,7 +123,15 @@ static class RequestHelper
         UserMeta? userMetaData = UserMetaHandler.GetUserMeta(username);
         if (userMetaData == null) return null;
 
-        int totalHits = 0;
+        HashSet<string> playedIds = [];
+        HashSet<(string Album, string MediaName)> playedPaths = [];
+        bool unwatchedOnly = request.UnwatchedOnly == true;
+        bool random = request.Random == true;
+        if (unwatchedOnly)
+            (playedIds, playedPaths) = WatchHistoryHandler.GetPlayedMedia(username);
+
+        long totalHits = 0;
+        int hitsToSkip = Math.Max(0, request.HitsToSkip ?? 0);
         List<UserAlbumMeta> albumsToSearch = FilterListOfAlbums(userMetaData.AlbumMeta, albumsArray, tagsArray, request.AllTagsMustMatch);
         foreach (UserAlbumMeta album in albumsToSearch)
         {
@@ -134,7 +142,7 @@ static class RequestHelper
                 List<Media>? albumItems = AlbumIndexHandler.GetAlbumItems(username, album.AlbumName, from, readSize);
                 if (albumItems == null || albumItems.Count == 0) break;
 
-                int mediaAlbumIndex = 0;
+                int mediaAlbumIndex = from;
                 foreach (Media item in albumItems)
                 {
                     bool tagsMatch = true;
@@ -171,30 +179,40 @@ static class RequestHelper
                         (request.MinFileSize is null || item.Size >= request.MinFileSize) &&
                         (request.MaxFileSize is null || item.Size <= request.MaxFileSize));
 
-                    if (tagsMatch && extensionMatch && mediaNameMatch && createdAfterMatch && createdBeforeMatch && fileSizeMatch)
+                    bool unplayedMatch = !unwatchedOnly ||
+                        (!playedIds.Contains(item.Id) && !playedPaths.Contains((album.AlbumName, item.Name)));
+
+                    if (tagsMatch && extensionMatch && mediaNameMatch && createdAfterMatch && createdBeforeMatch && fileSizeMatch && unplayedMatch)
                     {
                         totalHits++;
-                        if (totalHits > (request.HitsToSkip ?? 0))
+                        if (totalHits > hitsToSkip)
                         {
                             SearchHit searchHit = new()
                             {
                                 AlbumName = album.AlbumName,
-                                MediaAlbumIndex = mediaAlbumIndex,
+                                MediaAlbumIndex = item.Index ?? mediaAlbumIndex,
                                 MediaItem = item
                             };
-                            hits.Add(searchHit);
+                            if (!random || hits.Count < request.MaxResults)
+                                hits.Add(searchHit);
+                            else
+                            {
+                                // Reservoir sampling keeps every match eligible, without retaining every hit.
+                                long index = (randomSource ?? Random.Shared).NextInt64(totalHits - hitsToSkip);
+                                if (index < hits.Count) hits[(int)index] = searchHit;
+                            }
                         }
                     }
 
                     mediaAlbumIndex++;
-                    if (hits.Count >= request.MaxResults) break;
+                    if (!random && hits.Count >= request.MaxResults) break;
                 }
 
                 from += readSize;
-                if (hits.Count >= request.MaxResults) break;
+                if (!random && hits.Count >= request.MaxResults) break;
             }
 
-            if (hits.Count >= request.MaxResults) break;
+            if (!random && hits.Count >= request.MaxResults) break;
         }
 
         return hits;

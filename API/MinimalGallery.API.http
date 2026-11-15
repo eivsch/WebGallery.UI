@@ -4,3 +4,11 @@ GET {{MinimalGallery.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### One random long video without a recorded play, sampled across the entire library
+GET {{MinimalGallery.API_HostAddress}}/users/tester/search?fileExtensions=mp4&minFileSize=104857600&unwatchedOnly=true&random=true&maxResults=1&allTagsMustMatch=false
+Accept: application/json
+
+### History is retained without a total cap; requests remain paginated
+GET {{MinimalGallery.API_HostAddress}}/users/tester/watch-history?from=500&size=50
+Accept: application/json

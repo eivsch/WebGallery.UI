@@ -32,6 +32,7 @@ namespace WebGallery.UI.Controllers
         public string CreatedAfter { get; set; }
         public string CreatedBefore { get; set; }
         public bool HasMoreResults { get; set; }
+        public bool IsRandomized { get; set; }
     }
 
     [Authorize]
@@ -102,15 +103,19 @@ namespace WebGallery.UI.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, long? minFileSize = null, long? maxFileSize = null, bool? allTagsMustMatch = false, int? hitsToSkip = null, bool shuffle = false, string createdAfter = null, string createdBefore = null)
+        public async Task<IActionResult> Search(string albums = null, string tags = null, string fileExtensions = null, string mediaNameContains = null, int? maxSize = 200, long? minFileSize = null, long? maxFileSize = null, bool? allTagsMustMatch = false, int? hitsToSkip = null, bool shuffle = false, string createdAfter = null, string createdBefore = null, bool random = false)
         {
             // Note: tags are searched for "exclusive", i.e. logical AND. Albums are inclusive, i.e. logical OR.
             ViewBag.Current = "Search";
 
             int requestedSize = GetRequestedSearchSize(maxSize);
             int startingOffset = hitsToSkip ?? 0;
-            List<SearchHitDTO> searchHits = await GetSearchHitsAsync(albums, tags, fileExtensions, mediaNameContains, requestedSize, minFileSize, maxFileSize, allTagsMustMatch ?? true, startingOffset, createdAfter, createdBefore);
-            bool hasMoreResults = searchHits.Count == requestedSize;
+            List<SearchHitDTO> searchHits = random
+                ? await _minimalApiProxy.GetSearch(_username, albums, tags, fileExtensions, mediaNameContains,
+                    requestedSize, allTagsMustMatch ?? true, startingOffset, createdAfter, createdBefore,
+                    minFileSize, maxFileSize, random: true)
+                : await GetSearchHitsAsync(albums, tags, fileExtensions, mediaNameContains, requestedSize, minFileSize, maxFileSize, allTagsMustMatch ?? true, startingOffset, createdAfter, createdBefore);
+            bool hasMoreResults = !random && searchHits.Count == requestedSize;
 
             SearchDetails searchDetails = new()
             {
@@ -126,11 +131,12 @@ namespace WebGallery.UI.Controllers
                 CreatedAfter = createdAfter,
                 CreatedBefore = createdBefore,
                 HasMoreResults = hasMoreResults,
+                IsRandomized = shuffle || random,
             };
 
             _cache.Set(SearchCacheKeyPrefix + _username, searchDetails, SearchCacheExpiry);
 
-            if (shuffle)
+            if (shuffle || random)
             {
                 ShuffleSearchHits();
             }
@@ -142,7 +148,7 @@ namespace WebGallery.UI.Controllers
             vm.TotalImageCount = searchDetails.HasMoreResults ? searchHits.Count + 1 : searchHits.Count;
             vm.CurrentOffset = hitsToSkip ?? 0;
             vm.DisplayCount = _displayOptions.PageSize;
-            vm.IsRandomized = shuffle;
+            vm.IsRandomized = searchDetails.IsRandomized;
 
             return View("Index", vm);
 
@@ -214,6 +220,7 @@ namespace WebGallery.UI.Controllers
             vm.TotalImageCount = cachedResults.Hits.Count;
             vm.CurrentOffset = from;
             vm.DisplayCount = _displayOptions.PageSize;
+            vm.IsRandomized = cachedResults.IsRandomized;
 
             return View("Index", vm);
         }
