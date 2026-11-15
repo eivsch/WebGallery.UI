@@ -142,6 +142,20 @@ public class SearchTests : IDisposable
     }
 
     [Fact]
+    public void Played_id_survives_rename_and_filename_reuse()
+    {
+        AddAlbum("a", [Video("moved") with { Name = "reused.mp4" }, Video("unplayed")]);
+        WatchHistoryHandler.RecordPlay("alice", "a", "reused.mp4", "moved");
+        Assert.True(RequestHelper.RenameMedia("alice", "a", "moved", "renamed.mp4"));
+        AlbumIndexHandler.AddMedia("alice", "a", Video("replacement") with { Name = "reused.mp4" });
+        WatchHistoryHandler.RecordPlay("alice", "a", "reused.mp4", "replacement");
+
+        var hit = Assert.Single(RequestHelper.Search("alice", LongUnwatched() with { MaxResults = 20 })!);
+
+        Assert.Equal("unplayed", hit.MediaItem.Id);
+    }
+
+    [Fact]
     public void Full_history_is_checked_beyond_both_default_and_maximum_page_sizes()
     {
         AddAlbum("a", [Video("oldest"), Video("unplayed")]);

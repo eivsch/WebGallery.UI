@@ -9,8 +9,13 @@ static class WatchHistoryHandler
     public static void RecordPlay(string username, string album, string mediaName, string? mediaId = null, DateTime? playedAtUtc = null)
     {
         using SqliteConnection connection = Open(username);
+        using SqliteTransaction transaction = connection.BeginTransaction();
         using SqliteCommand cmd = connection.CreateCommand();
+        cmd.Transaction = transaction;
         cmd.CommandText = """
+            INSERT OR IGNORE INTO played_media (media_id)
+            SELECT $id WHERE $id IS NOT NULL AND $id <> '';
+
             INSERT INTO watch_history (album, media_name, media_id, last_played_utc, play_count)
             VALUES ($album, $media, $id, $played, 1)
             ON CONFLICT(album, media_name) DO UPDATE SET
@@ -23,6 +28,7 @@ static class WatchHistoryHandler
         cmd.Parameters.AddWithValue("$id", (object?)mediaId ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$played", (playedAtUtc ?? DateTime.UtcNow).ToUniversalTime().ToString("O"));
         cmd.ExecuteNonQuery();
+        transaction.Commit();
     }
 
     public const int MaxPageSize = 500;
@@ -57,14 +63,19 @@ static class WatchHistoryHandler
 
         using SqliteConnection connection = Open(username);
         using SqliteCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT album, media_name, media_id FROM watch_history;";
-        using SqliteDataReader reader = cmd.ExecuteReader();
-        while (reader.Read())
+        cmd.CommandText = "SELECT media_id FROM played_media;";
+        using (SqliteDataReader reader = cmd.ExecuteReader())
         {
-            if (reader.IsDBNull(2) || string.IsNullOrEmpty(reader.GetString(2)))
-                legacyPaths.Add((reader.GetString(0), reader.GetString(1)));
-            else
-                ids.Add(reader.GetString(2));
+            while (reader.Read()) ids.Add(reader.GetString(0));
+        }
+
+        cmd.CommandText = """
+            SELECT album, media_name FROM watch_history
+            WHERE media_id IS NULL OR media_id = '';
+            """;
+        using (SqliteDataReader reader = cmd.ExecuteReader())
+        {
+            while (reader.Read()) legacyPaths.Add((reader.GetString(0), reader.GetString(1)));
         }
 
         return (ids, legacyPaths);
@@ -112,11 +123,42 @@ static class WatchHistoryHandler
         if (!File.Exists(GetPath(username))) return false;
 
         using SqliteConnection connection = Open(username);
+        using SqliteTransaction transaction = connection.BeginTransaction();
         using SqliteCommand cmd = connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            SELECT media_id FROM watch_history
+            WHERE album = $album AND media_name = $media;
+            """;
+        cmd.Parameters.AddWithValue("$album", album);
+        cmd.Parameters.AddWithValue("$media", mediaName);
+        object? value = cmd.ExecuteScalar();
+        if (value is null)
+        {
+            transaction.Commit();
+            return false;
+        }
+
+        string? mediaId = value is DBNull ? null : (string)value;
+        cmd.Parameters.Clear();
         cmd.CommandText = "DELETE FROM watch_history WHERE album = $album AND media_name = $media;";
         cmd.Parameters.AddWithValue("$album", album);
         cmd.Parameters.AddWithValue("$media", mediaName);
-        return cmd.ExecuteNonQuery() > 0;
+        bool removed = cmd.ExecuteNonQuery() > 0;
+        if (removed && !string.IsNullOrEmpty(mediaId))
+        {
+            cmd.Parameters.Clear();
+            cmd.CommandText = """
+                DELETE FROM played_media
+                WHERE media_id = $id
+                    AND NOT EXISTS (SELECT 1 FROM watch_history WHERE media_id = $id);
+                """;
+            cmd.Parameters.AddWithValue("$id", mediaId);
+            cmd.ExecuteNonQuery();
+        }
+
+        transaction.Commit();
+        return removed;
     }
 
     public static void Clear(string username)
@@ -125,7 +167,7 @@ static class WatchHistoryHandler
 
         using SqliteConnection connection = Open(username);
         using SqliteCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM watch_history;";
+        cmd.CommandText = "DELETE FROM watch_history; DELETE FROM played_media;";
         cmd.ExecuteNonQuery();
     }
 
@@ -169,6 +211,16 @@ static class WatchHistoryHandler
         EnsureColumn(connection, "position_seconds", "REAL NOT NULL DEFAULT 0");
         EnsureColumn(connection, "duration_seconds", "REAL NULL");
         EnsureColumn(connection, "watched", "INTEGER NOT NULL DEFAULT 0");
+
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS played_media (
+                media_id TEXT NOT NULL PRIMARY KEY
+            );
+            INSERT OR IGNORE INTO played_media (media_id)
+            SELECT media_id FROM watch_history
+            WHERE media_id IS NOT NULL AND media_id <> '';
+            """;
+        cmd.ExecuteNonQuery();
 
         return connection;
     }
