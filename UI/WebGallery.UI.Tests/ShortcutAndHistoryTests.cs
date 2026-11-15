@@ -8,12 +8,111 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using WebGallery.UI.Configuration;
 using WebGallery.UI.Controllers;
+using WebGallery.UI.ViewModels.Single;
 
 namespace WebGallery.UI.Tests;
 
 public class ShortcutAndHistoryTests
 {
+    [Theory]
+    [InlineData("jpg,jpeg,webp,png", "jpg")]
+    [InlineData("gif", "gif")]
+    public async Task Random_image_and_gif_galleries_sample_the_full_library_and_keep_a_stable_cached_sample(
+        string extensions, string extension)
+    {
+        using var api = new RecordingApi { Body = GalleryHits(200, extension) };
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        var controller = api.Single(cache);
+
+        var view = Assert.IsType<ViewResult>(await controller.Search(
+            fileExtensions: extensions, shuffle: true, random: true));
+        var model = Assert.IsType<SingleGalleryViewModel>(view.Model);
+
+        Assert.Equal(48, model.Images.Count);
+        Assert.Equal(200, model.TotalImageCount);
+        Assert.True(model.IsRandomized);
+        var query = QueryHelpers.ParseQuery(Assert.Single(api.Requests).Query);
+        Assert.Equal(extensions, query["fileExtensions"]);
+        Assert.Equal("200", query["maxResults"]);
+        Assert.Equal("true", query["random"]);
+        Assert.False(query.ContainsKey("unwatchedOnly"));
+
+        var next = Assert.IsType<SingleGalleryViewModel>(
+            Assert.IsType<ViewResult>(await controller.ScrollSearch(48)).Model);
+        Assert.Equal(48, next.Images.Count);
+        Assert.True(next.IsRandomized);
+        Assert.Empty(model.Images.Select(i => i.Id).Intersect(next.Images.Select(i => i.Id)));
+        var repeated = Assert.IsType<SingleGalleryViewModel>(
+            Assert.IsType<ViewResult>(await controller.ScrollSearch(48)).Model);
+        Assert.Equal(next.Images.Select(i => i.Id), repeated.Images.Select(i => i.Id));
+
+        var end = Assert.IsType<SingleGalleryViewModel>(
+            Assert.IsType<ViewResult>(await controller.ScrollSearch(200)).Model);
+        Assert.Empty(end.Images);
+        Assert.Equal(200, end.TotalImageCount);
+        Assert.Single(api.Requests);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3)]
+    [InlineData(450)]
+    public async Task Random_gallery_uses_one_sampling_request_for_empty_small_and_large_samples(int count)
+    {
+        using var api = new RecordingApi { Body = GalleryHits(count, "gif") };
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+        var controller = api.Single(cache);
+
+        var model = Assert.IsType<SingleGalleryViewModel>(Assert.IsType<ViewResult>(
+            await controller.Search(fileExtensions: "gif", maxSize: 450, random: true)).Model);
+
+        Assert.Equal(Math.Min(count, 48), model.Images.Count);
+        Assert.Equal(count, model.TotalImageCount);
+        Assert.True(model.IsRandomized);
+        var query = QueryHelpers.ParseQuery(Assert.Single(api.Requests).Query);
+        Assert.Equal("450", query["maxResults"]);
+        Assert.Equal("true", query["random"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Ordinary_search_and_shuffle_without_sampling_keep_existing_search_requests(bool shuffle)
+    {
+        using var api = new RecordingApi { Body = GalleryHits(200, "jpg") };
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+
+        var model = Assert.IsType<SingleGalleryViewModel>(Assert.IsType<ViewResult>(
+            await api.Single(cache).Search(fileExtensions: "jpg", shuffle: shuffle)).Model);
+
+        Assert.Equal(201, model.TotalImageCount);
+        Assert.Equal(shuffle, model.IsRandomized);
+        var query = QueryHelpers.ParseQuery(Assert.Single(api.Requests).Query);
+        Assert.False(query.ContainsKey("random"));
+        Assert.Equal("200", query["maxResults"]);
+        if (!shuffle) Assert.Equal("image-0", model.Images[0].Id);
+    }
+
+    [Fact]
+    public async Task Random_gallery_api_failure_is_not_hidden()
+    {
+        using var api = new RecordingApi { Status = HttpStatusCode.InternalServerError };
+        using var cache = new MemoryCache(new MemoryCacheOptions());
+
+        await Assert.ThrowsAsync<Exception>(() => api.Single(cache).Search(fileExtensions: "gif", random: true));
+    }
+
+    static List<SearchHitDTO> GalleryHits(int count, string extension) => Enumerable.Range(0, count)
+        .Select(i => new SearchHitDTO
+        {
+            AlbumName = "a",
+            MediaItem = new() { Id = $"image-{i}", Name = $"image-{i}.{extension}", Tags = [] }
+        }).ToList();
+
     [Fact]
     public async Task Unwatched_shortcut_requests_one_random_long_video_and_opens_its_player()
     {
@@ -145,6 +244,9 @@ public class ShortcutAndHistoryTests
         {
             TempData = new TempDataDictionary(Accessor.HttpContext, new EmptyTempDataProvider())
         };
+
+        public SingleController Single(IMemoryCache cache) => new(
+            Proxy, Accessor, cache, Options.Create(new DisplayOptions { PageSize = 48 }));
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {

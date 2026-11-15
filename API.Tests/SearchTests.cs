@@ -67,6 +67,27 @@ public class SearchTests : IDisposable
         Assert.Equal(Enumerable.Range(2, 1209).Select(i => (long)i), random.Bounds);
     }
 
+    [Theory]
+    [InlineData("jpg,jpeg,webp,png", "png")]
+    [InlineData("gif", "GIF")]
+    public void Random_gallery_samples_across_all_albums_beyond_200_matches_without_duplicates(
+        string extensions, string extension)
+    {
+        Media Image(int i) => Video($"image-{i}") with { Name = $"image-{i}.{extension}" };
+        AddAlbum("early", Enumerable.Range(0, 1005).Select(Image));
+        AddAlbum("late", Enumerable.Range(1005, 205).Select(Image).Append(Video("not-an-image")));
+        var random = new ReplaceWithLatestRandom();
+        var request = new SearchRequest { FileExtensions = extensions, Random = true, MaxResults = 200 };
+
+        var hits = RequestHelper.Search("alice", request, randomSource: random)!;
+
+        Assert.Equal(200, hits.Count);
+        Assert.Equal(200, hits.Select(h => h.MediaItem.Id).Distinct().Count());
+        Assert.Contains(hits, h => h.MediaItem.Id == "image-1209" && h.AlbumName == "late");
+        Assert.DoesNotContain(hits, h => h.MediaItem.Id == "not-an-image");
+        Assert.Equal(Enumerable.Range(201, 1010).Select(i => (long)i), random.Bounds);
+    }
+
     [Fact]
     public void Long_unwatched_search_uses_size_boundary_and_no_tag_requirement()
     {
